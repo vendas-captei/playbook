@@ -2855,31 +2855,37 @@ function clearSettingsModal() {
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:20px 0;">
+     <div style="display:flex; flex-direction:column; align-items:center; gap:0; padding:20px 0;">
 
        <!-- Head Comercial -->
        <div style="background:var(--ink-05); color:white; padding:14px 32px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; text-align:center; min-width:240px;">
          Head Comercial
          <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Liderança estratégica da operação comercial</div>
        </div>
-       <div style="width:2px; height:16px; background:var(--n-200);"></div>
 
-       <!-- Supervisor + SalesOps lateral -->
+       <!-- Linha com SalesOps pendurado no meio -->
        <div style="display:flex; align-items:center; gap:0;">
-         <!-- Supervisor -->
-         <div style="background:var(--blue); color:white; padding:14px 32px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; text-align:center; min-width:220px;">
-           Supervisor Comercial
-           <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Estratégia, metas e resultados do time</div>
+         <!-- Coluna central: linha vertical superior + linha vertical inferior -->
+         <div style="display:flex; flex-direction:column; align-items:center;">
+           <div style="width:2px; height:20px; background:var(--n-200);"></div>
+           <div style="width:2px; height:20px; background:var(--n-200);"></div>
          </div>
-         <!-- Linha lateral -->
-         <div style="width:32px; height:2px; background:var(--n-300);"></div>
-         <!-- SalesOps -->
-         <div style="background:var(--purple); color:white; padding:12px 20px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; text-align:center; min-width:160px; border:2px dashed rgba(255,255,255,0.25);">
-           SalesOps
-           <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.7; margin-top:4px;">Dados & inteligência comercial</div>
+         <!-- Linha horizontal saindo do meio + SalesOps -->
+         <div style="display:flex; align-items:center; margin-bottom:20px;">
+           <div style="width:28px; height:2px; background:var(--n-300);"></div>
+           <div style="background:var(--purple); color:white; padding:10px 18px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; text-align:center; min-width:150px; border:2px dashed rgba(255,255,255,0.25);">
+             SalesOps
+             <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.7; margin-top:4px;">Dados & inteligência comercial</div>
+           </div>
          </div>
        </div>
-       <div style="width:2px; height:16px; background:var(--n-200);"></div>
+
+       <!-- Supervisor Comercial -->
+       <div style="background:var(--blue); color:white; padding:14px 32px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; text-align:center; min-width:220px;">
+         Supervisor Comercial
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Estratégia, metas e resultados do time</div>
+       </div>
+       <div style="width:2px; height:20px; background:var(--n-200);"></div>
 
        <!-- Inside Sales + BDRs -->
        <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
