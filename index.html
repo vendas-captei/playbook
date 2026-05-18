@@ -2903,8 +2903,8 @@ function clearSettingsModal() {
    </div>
  </div>
 
- <!-- TABELA DE SENIORIDADE -->
- <div class="card open">
+ <!-- TABELA DE SENIORIDADE - SUPRIMIDA -->
+ <div class="card open" style="display:none;">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon green">02</div>
@@ -2996,114 +2996,41 @@ function clearSettingsModal() {
  <div class="page-header">
    <div class="crumb"><b>Institucional</b> / Operação Comercial</div>
    <h2>Metas & Atividades</h2>
-   <p>Volume de atividades diárias, semanais e mensais esperadas por nível de senioridade, incluindo taxa de conversão de reunião para venda.</p>
+   <p>Metas e volumes de atividades por equipe. O time está dividido em duas frentes: <strong>CAP</strong> (Captação Ativa) e <strong>COP</strong> (Copiloto).</p>
  </div>
 
- <!-- Atividades Dia / Semana / Mês -->
+ <!-- CAP -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon accent">01</div>
-       <div><div class="card-title">Volume de Atividades por Período</div><div class="card-subtitle">Quantidade esperada de atividades por dia, semana e mês</div></div>
+       <div class="card-icon accent">CAP</div>
+       <div><div class="card-title">Captação Ativa</div><div class="card-subtitle">Metas e atividades da equipe CAP — a ser preenchido</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div style="overflow-x:auto;">
-       <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
-         <thead>
-           <tr style="border-bottom:2px solid var(--n-100); text-align:left;">
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">Atividade</th>
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:center;">Dia</th>
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:center;">Semana</th>
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:center;">Mês</th>
-           </tr>
-         </thead>
-         <tbody>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:600; color:var(--n-700);"><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--blue); margin-right:8px;"></span>Reuniões Realizadas</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--blue);">3</td>
-             <td style="padding:10px 12px; text-align:center; color:var(--n-600);">15</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--n-800);">60</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:600; color:var(--n-700);"><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--green); margin-right:8px;"></span>Chamadas Realizadas</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--green);">24</td>
-             <td style="padding:10px 12px; text-align:center; color:var(--n-600);">120</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--n-800);">480</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:600; color:var(--n-700);"><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--purple); margin-right:8px;"></span>E-mails Enviados</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--purple);">60</td>
-             <td style="padding:10px 12px; text-align:center; color:var(--n-600);">300</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--n-800);">1.200</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:600; color:var(--n-700);"><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--accent); margin-right:8px;"></span>Mensagens WhatsApp</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--accent);">40</td>
-             <td style="padding:10px 12px; text-align:center; color:var(--n-600);">200</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--n-800);">800</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:600; color:var(--n-700);"><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--green); margin-right:8px;"></span>Receita</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--green);">R$ 3.731</td>
-             <td style="padding:10px 12px; text-align:center; color:var(--n-600);">R$ 18.658</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--n-800);">R$ 74.633</td>
-           </tr>
-           <tr>
-             <td style="padding:10px 12px; font-weight:600; color:var(--n-700);"><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:var(--ink-05); margin-right:8px;"></span>Contas Fechadas</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--ink-05);">2</td>
-             <td style="padding:10px 12px; text-align:center; color:var(--n-600);">7</td>
-             <td style="padding:10px 12px; text-align:center; font-weight:700; color:var(--n-800);">28</td>
-           </tr>
-         </tbody>
-       </table>
+     <div class="info-box" style="text-align:center; padding:32px;">
+       <div style="font-size:28px; margin-bottom:8px;">🔧</div>
+       <strong>Em construção</strong>
+       <div style="font-size:13px; color:var(--n-500); margin-top:6px;">As metas e atividades da equipe de Captação Ativa serão definidas em breve.</div>
      </div>
    </div>
  </div>
 
- <!-- Escala por Nível -->
+ <!-- COP -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon blue">02</div>
-       <div><div class="card-title">Atividades e Conversão por Nível</div><div class="card-subtitle">Volume diário, contas mensais e taxa de conversão reunião → venda</div></div>
+       <div class="card-icon purple">COP</div>
+       <div><div class="card-title">Copiloto</div><div class="card-subtitle">Metas e atividades da equipe COP — a ser preenchido</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div style="overflow-x:auto;">
-       <table style="width:100%; border-collapse:collapse; font-size:12px;">
-         <thead>
-           <tr style="border-bottom:2px solid var(--n-100); text-align:center;">
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Nível</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">Meta</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">Reuniões/dia</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">Chamadas/dia</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">E-mails/dia</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">WPP/dia</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">Reuniões/mês</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400);">Contas/mês</th>
-             <th style="padding:10px 8px; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent);">Conversão</th>
-           </tr>
-         </thead>
-         <tbody>
-           <tr style="border-bottom:1px solid var(--n-75); background:var(--n-25);"><td style="padding:8px; font-weight:600; color:var(--n-500); font-style:italic;">Rampagem</td><td style="padding:8px; text-align:center; color:var(--n-500);">R$ 25k</td><td style="padding:8px; text-align:center;">2</td><td style="padding:8px; text-align:center;">14</td><td style="padding:8px; text-align:center;">36</td><td style="padding:8px; text-align:center;">24</td><td style="padding:8px; text-align:center;">36</td><td style="padding:8px; text-align:center;">10</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--red);">28%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Júnior I</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 30k</td><td style="padding:8px; text-align:center;">2</td><td style="padding:8px; text-align:center;">16</td><td style="padding:8px; text-align:center;">40</td><td style="padding:8px; text-align:center;">27</td><td style="padding:8px; text-align:center;">40</td><td style="padding:8px; text-align:center;">12</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--red);">30%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Júnior II</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 35k</td><td style="padding:8px; text-align:center;">2</td><td style="padding:8px; text-align:center;">18</td><td style="padding:8px; text-align:center;">44</td><td style="padding:8px; text-align:center;">29</td><td style="padding:8px; text-align:center;">44</td><td style="padding:8px; text-align:center;">14</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--amber);">32%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Júnior III</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 40k</td><td style="padding:8px; text-align:center;">2</td><td style="padding:8px; text-align:center;">19</td><td style="padding:8px; text-align:center;">47</td><td style="padding:8px; text-align:center;">31</td><td style="padding:8px; text-align:center;">47</td><td style="padding:8px; text-align:center;">16</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--amber);">34%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75); background:rgba(0,119,182,0.03);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Pleno I</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 45k</td><td style="padding:8px; text-align:center;">2</td><td style="padding:8px; text-align:center;">20</td><td style="padding:8px; text-align:center;">49</td><td style="padding:8px; text-align:center;">33</td><td style="padding:8px; text-align:center;">49</td><td style="padding:8px; text-align:center;">18</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--amber);">37%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75); background:rgba(0,119,182,0.03);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Pleno II</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 50k</td><td style="padding:8px; text-align:center;">3</td><td style="padding:8px; text-align:center;">20</td><td style="padding:8px; text-align:center;">51</td><td style="padding:8px; text-align:center;">34</td><td style="padding:8px; text-align:center;">51</td><td style="padding:8px; text-align:center;">20</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--blue);">39%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75); background:rgba(0,119,182,0.03);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Pleno III</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 55k</td><td style="padding:8px; text-align:center;">3</td><td style="padding:8px; text-align:center;">22</td><td style="padding:8px; text-align:center;">54</td><td style="padding:8px; text-align:center;">36</td><td style="padding:8px; text-align:center;">54</td><td style="padding:8px; text-align:center;">22</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--blue);">41%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75); background:rgba(247,122,48,0.04);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Sênior I</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 60k</td><td style="padding:8px; text-align:center;">3</td><td style="padding:8px; text-align:center;">22</td><td style="padding:8px; text-align:center;">56</td><td style="padding:8px; text-align:center;">37</td><td style="padding:8px; text-align:center;">56</td><td style="padding:8px; text-align:center;">24</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--green);">43%</td></tr>
-           <tr style="border-bottom:1px solid var(--n-75); background:rgba(247,122,48,0.04);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Sênior II</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 70k</td><td style="padding:8px; text-align:center;">3</td><td style="padding:8px; text-align:center;">25</td><td style="padding:8px; text-align:center;">62</td><td style="padding:8px; text-align:center;">41</td><td style="padding:8px; text-align:center;">62</td><td style="padding:8px; text-align:center;">28</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--green);">45%</td></tr>
-           <tr style="background:rgba(247,122,48,0.04);"><td style="padding:8px; font-weight:600; color:var(--n-700);">Sênior III</td><td style="padding:8px; text-align:center; color:var(--n-600);">R$ 80k</td><td style="padding:8px; text-align:center;">3</td><td style="padding:8px; text-align:center;">27</td><td style="padding:8px; text-align:center;">68</td><td style="padding:8px; text-align:center;">45</td><td style="padding:8px; text-align:center;">68</td><td style="padding:8px; text-align:center;">32</td><td style="padding:8px; text-align:center; font-weight:700; color:var(--green);">47%</td></tr>
-         </tbody>
-       </table>
-     </div>
-     <div class="tip-box" style="margin-top:16px;">
-       <strong>Taxa de Conversão</strong>
-       A conversão reunião → venda varia de <strong style="color:var(--red);">28%</strong> (Rampagem) até <strong style="color:var(--green);">47%</strong> (Sênior III). A evolução é natural: quanto mais experiência, melhor a conversão. Se a taxa estiver abaixo do mínimo do nível, revisar qualidade da demonstração, tratamento de objeções e qualificação de leads.
+     <div class="info-box" style="text-align:center; padding:32px;">
+       <div style="font-size:28px; margin-bottom:8px;">🔧</div>
+       <strong>Em construção</strong>
+       <div style="font-size:13px; color:var(--n-500); margin-top:6px;">As metas e atividades da equipe de Copiloto serão definidas em breve.</div>
      </div>
    </div>
  </div>
@@ -3262,7 +3189,7 @@ function clearSettingsModal() {
      <div style="display:flex; flex-direction:column; gap:0;">
        <div style="display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--n-75);">
          <div style="flex:0 0 auto; background:var(--green); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:6px 12px; border-radius:6px; letter-spacing:0.5px;">PROSPECÇÃO</div>
-         <div style="font-size:13px; color:var(--n-600); line-height:1.6;"><strong style="color:var(--n-800);">OutboundPro</strong> gera a lista → <strong style="color:var(--n-800);">Meetime</strong> executa cadência (ligação + e-mail) → <strong style="color:var(--n-800);">WhatsApp</strong> complementa contato → <strong style="color:var(--n-800);">Pipedrive</strong> registra lead</div>
+         <div style="font-size:13px; color:var(--n-600); line-height:1.6;"><strong style="color:var(--n-800);">OutboundPro</strong> gera a lista → <strong style="color:var(--n-800);">Copiloto</strong> entra em contato automaticamente via WhatsApp → <strong style="color:var(--n-800);">Meetime</strong> executa cadência (ligação + e-mail) → <strong style="color:var(--n-800);">Pipedrive</strong> registra lead</div>
        </div>
        <div style="display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--n-75);">
          <div style="flex:0 0 auto; background:var(--blue); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:6px 12px; border-radius:6px; letter-spacing:0.5px;">REUNIÃO</div>
@@ -3302,7 +3229,7 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon green">01</div>
-       <div><div class="card-title">Daily</div><div class="card-subtitle">Alinhamento rápido — terça e quinta, máximo 15 minutos</div></div>
+       <div><div class="card-title">Daily</div><div class="card-subtitle">Alinhamento rápido — terça a sexta, 15 minutos</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
@@ -3310,7 +3237,7 @@ function clearSettingsModal() {
      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
        <div style="background:var(--blue-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:4px;">Frequência</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--blue);">Terça e Quinta</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--blue);">Terça a Sexta</div>
        </div>
        <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Duração</div>
@@ -3324,7 +3251,7 @@ function clearSettingsModal() {
 
      <div class="info-box">
        <strong>O que é</strong>
-       Reunião curta e objetiva às terças e quintas-feiras. O time inteiro participa. Cada pessoa fala no máximo 2 minutos. Não é espaço para debate profundo — é alinhamento rápido para que todo mundo saia sabendo o que fazer.
+       Reunião curta e objetiva de terça a sexta-feira. O time inteiro participa. Cada pessoa fala no máximo 2 minutos. Não é espaço para debate profundo — é alinhamento rápido para que todo mundo saia sabendo o que fazer.
      </div>
 
      <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Estrutura — cada vendedor responde:</div>
@@ -3350,12 +3277,12 @@ function clearSettingsModal() {
    </div>
  </div>
 
- <!-- RITUAL: PIT STOP -->
+ <!-- RITUAL: WEEKLY -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">02</div>
-       <div><div class="card-title">Pit Stop</div><div class="card-subtitle">Pausa estratégica mensal de 1h30 para revisar deals, objeções e recalibrar</div></div>
+       <div><div class="card-title">Weekly</div><div class="card-subtitle">Reunião semanal do time comercial — toda segunda, 30–45 min</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
@@ -3363,42 +3290,40 @@ function clearSettingsModal() {
      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
        <div style="background:var(--accent-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:4px;">Frequência</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--accent);">Mensal</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--accent);">Toda segunda</div>
        </div>
        <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Duração</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">1h30</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">30–45 min</div>
        </div>
        <div style="background:var(--purple-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:4px;">Participantes</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--purple);">Líder + Vendedor</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--purple);">Time comercial</div>
        </div>
      </div>
 
      <div class="info-box">
        <strong>O que é</strong>
-       Intervenção estratégica que acontece uma vez por mês, com duração de 1 hora e meia. Quando um vendedor trava em um deal, acumula objeções novas, perde fechamentos ou precisa de direcionamento — o Pit Stop é a pausa na corrida pra trocar pneu, recalibrar e voltar mais forte.
+       Toda segunda-feira o time comercial se reúne para abrir a semana com clareza. É o momento de olhar para a semana passada com honestidade e preparar a semana que começa. Sem enrolação — direto ao ponto.
      </div>
 
-     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Quando acionar:</div>
-     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
-       <div style="background:white; border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 14px;">
-         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Deal travado</strong> — Lead pediu pra pensar, sumiu, ou jogou objeção nova. Precisa de estratégia pra destravar.</div>
-       </div>
-       <div style="background:white; border-left:3px solid var(--blue); border-radius:0 8px 8px 0; padding:12px 14px;">
-         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Objeção inédita</strong> — Ouviu algo que nunca ouviu. Precisa de munição antes de responder.</div>
-       </div>
-       <div style="background:white; border-left:3px solid var(--green); border-radius:0 8px 8px 0; padding:12px 14px;">
-         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Antes de reunião importante</strong> — Lead grande, decisor complicado. Quer alinhar abordagem.</div>
-       </div>
-       <div style="background:white; border-left:3px solid var(--red); border-radius:0 8px 8px 0; padding:12px 14px;">
-         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Após perda</strong> — Perdeu um deal e precisa entender o que aconteceu pra não repetir.</div>
-       </div>
-     </div>
+     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Pauta fixa:</div>
+     <table class="data-table">
+       <thead><tr><th style="width:35%">Tópico</th><th>Descrição</th></tr></thead>
+       <tbody>
+         <tr><td><strong>O que tivemos na semana passada</strong></td><td>Resultados concretos: reuniões, fechamentos, KPIs. O que foi entregue.</td></tr>
+         <tr><td><strong>Quais metas foram batidas</strong></td><td>Celebrar o que foi atingido. Reconhecimento público alimenta a cultura.</td></tr>
+         <tr><td><strong>O que está faltando</strong></td><td>Gaps em relação à meta do mês. Quantas contas ainda faltam? Onde estamos no funil?</td></tr>
+         <tr><td><strong>Quais ajustes precisamos fazer</strong></td><td>Mudança de abordagem, script, foco de produto, segmento. O que precisa mudar essa semana?</td></tr>
+         <tr><td><strong>Perspectivas e forecast</strong></td><td>Quais deals têm chance de fechar essa semana? Qual a previsão realista de receita?</td></tr>
+         <tr><td><strong>Quais gargalos</strong></td><td>O que está travando o time? Objeções repetidas, processo, ferramenta, produto.</td></tr>
+         <tr><td><strong>KPIs gerais</strong></td><td>Visão rápida dos números: ligações, reuniões, taxa de conversão, pipeline total.</td></tr>
+       </tbody>
+     </table>
 
-     <div class="tip-box">
-       <strong>Formato</strong>
-       O vendedor traz os problemas específicos, o líder facilita a resolução. Com 1h30, dá tempo de revisar deals travados, fazer roleplay de objeções, alinhar estratégia de fechamento e sair com plano de ação claro. Aproveite o tempo — é a reunião mais prática da semana.
+     <div class="tip-box" style="margin-top:16px;">
+       <strong>Dia fixo: segunda-feira</strong>
+       Abre a semana com visibilidade e direção. Horário fixo — quem não tem clareza no começo da semana opera no escuro a semana inteira.
      </div>
    </div>
  </div>
@@ -3408,7 +3333,7 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon blue">03</div>
-       <div><div class="card-title">1:1 (One-on-One)</div><div class="card-subtitle">Reunião individual mensal entre colaborador e líder — 1 hora</div></div>
+       <div><div class="card-title">1:1 (One-on-One)</div><div class="card-subtitle">Conversa individual quinzenal — sem pauta definida, o colaborador conduz</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
@@ -3416,11 +3341,11 @@ function clearSettingsModal() {
      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
        <div style="background:var(--blue-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:4px;">Frequência</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--blue);">Mensal</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--blue);">A cada 15 dias</div>
        </div>
        <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Duração</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">1 hora</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Alternância</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--green);">Alterna com Feedback</div>
        </div>
        <div style="background:var(--purple-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:4px;">Participantes</div>
@@ -3430,28 +3355,139 @@ function clearSettingsModal() {
 
      <div class="info-box">
        <strong>O que é</strong>
-       A reunião mais importante do líder. Conversa individual, mensal, de 1 hora com cada membro do time. É aqui que se constrói confiança, se corrige rota, se desenvolve habilidade e se resolve o que a Daily não dá conta. O 1:1 é do colaborador — ele traz a pauta, o líder facilita.
+       Conversa individual quinzenal que alterna com o Feedback. O 1:1 é menos sobre trabalho e mais sobre o colaborador. Não tem pauta definida — a liderança escuta mais do que fala. É espaço para o colaborador falar o que quiser: aspirações, dificuldades, percepções, ideias, ou simplesmente o que está na cabeça.
      </div>
 
-     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Pauta sugerida:</div>
-     <table class="data-table">
-       <thead><tr><th style="width:30%">Bloco</th><th style="width:15%">Tempo</th><th>O que cobrir</th></tr></thead>
-       <tbody>
-         <tr><td><strong>Check-in pessoal</strong></td><td>5 min</td><td>Como a pessoa está se sentindo? Energia, motivação, algo pessoal afetando o trabalho. Escuta genuína.</td></tr>
-         <tr><td><strong>Pipeline review</strong></td><td>20 min</td><td>Revisar os deals mais importantes do funil. Onde está cada um? Qual próximo passo? Tem deal parado? Tem deal que deveria ser descartado?</td></tr>
-         <tr><td><strong>Desenvolvimento</strong></td><td>20 min</td><td>Feedback sobre ligações/reuniões ouvidas no mês. Pontos fortes + pontos de melhoria específicos. Roleplay se necessário.</td></tr>
-         <tr><td><strong>Plano de ação</strong></td><td>15 min</td><td>Definir 2-3 ações concretas para o próximo mês. Quem faz o quê, até quando. Anotar e cobrar no próximo 1:1.</td></tr>
-       </tbody>
-     </table>
-
-     <div class="alert-box" style="margin-top:16px;">
-       <strong>Regras do 1:1</strong>
-       Nunca cancelar — é sagrado. Se precisar remarcar, remarcar na mesma semana. O líder prepara antes: olha o CRM, escuta ligações do mês, verifica as métricas. Chegar sem preparação é desrespeito com o tempo do colaborador.
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0;">
+       <div style="background:var(--green-soft); border-radius:8px; padding:16px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:8px;">✅ O que é</div>
+         <ul style="font-size:13px; color:var(--n-700); line-height:1.8; padding-left:16px; margin:0;">
+           <li>Espaço do colaborador</li>
+           <li>Escuta genuína</li>
+           <li>Conversa aberta, sem roteiro</li>
+           <li>Confiança e vínculo</li>
+         </ul>
+       </div>
+       <div style="background:var(--red-soft); border-radius:8px; padding:16px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:8px;">❌ O que não é</div>
+         <ul style="font-size:13px; color:var(--n-700); line-height:1.8; padding-left:16px; margin:0;">
+           <li>Cobrança de meta</li>
+           <li>Revisão de pipeline</li>
+           <li>Bronca ou correção</li>
+           <li>Alinhamento de processo</li>
+         </ul>
+       </div>
      </div>
 
-     <div class="tip-box" style="margin-top:10px;">
-       <strong>O que o 1:1 NÃO é</strong>
-       Não é bronca. Não é cobrança de meta. Não é reunião de alinhamento de processo. É espaço de desenvolvimento e confiança. Se o colaborador tem medo do 1:1, algo está errado.
+     <div class="tip-box">
+       <strong>Ritmo quinzenal</strong>
+       Semana 1: 1:1 — Semana 3: Feedback. Os dois se complementam: no 1:1 você escuta o colaborador, no Feedback você traz dados concretos dos últimos 30 dias para evoluir juntos.
+     </div>
+   </div>
+ </div>
+
+ <!-- RITUAL: FEEDBACK -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">04</div>
+       <div><div class="card-title">Feedback</div><div class="card-subtitle">Pontos factuais dos últimos 30 dias — quinzenal, alternando com o 1:1</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+       <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Frequência</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">A cada 15 dias</div>
+       </div>
+       <div style="background:var(--blue-soft); border-radius:8px; padding:12px; text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:4px;">Alternância</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--blue);">Alterna com 1:1</div>
+       </div>
+       <div style="background:var(--purple-soft); border-radius:8px; padding:12px; text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:4px;">Participantes</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--purple);">Líder + 1 Colaborador</div>
+       </div>
+     </div>
+
+     <div class="info-box">
+       <strong>O que é</strong>
+       Sessão quinzenal de feedback baseada em fatos dos últimos 30 dias. A liderança traz pontos concretos — comportamentos observados, métricas, situações específicas — para discutir e melhorar juntos. Nada de vago ou genérico: cada ponto tem evidência.
+     </div>
+
+     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Princípios do feedback factual:</div>
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+       <div style="background:white; border-left:3px solid var(--green); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Específico</strong> — "Na reunião de quinta com o lead X, você cortou a fala do cliente 3 vezes", não "você não sabe escutar".</div>
+       </div>
+       <div style="background:white; border-left:3px solid var(--blue); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Recente</strong> — Fatos dos últimos 30 dias. Feedback sobre algo de 3 meses atrás não gera mudança, gera ressentimento.</div>
+       </div>
+       <div style="background:white; border-left:3px solid var(--purple); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Equilibrado</strong> — Pontos positivos e pontos de melhoria. Só crítica desmotiva, só elogio não desenvolve.</div>
+       </div>
+       <div style="background:white; border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Acionável</strong> — Todo ponto de melhoria vem com sugestão concreta. "O que fazer diferente da próxima vez?"</div>
+       </div>
+     </div>
+
+     <div class="alert-box">
+       <strong>Prepare antes</strong>
+       A liderança chega na sessão com os pontos já mapeados: ligações ouvidas, dados de CRM, situações observadas na semana. Feedback improvisado é feedback genérico — e genérico não muda comportamento.
+     </div>
+   </div>
+ </div>
+
+ <!-- RITUAL: BATER FUNIL -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon accent">05</div>
+       <div><div class="card-title">Bater Funil</div><div class="card-subtitle">Revisão semanal do pipeline — 30 min para identificar gargalos</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+       <div style="background:var(--accent-soft); border-radius:8px; padding:12px; text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:4px;">Frequência</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--accent);">1x por semana</div>
+       </div>
+       <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Duração</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">30 min</div>
+       </div>
+       <div style="background:var(--purple-soft); border-radius:8px; padding:12px; text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:4px;">Participantes</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--purple);">Liderança + Time</div>
+       </div>
+     </div>
+
+     <div class="info-box">
+       <strong>O que é</strong>
+       Revisão semanal do funil de vendas. O time passa deal a deal pelos estágios do pipeline no Pipedrive: o que avançou, o que travou, o que precisa ser descartado. O objetivo é manter o funil limpo, identificar gargalos e definir ações para destravar o que está parado.
+     </div>
+
+     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">O que verificar em cada deal:</div>
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+       <div style="background:white; border-left:3px solid var(--blue); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Está no estágio certo?</strong> — Deal no estágio errado distorce o pipeline e prejudica o forecast.</div>
+       </div>
+       <div style="background:white; border-left:3px solid var(--green); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Qual o próximo passo?</strong> — Todo deal precisa ter atividade futura agendada. Sem próximo passo, está morto.</div>
+       </div>
+       <div style="background:white; border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Há quanto tempo está parado?</strong> — Deal sem movimento há mais de 7 dias precisa de ação ou descarte.</div>
+       </div>
+       <div style="background:white; border-left:3px solid var(--red); border-radius:0 8px 8px 0; padding:12px 14px;">
+         <div style="font-size:13px; color:var(--n-700); line-height:1.5;"><strong>Qual o gargalo?</strong> — Muitos deals travando no mesmo estágio indica problema sistêmico, não individual.</div>
+       </div>
+     </div>
+
+     <div class="tip-box">
+       <strong>Funil limpo, previsão correta</strong>
+       Um funil cheio de deals zumbis (parados, sem próximo passo, desatualizados) cria forecast irreal e esconde os verdadeiros gargalos. Bater o funil semanalmente mantém a operação honesta.
      </div>
    </div>
  </div>
@@ -3514,12 +3550,12 @@ function clearSettingsModal() {
    </div>
  </div>
 
- <!-- RITUAL: ALINHAMENTO SEMANAL -->
+ <!-- RITUAL: MONTHLY -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon red">05</div>
-       <div><div class="card-title">Alinhamento Semanal</div><div class="card-subtitle">Reunião com toda a empresa — cada setor apresenta os resultados da semana anterior</div></div>
+       <div class="card-icon red">06</div>
+       <div><div class="card-title">Monthly</div><div class="card-subtitle">Reunião mensal macro — primeiro dia útil do mês seguinte, ~1 hora</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
@@ -3527,42 +3563,38 @@ function clearSettingsModal() {
      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
        <div style="background:rgba(239,68,68,0.06); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:4px;">Frequência</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--red);">Segunda-feira</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--red);">1º dia útil do mês</div>
        </div>
        <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:4px;">Duração</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">30-45 min</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--green);">~1 hora</div>
        </div>
        <div style="background:var(--blue-soft); border-radius:8px; padding:12px; text-align:center;">
          <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:4px;">Participantes</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--blue);">Empresa toda</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; color:var(--blue);">Time comercial</div>
        </div>
      </div>
 
      <div class="info-box">
        <strong>O que é</strong>
-       Reunião semanal com toda a empresa. Cada setor apresenta os resultados da semana anterior: comercial, CS, produto, marketing, operações. O objetivo é dar visibilidade do que cada área está fazendo, celebrar conquistas e manter todo mundo na mesma página. Quem entende o todo, trabalha melhor na sua parte.
+       Versão macro da Weekly. Acontece no primeiro dia útil do mês seguinte — olha para o mês que fechou e define o norte para o mês que começa. Além dos tópicos da Weekly, traz informações top-down: diretrizes gerais da liderança, contexto estratégico e KPIs mensais consolidados.
      </div>
 
-     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Dinâmica do Alinhamento:</div>
+     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Pauta:</div>
      <table class="data-table">
-       <thead><tr><th style="width:30%">Bloco</th><th style="width:12%">Tempo</th><th>O que cobrir</th></tr></thead>
+       <thead><tr><th style="width:35%">Bloco</th><th>Descrição</th></tr></thead>
        <tbody>
-         <tr><td><strong>Abertura</strong></td><td>5 min</td><td>Liderança abre a reunião com visão geral: como foi a semana da empresa como um todo. Destaques, marcos e contexto.</td></tr>
-         <tr><td><strong>Setor por setor</strong></td><td>5-7 min cada</td><td>Cada setor apresenta seus resultados da semana anterior: métricas principais, o que foi entregue, o que ficou pendente e próximos passos. Objetivo: dar visibilidade pra toda a empresa.</td></tr>
-         <tr><td><strong>Celebrações</strong></td><td>5 min</td><td>Quem se destacou? Qual setor entregou acima do esperado? Reconhecer em público — isso alimenta a cultura e conecta os times.</td></tr>
-         <tr><td><strong>Informes gerais</strong></td><td>5 min</td><td>Novidades de produto, mudanças de processo, eventos, contratações, lançamentos. Tudo que a empresa precisa saber.</td></tr>
+         <tr><td><strong>Fechamento do mês anterior</strong></td><td>KPIs mensais consolidados: receita, contas, reuniões, conversão. O que foi entregue vs. o que foi prometido.</td></tr>
+         <tr><td><strong>Metas batidas e gaps</strong></td><td>Celebrar o que foi atingido. Ser honesto sobre o que ficou para trás e por quê.</td></tr>
+         <tr><td><strong>Diretrizes top-down</strong></td><td>A liderança traz o contexto estratégico: prioridades da empresa, ajustes de produto, foco do mês, mudanças de rota.</td></tr>
+         <tr><td><strong>Meta do novo mês</strong></td><td>Definir a meta do mês que começa: receita, contas, atividades. Todo mundo sai alinhado com o número.</td></tr>
+         <tr><td><strong>Ajustes e plano de ação</strong></td><td>O que vamos fazer diferente? Quais ações concretas para o próximo mês? Quem é responsável pelo quê?</td></tr>
        </tbody>
      </table>
 
      <div class="tip-box" style="margin-top:16px;">
-       <strong>Dia fixo: segunda-feira</strong>
-       Toda segunda de manhã, sem exceção. Abre a semana com clareza, visão do que cada setor entregou e alinhamento geral. Horário fixo — previsibilidade cria disciplina.
-     </div>
-
-     <div class="alert-box" style="margin-top:10px;">
-       <strong>O que o Alinhamento NÃO é</strong>
-       Não é tribunal. Não é pra expor quem não entregou. Os resultados são compartilhados com transparência, mas o foco é em visibilidade e melhoria coletiva — cada setor entende como contribui pro resultado da empresa. Quem se sente julgado para de compartilhar, e aí a empresa perde visibilidade.
+       <strong>Por que no primeiro dia útil?</strong>
+       O mês não deveria começar sem clareza. Fazer a Monthly no primeiro dia útil garante que o time entra em velocidade de cruzeiro desde o início — sem semana "morta" de ambientação.
      </div>
    </div>
  </div>
@@ -3594,40 +3626,40 @@ function clearSettingsModal() {
              <td style="padding:10px 12px; font-weight:700; color:var(--green);">Daily</td>
              <td style="padding:10px 12px; text-align:center;">—</td>
              <td style="padding:10px 12px; text-align:center;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">15 min</span></td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
              <td style="padding:10px 12px; text-align:center;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">15 min</span></td>
+             <td style="padding:10px 12px; text-align:center;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">15 min</span></td>
+             <td style="padding:10px 12px; text-align:center;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">15 min</span></td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-75);">
+             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Weekly</td>
+             <td style="padding:10px 12px; text-align:center;"><span style="background:var(--accent-soft); color:var(--accent); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">30–45 min</span></td>
+             <td style="padding:10px 12px; text-align:center;">—</td>
+             <td style="padding:10px 12px; text-align:center;">—</td>
+             <td style="padding:10px 12px; text-align:center;">—</td>
              <td style="padding:10px 12px; text-align:center;">—</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Pit Stop</td>
-             <td colspan="5" style="padding:10px 12px; text-align:center; font-size:12px; color:var(--n-500); font-style:italic;">1x por mês — 1h30 de revisão estratégica com cada vendedor</td>
+             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Bater Funil</td>
+             <td colspan="5" style="padding:10px 12px; text-align:center; font-size:12px; color:var(--n-500); font-style:italic;">1x por semana — 30 min de revisão de pipeline e gargalos</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
              <td style="padding:10px 12px; font-weight:700; color:var(--blue);">1:1</td>
-             <td colspan="5" style="padding:10px 12px; text-align:center; font-size:12px; color:var(--n-500); font-style:italic;">1x por mês — 1h individual entre colaborador e líder</td>
+             <td colspan="5" style="padding:10px 12px; text-align:center; font-size:12px; color:var(--n-500); font-style:italic;">A cada 15 dias — alternando com Feedback</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--purple);">Brainstorm</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600;">CA + Copiloto</span></td>
+             <td style="padding:10px 12px; font-weight:700; color:var(--green);">Feedback</td>
+             <td colspan="5" style="padding:10px 12px; text-align:center; font-size:12px; color:var(--n-500); font-style:italic;">A cada 15 dias — alternando com 1:1</td>
            </tr>
            <tr>
-             <td style="padding:10px 12px; font-weight:700; color:var(--red);">Alinhamento Semanal</td>
-             <td style="padding:10px 12px; text-align:center;"><span style="background:rgba(239,68,68,0.06); color:var(--red); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">45 min</span></td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
-             <td style="padding:10px 12px; text-align:center;">—</td>
+             <td style="padding:10px 12px; font-weight:700; color:var(--red);">Monthly</td>
+             <td colspan="5" style="padding:10px 12px; text-align:center; font-size:12px; color:var(--n-500); font-style:italic;">1º dia útil do mês — ~1h macro de fechamento e abertura de ciclo</td>
            </tr>
          </tbody>
        </table>
      </div>
      <div class="tip-box" style="margin-top:16px;">
        <strong>Essa é a base — adapte ao seu ritmo</strong>
-       O mapa acima é a estrutura atual. Daily é terça e quinta, Brainstorm é sexta (uma sessão CA + uma Copiloto), 1:1 e Pit Stop são mensais, e Alinhamento é semanal. Ajustes podem ser feitos conforme a dinâmica evolui, mas os rituais em si são inegociáveis.
+       Daily de terça a sexta (15 min), Weekly toda segunda (30–45 min), Bater Funil 1x por semana (30 min), 1:1 e Feedback quinzenais alternados, Monthly no primeiro dia útil do mês. Os rituais são inegociáveis — a consistência é o que gera previsibilidade.
      </div>
    </div>
  </div>
@@ -3681,52 +3713,6 @@ function clearSettingsModal() {
      <div class="tip-box">
        <strong>Dica prática</strong>
        Na hora de agendar, seja específico: não é "ligar semana que vem". É "Ligar terça 14h — lead pediu pra retornar após reunião com sócio". Quanto mais contexto na atividade, menos tempo você perde lembrando o que aconteceu.
-     </div>
-   </div>
- </div>
-
- <!-- REGRA 2: ATIVIDADE DE WHATSAPP -->
- <div class="card open">
-   <div class="card-header" onclick="toggleCard(this)">
-     <div class="card-header-left">
-       <div class="card-icon blue">02</div>
-       <div><div class="card-title">Atividade de WhatsApp — Print Obrigatório</div><div class="card-subtitle">Toda mensagem enviada precisa de evidência dentro da atividade</div></div>
-     </div>
-     <span class="card-chevron">&#9660;</span>
-   </div>
-   <div class="card-body">
-     <div class="info-box">
-       <strong>Regra</strong>
-       Quando a atividade é "Mensagem WhatsApp", antes de dar check você precisa: tirar print da conversa e colar dentro da atividade. Sem print, não tem como a liderança auditar, dar feedback ou entender o contexto.
-     </div>
-
-     <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900); margin:16px 0 10px;">Passo a passo:</div>
-     <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px; text-align:center;">
-         <div style="width:32px; height:32px; border-radius:50%; background:var(--blue-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; color:var(--blue);">1</div>
-         <div style="font-size:12px; color:var(--n-700); font-weight:600;">Enviar mensagem</div>
-         <div style="font-size:11px; color:var(--n-400); margin-top:4px;">WhatsApp do lead</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px; text-align:center;">
-         <div style="width:32px; height:32px; border-radius:50%; background:var(--blue-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; color:var(--blue);">2</div>
-         <div style="font-size:12px; color:var(--n-700); font-weight:600;">Tirar print</div>
-         <div style="font-size:11px; color:var(--n-400); margin-top:4px;">Da conversa inteira</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px; text-align:center;">
-         <div style="width:32px; height:32px; border-radius:50%; background:var(--blue-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; color:var(--blue);">3</div>
-         <div style="font-size:12px; color:var(--n-700); font-weight:600;">Colar na atividade</div>
-         <div style="font-size:11px; color:var(--n-400); margin-top:4px;">Dentro do Pipedrive</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px; text-align:center;">
-         <div style="width:32px; height:32px; border-radius:50%; background:var(--green-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; color:var(--green);">✓</div>
-         <div style="font-size:12px; color:var(--n-700); font-weight:600;">Dar check</div>
-         <div style="font-size:11px; color:var(--n-400); margin-top:4px;">Só depois do print</div>
-       </div>
-     </div>
-
-     <div class="alert-box">
-       <strong>Por que isso importa?</strong>
-       O print é a evidência do contato. Permite: auditoria da qualidade da abordagem, feedback da liderança sobre o script, continuidade caso outro vendedor assuma o deal, e rastreabilidade completa da cadência.
      </div>
    </div>
  </div>
