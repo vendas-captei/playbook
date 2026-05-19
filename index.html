@@ -8413,295 +8413,565 @@ function clearSettingsModal() {
  <div class="section" id="sec-copiloto-inbound">
  <div class="page-header">
    <div class="crumb"><b>Copiloto</b> / Prospecção</div>
-   <h2>Inbound — Lead Inscrito (Copiloto IA)</h2>
-   <p>Processo completo para leads que se inscreveram para conhecer o Copiloto IA. Canais de origem: landing page, evento, RD Station, WhatsApp, campanhas. O lead já levantou a mão — o objetivo é converter em reunião de demonstração agendada.</p>
+   <h2>Cadência de Reativação — Inbound</h2>
+   <p>Leads inbound do Copiloto que demonstraram interesse e estão parados. 9 dias, multicanal. O tom é de <strong>retomada</strong> — não de cold call.</p>
  </div>
 
  <div class="golden-rule">
-   <h3>Lead inbound = velocidade é tudo.</h3>
-   <p>Cada hora sem contato, a taxa de conversão despenca. Ideal: ligar em <strong>menos de 5 minutos</strong> após a inscrição. O lead acabou de ver algo sobre IA e está quente — não deixe esfriar.</p>
+   <h3>"Estamos ajudando imobiliárias a responder e acompanhar leads automaticamente para evitar perda de oportunidades."</h3>
+   <p>Frase-base de posicionamento. Transmita continuidade — não prospecção fria.</p>
  </div>
 
- <div class="flow-banner">
-   <div class="flow-banner-step"><div class="flow-banner-num">1</div><div class="flow-banner-label">Ligar</div></div>
-   <div class="flow-banner-arrow">&rarr;</div>
-   <div class="flow-banner-step"><div class="flow-banner-num">2</div><div class="flow-banner-label">Qualificar</div></div>
-   <div class="flow-banner-arrow">&rarr;</div>
-   <div class="flow-banner-step"><div class="flow-banner-num">3</div><div class="flow-banner-label">Agendar Demo</div></div>
-   <div class="flow-banner-arrow">&rarr;</div>
-   <div class="flow-banner-step"><div class="flow-banner-num">4</div><div class="flow-banner-label">Cadência</div></div>
- </div>
-
- <!-- ETAPA 1: LIGAÇÃO INBOUND -->
+ <!-- POSICIONAMENTO -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon green">01</div>
-       <div><div class="card-title">Etapa 1 — Ligação (Primeiro Contato)</div><div class="card-subtitle">Lead se inscreveu para conhecer o Copiloto IA — ligar o mais rápido possível</div></div>
+       <div class="card-icon amber">!</div>
+       <div><div class="card-title">Contexto Estratégico — Como Posicionar</div><div class="card-subtitle">O que dizer e o que evitar no discurso do Copiloto</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+       <div class="alert-box" style="margin:0;">
+         <strong>NÃO comunicar como:</strong>
+         <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9;">
+           <li>IA para captação</li>
+           <li>Ferramenta de geração de leads</li>
+           <li>IA imobiliária genérica</li>
+           <li>Automação inteligente</li>
+           <li>Plataforma omnichannel</li>
+         </ul>
+       </div>
+       <div class="tip-box" style="margin:0;">
+         <strong>Focar em:</strong>
+         <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9;">
+           <li>Atendimento automático</li>
+           <li>Velocidade de resposta</li>
+           <li>Follow-up automático</li>
+           <li>Evitar perda de leads</li>
+           <li>Ganho operacional</li>
+         </ul>
+       </div>
+     </div>
      <div class="info-box">
-       <strong>Regra de ouro do Inbound</strong>
-       O lead levantou a mão. Velocidade é tudo. Ideal: ligar em menos de 5 minutos após a inscrição. Cada hora que passa, a taxa de conversão cai drasticamente.
-     </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-rapport">Abertura — Lead Inscrito</div>
-       <div class="script-text">
-         "<span class="placeholder">[Nome]</span>, tudo bem? Aqui é o <span class="placeholder">[Seu Nome]</span> da Captei! Vi que você se inscreveu para conhecer o nosso Copiloto IA. Que bom que chegou até a gente!"<br><br>
-         "<em>Me conta, como foi que você ficou sabendo do Copiloto?</em>"
-       </div>
-     </div>
-     <div class="tip-box">
-       <strong>Por que perguntar a origem?</strong>
-       Entender se veio de evento, anúncio, indicação ou busca orgânica ajuda a calibrar o nível de conhecimento do lead sobre o produto. Quem veio de evento já viu uma prévia; quem veio de anúncio pode saber muito pouco.
-     </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-contexto">Contexto Rápido (pós-abertura)</div>
-       <div class="script-text">
-         "Perfeito! Então, resumindo: o Copiloto é a nossa inteligência artificial que atende seus leads 24 horas por dia via WhatsApp. Qualifica, agenda visita, responde dúvidas, encaminha pro corretor certo — tudo automático, com linguagem natural, como se fosse uma pessoa de verdade."<br><br>
-         "<em>Me conta um pouco da operação de vocês: quantos corretores tem na equipe? Vocês trabalham mais com vendas, locação ou ambos?</em>"
-       </div>
-     </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor">Sondagem Rápida — Descoberta de Dor</div>
-       <div class="script-text">
-         "<em>Quantos leads vocês recebem por mês, mais ou menos? De portais, tráfego, WhatsApp?</em>"<br><br>
-         "<em>Qual o maior gargalo hoje no atendimento? É a velocidade de resposta, a qualificação, ou o time não dá conta do volume?</em>"<br><br>
-         "<em>E fora de horário comercial — quem atende os leads que chegam à noite, final de semana?</em>"
-       </div>
-     </div>
-     <div class="alert-box">
-       <strong>ATENÇÃO — Lead de locação é gatilho</strong>
-       Se o lead menciona locação forte, explore: manutenção, 2ª via de boleto, requalificação. São áreas que o Copiloto Pro cobre e que ninguém mais resolve com IA.
-     </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-meet">Convite para Demo</div>
-       <div class="script-text">
-         "Olha, pelo que você me contou, faz muito sentido a gente fazer uma demonstração ao vivo. Em 30 minutos eu te mostro o Copiloto funcionando no WhatsApp, com conversas reais — você vai ver como o atendimento fica."<br><br>
-         "<em>Qual o melhor horário pra você? Consigo encaixar <span class="placeholder">[opções de horário]</span>.</em>"<br><br>
-         "<em>E quem mais decide sobre tecnologia aí? Seria bom essa pessoa participar também pra gente resolver tudo em uma conversa só.</em>"
-       </div>
+       <strong>Contexto dos leads desta cadência</strong><br>
+       Esses leads são <strong>inbound</strong>, vieram de campanhas específicas do Copiloto, já demonstraram interesse e já possuem contexto do produto. <strong>Não trate como cold outbound.</strong> O tom ideal deve parecer retomada — continuidade de uma conversa iniciada anteriormente.
      </div>
    </div>
  </div>
 
- <!-- ETAPA 2: CADÊNCIA WHATSAPP INBOUND -->
+ <!-- VISÃO GERAL 9 DIAS -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon green">02</div>
-       <div><div class="card-title">Etapa 2 — Cadência WhatsApp (não atendeu)</div><div class="card-subtitle">Sequência de 3 mensagens para leads que não atenderam a ligação</div></div>
+       <div class="card-icon amber">9</div>
+       <div><div class="card-title">Visão Geral — Cadência 9 Dias</div><div class="card-subtitle">Sequência multicanal de reativação</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-whatsapp">WhatsApp 1 — Imediato (não atendeu)</div>
-       <div class="script-text">
-         Oi <span class="placeholder">[Nome]</span>, tudo bem? Aqui é o <span class="placeholder">[Seu Nome]</span> da Captei!<br><br>
-         Vi que você se inscreveu para conhecer o Copiloto IA. Tentei te ligar agora, mas não consegui falar.<br><br>
-         O Copiloto é nossa inteligência artificial que atende seus leads 24h via WhatsApp — qualifica, agenda visita e responde como se fosse uma pessoa real. Tudo automático.<br><br>
-         Queria marcar uma demonstração ao vivo de 30 min. Você vê o Copiloto funcionando no WhatsApp com conversas reais.<br><br>
-         Qual o melhor horário para você?
+     <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:6px;text-align:center;">
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 1</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Lig.</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">WPP</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Email</span>
+         </div>
        </div>
-     </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-whatsapp">WhatsApp 2 — Follow-up (dia seguinte)</div>
-       <div class="script-text">
-         Oi <span class="placeholder">[Nome]</span>, passando aqui para dar sequência!<br><br>
-         A demonstração do Copiloto é bem prática: 30 minutos, ao vivo, e você vê a IA atendendo no WhatsApp como se fosse um corretor experiente. Qualificação, agendamento de visita, dúvidas sobre imóvel — tudo resolvido na hora.<br><br>
-         Tenho <span class="placeholder">[horário]</span> disponível hoje. Funciona?
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 2</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--purple-soft);color:var(--purple);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Email</span>
+         </div>
        </div>
-     </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-whatsapp">WhatsApp 3 — Última tentativa (3 dias depois)</div>
-       <div class="script-text">
-         <span class="placeholder">[Nome]</span>, última mensagem para não ficar insistente.<br><br>
-         Se ter uma IA atendendo 24h no WhatsApp da sua imobiliária faz sentido, estou aqui. A demo leva 30 min e não tem compromisso nenhum.<br><br>
-         Qualquer coisa é só me chamar. Sucesso!
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 3</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Lig.</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">WPP</span>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);opacity:0.55;">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 4</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--n-100);color:var(--n-400);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Break</span>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 5</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Lig.</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">WPP</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Email</span>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);opacity:0.55;">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 6</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--n-100);color:var(--n-400);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Break</span>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 7</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--green-soft);color:var(--green);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">WPP</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Email</span>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);opacity:0.55;">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 8</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--n-100);color:var(--n-400);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Break</span>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--red-soft);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 9</div>
+         <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Lig.</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">WPP</span>
+           <span style="background:var(--red-soft);color:var(--red);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Break</span>
+         </div>
        </div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 3: CADÊNCIA E-MAIL INBOUND -->
+ <!-- DIA 1 -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon purple">03</div>
-       <div><div class="card-title">Etapa 3 — Cadência de E-mail Inbound</div><div class="card-subtitle">Disparar em paralelo ao WhatsApp — 4 e-mails em 8 dias</div></div>
+       <div class="card-icon green">D1</div>
+       <div>
+         <div class="card-title">Dia 1 — Retomada</div>
+         <div class="card-subtitle">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">Ligação</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">WhatsApp</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Email</span>
+         </div>
+       </div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="inner-tabs">
-       <button class="inner-tab active" onclick="switchTab(this, 'copiloto-inbound-email-tab')">Dia 0</button>
-       <button class="inner-tab" onclick="switchTab(this, 'copiloto-inbound-email-tab')">Dia 2</button>
-       <button class="inner-tab" onclick="switchTab(this, 'copiloto-inbound-email-tab')">Dia 5</button>
-       <button class="inner-tab" onclick="switchTab(this, 'copiloto-inbound-email-tab')">Dia 8</button>
+       <button class="inner-tab active" onclick="switchTab(this,'dia1-tab')">📞 Ligação</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia1-tab')">💬 WhatsApp</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia1-tab')">✉️ Email</button>
      </div>
+     <div class="inner-content dia1-tab active">
+       <div class="info-box"><strong>Objetivo:</strong> Retomar contato de forma natural — como continuidade de conversa. Não fazer pitch completo. Validar interesse e marcar reunião.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-rapport">Abertura</div>
+         <div class="script-text">"Fala, [Nome], tudo bem?<br><br>Aqui é o Luiz, da Captei.<br><br>Vi que vocês tinham demonstrado interesse no Copiloto há um tempo e estou retomando alguns contatos aqui rapidamente.<br><br>Peguei você em um momento ruim?"</div>
+       </div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-dor">Contexto Operacional</div>
+         <div class="script-text">"A gente começou a conversar com muitas imobiliárias porque várias acabam sofrendo muito na velocidade do atendimento e no follow-up dos leads.<br><br>Mesmo tendo lead, muita oportunidade acaba esfriando pela operação do dia a dia."</div>
+       </div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-meet">CTA</div>
+         <div class="script-text">"Faz sentido eu te mostrar rapidamente como funciona?"<br><br>"Vale marcar 15 minutos para você ver na prática?"</div>
+       </div>
+     </div>
+     <div class="inner-content dia1-tab">
+       <div class="info-box"><strong>Tom:</strong> Curto, humano, parecer continuação de conversa. Evitar textão e linguagem institucional.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp 1 — Retomada</div>
+         <div class="script-text">Oi, [Nome], tudo bem?<br><br>Aqui é o Luiz, da Captei.<br><br>Vi que vocês tinham demonstrado interesse no Copiloto há um tempo e queria retomar esse contato rapidinho 🙂<br><br>Estamos ajudando imobiliárias a automatizar atendimento e follow-up dos leads.<br><br>Faz sentido conversar sobre isso?</div>
+       </div>
+       <div class="tip-box"><strong>Dica de áudio (20–40s):</strong> "Fala, [Nome], tudo bem? Aqui é o Luiz, da Captei. Vi que vocês tinham demonstrado interesse no Copiloto e queria só retomar contigo rapidinho. Estamos ajudando imobiliárias principalmente na parte de atendimento automático e follow-up dos leads, para evitar perda de oportunidade no dia a dia. Achei que poderia fazer sentido aí também. Depois me diz se vale conversarmos 🙂"</div>
+     </div>
+     <div class="inner-content dia1-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Assunto: Retomando nosso contato sobre o Copiloto</div>
+         <div class="script-text">Olá, [Nome].<br><br>Vi que vocês demonstraram interesse no Copiloto da Captei há um tempo e queria retomar esse contato.<br><br>Estamos ajudando imobiliárias a automatizar o atendimento dos leads, acelerar respostas e manter os follow-ups ativos.<br><br>Achei que poderia fazer sentido voltar a conversar sobre isso.<br><br>Faz sentido te mostrar rapidamente como está funcionando hoje?</div>
+       </div>
+     </div>
+     <div class="info-box">
+       <strong>Regra de ouro do Inbound</strong>
+       O lead levantou a mão. Velocidade é tudo. Ideal: ligar em menos de 5 minutos após a inscrição. Cada hora que passa, a taxa de conversão cai drasticamente.
+     </div>
+   </div>
+ </div>
 
-     <div class="inner-content copiloto-inbound-email-tab active">
-       <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Sua inscrição no Copiloto IA — próximo passo</span></div>
-         <div class="email-body-preview">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           Oi <span class="placeholder">[Nome]</span>, tudo bem?<br><br>
-           Vi que você se inscreveu para conhecer o Copiloto IA da Captei — que bom ter você aqui!<br><br>
-           O Copiloto é uma inteligência artificial que atende os leads da sua imobiliária 24 horas por dia via WhatsApp. Ele qualifica, agenda visita, tira dúvidas sobre imóveis e encaminha pro corretor certo — tudo com linguagem natural, como se fosse uma pessoa real.<br><br>
-           <strong>Próximo passo:</strong> em 30 minutos de demo ao vivo, você vê o Copiloto funcionando no WhatsApp com conversas reais. Sem custo, sem compromisso.<br><br>
-           Tenho <span class="placeholder">[horário]</span> disponível amanhã. Funciona?<br><br>
-           Abraço,<br>
-           <span class="placeholder">[Seu Nome]</span> — Captei
+ <!-- DIA 2 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">D2</div>
+       <div>
+         <div class="card-title">Dia 2 — Dor Operacional</div>
+         <div class="card-subtitle"><span style="background:var(--purple-soft);color:var(--purple);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Email</span></div>
+       </div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Assunto: O que mais temos visto no atendimento das imobiliárias</div>
+       <div class="script-text">[Nome], uma coisa que temos percebido bastante:<br><br>muitas imobiliárias já conseguem gerar leads, mas acabam perdendo oportunidades na velocidade do atendimento e no acompanhamento.<br><br>O Copiloto surgiu exatamente para resolver essa parte operacional.<br><br>Ele responde automaticamente, mantém follow-ups ativos e ajuda a equipe comercial a não deixar lead esfriar.<br><br>Se fizer sentido, posso te mostrar alguns exemplos práticos.</div>
+     </div>
+   </div>
+ </div>
+
+ <!-- DIA 3 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">D3</div>
+       <div>
+         <div class="card-title">Dia 3 — Dor Operacional</div>
+         <div class="card-subtitle">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">Ligação</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">WhatsApp</span>
          </div>
        </div>
      </div>
-
-     <div class="inner-content copiloto-inbound-email-tab">
-       <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Você sabia que 60% dos leads são perdidos fora do horário comercial?</span></div>
-         <div class="email-body-preview">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <span class="placeholder">[Nome]</span>, uma pergunta rápida:<br><br>
-           Quem atende os leads da sua imobiliária às 22h? E no domingo à tarde?<br><br>
-           A maioria das imobiliárias perde oportunidades simplesmente porque ninguém está disponível fora do horário comercial. O Copiloto IA resolve isso — atende no WhatsApp 24/7, qualifica o lead, agenda a visita e deixa tudo pronto pro corretor no dia seguinte.<br><br>
-           A demonstração leva 30 minutos, ao vivo, e você vê conversas reais acontecendo. Sem custo.<br><br>
-           Qual o melhor horário para você nesta semana?<br><br>
-           Abraço,<br>
-           <span class="placeholder">[Seu Nome]</span> — Captei
-         </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'dia3-tab')">📞 Ligação</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia3-tab')">💬 WhatsApp</button>
+     </div>
+     <div class="inner-content dia3-tab active">
+       <div class="info-box"><strong>Foco:</strong> Diagnóstico da operação. Perguntar mais do que falar. Identificar e nomear a dor.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-dor">Diagnóstico — Atendimento</div>
+         <div class="script-text">• Hoje vocês conseguem responder os leads rapidamente?<br>• Como funciona o atendimento inicial aí hoje?<br>• O atendimento fica centralizado ou depende dos corretores?<br>• Vocês conseguem atender 100% dos leads?</div>
+       </div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-dor">Diagnóstico — Follow-up</div>
+         <div class="script-text">• Como vocês fazem follow-up hoje?<br>• Existe algum processo automático ou é mais manual?<br>• Vocês sentem que alguns leads acabam esfriando no caminho?</div>
+       </div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-dor">Diagnóstico — Operação</div>
+         <div class="script-text">• O time consegue manter constância no atendimento?<br>• Em horários fora do comercial vocês acabam perdendo lead?<br>• O volume de leads hoje é tranquilo de operar?</div>
        </div>
      </div>
-
-     <div class="inner-content copiloto-inbound-email-tab">
-       <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Como imobiliárias estão usando IA no atendimento</span></div>
-         <div class="email-body-preview">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <span class="placeholder">[Nome]</span>,<br><br>
-           Queria compartilhar o que estamos vendo no mercado:<br><br>
-           Antes: corretor atende manualmente, leva horas pra responder, lead esfria e vai pra concorrência.<br>
-           Depois: IA responde em segundos, qualifica o lead, agenda visita e libera o corretor pra fazer o que ele faz de melhor — fechar negócio.<br><br>
-           O diferencial do Copiloto é que ele não é chatbot. Ele entende áudio, responde com naturalidade, e cobre até 6 áreas da imobiliária (comercial, locação, manutenção, financeiro, captação e requalificação).<br><br>
-           O teste é simples: 30 min de demo ao vivo. Você vê o WhatsApp funcionando com IA.<br><br>
-           Posso agendar para <span class="placeholder">[data]</span>?<br><br>
-           Abraço,<br>
-           <span class="placeholder">[Seu Nome]</span> — Captei
-         </div>
-       </div>
-     </div>
-
-     <div class="inner-content copiloto-inbound-email-tab">
-       <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Último contato — porta aberta</span></div>
-         <div class="email-body-preview">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <span class="placeholder">[Nome]</span>, não quero tomar mais o seu tempo.<br><br>
-           Se ter uma IA atendendo 24h no WhatsApp da imobiliária não é prioridade agora, entendo totalmente. Mas se em algum momento quiser ver como funciona na prática, a porta está aberta.<br><br>
-           A demonstração é gratuita, leva 30 minutos, e não tem fidelidade — sem risco nenhum.<br><br>
-           Sucesso e até a próxima!<br><br>
-           Abraço,<br>
-           <span class="placeholder">[Seu Nome]</span> — Captei
-         </div>
+     <div class="inner-content dia3-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp 2 — Dor Operacional</div>
+         <div class="script-text">[Nome], uma coisa que temos visto bastante:<br><br>muitas imobiliárias conseguem gerar lead, mas acabam perdendo oportunidade na velocidade do atendimento e no follow-up.<br><br>Vocês sentem isso aí também?</div>
        </div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 4: CADÊNCIA VISUAL -->
+ <!-- DIA 4 -->
  <div class="card">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon amber">04</div>
-       <div><div class="card-title">Cadência Inbound — Mapa Completo</div><div class="card-subtitle">Fluxo completo de contato com lead inscrito (Copiloto)</div></div>
+       <div class="card-icon" style="background:var(--n-100);color:var(--n-400);">D4</div>
+       <div><div class="card-title">Dia 4 — Break Estratégico</div><div class="card-subtitle"><span style="background:var(--n-100);color:var(--n-400);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Nenhuma ação</span></div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="alert-box" style="margin-bottom:16px;">
-       <strong>Regra da cadência inbound</strong>
-       O lead levantou a mão — a urgência é maior que no outbound. Velocidade no primeiro contato é tudo. A cada hora que passa sem contato, a taxa de conversão cai drasticamente.
+     <div class="tip-box">
+       <strong>Por que o break?</strong><br>
+       Dar espaço entre contatos evita percepção de pressão ou automação. O lead precisa de tempo para processar. Contatos muito frequentes geram bloqueio — o silêncio estratégico é parte da cadência.
      </div>
-     <div style="overflow-x:auto;">
-       <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
-         <thead>
-           <tr style="border-bottom:2px solid var(--n-100);">
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Dia</th>
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Ação</th>
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Canal</th>
-             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Observação</th>
-           </tr>
-         </thead>
-         <tbody>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 0</td>
-             <td style="padding:10px 12px; color:var(--n-700);">1ª ligação (até 5 min após inscrição)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">Ligação</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Usar script de abertura inbound Copiloto</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 0</td>
-             <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 1 (se não atendeu)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">WhatsApp</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Referência: "Vi que você se inscreveu para conhecer o Copiloto IA..."</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 0</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 1 — Próximo passo</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Apresentação rápida do Copiloto + propor demo</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 1</td>
-             <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 2 — Follow-up</td>
-             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">WhatsApp</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Reforço: demo prática, 30 min, IA funcionando ao vivo</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 2</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 2 — Lead perdido fora do horário</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Gatilho: "Quem atende seus leads às 22h?"</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 3</td>
-             <td style="padding:10px 12px; color:var(--n-700);">2ª ligação (se não conectou)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">Ligação</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Horário diferente do Dia 0. Abordagem direta.</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 4</td>
-             <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 3 — Última tentativa</td>
-             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">WhatsApp</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">"Última mensagem para não ser insistente" + porta aberta</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 5</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 3 — Case de uso</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Antes vs Depois + diferencial do Copiloto vs chatbot</td>
-           </tr>
-           <tr>
-             <td style="padding:10px 12px; font-weight:700; color:var(--n-400);">Dia 8</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 4 — Encerramento</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Porta aberta. Sem pressão. Registrar no CRM como "Inbound — sem conversão"</td>
-           </tr>
-         </tbody>
-       </table>
+   </div>
+ </div>
+
+ <!-- DIA 5 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">D5</div>
+       <div>
+         <div class="card-title">Dia 5 — Credibilidade</div>
+         <div class="card-subtitle">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">Ligação</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">WhatsApp</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Email</span>
+         </div>
+       </div>
      </div>
-     <div class="tip-box" style="margin-top:16px;">
-       <strong>Dica: registrar tudo no Pipedrive</strong>
-       Cada tentativa de contato deve ser registrada. Lead que não converteu no inbound pode ser reabordado em 30-60 dias com uma abordagem outbound, especialmente se houver novidade no produto.
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'dia5-tab')">📞 Ligação</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia5-tab')">💬 WhatsApp</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia5-tab')">✉️ Email</button>
+     </div>
+     <div class="inner-content dia5-tab active">
+       <div class="info-box"><strong>Foco:</strong> Gerar curiosidade com resultados reais. Frases que provocam interesse sem virar pitch.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-rapport">Frases de Curiosidade</div>
+         <div class="script-text">• "Tem imobiliária usando para responder lead em segundos."<br>• "Muita gente está usando mais pela constância do follow-up."<br>• "O ganho maior normalmente é velocidade operacional."<br>• "O interessante é que reduz bastante lead perdido."<br>• "A operação fica muito menos dependente do corretor lembrar de responder."</div>
+       </div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-meet">Posicionamento do Copiloto</div>
+         <div class="script-text">"Foi exatamente por isso que criamos o Copiloto.<br><br>A ideia é ajudar a imobiliária no atendimento inicial e no acompanhamento dos leads automaticamente.<br><br>Ele ajuda a responder rápido, manter follow-up ativo e evitar que oportunidades esfriem por falta de contato."</div>
+       </div>
+     </div>
+     <div class="inner-content dia5-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp 3 — Curiosidade/Benefício</div>
+         <div class="script-text">Hoje o que mais temos visto no Copiloto é ganho de velocidade no atendimento.<br><br>Tem imobiliária usando para responder lead em segundos e manter follow-up ativo automaticamente.<br><br>Achei que poderia fazer sentido para vocês também.</div>
+       </div>
+     </div>
+     <div class="inner-content dia5-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Assunto: Como imobiliárias estão acelerando atendimento</div>
+         <div class="script-text">[Nome], hoje o que mais temos visto no Copiloto é ganho de velocidade no atendimento.<br><br>Algumas imobiliárias estão usando para:<br><br>• responder leads em segundos<br>• manter follow-ups ativos<br>• evitar perda de oportunidade<br>• reduzir sobrecarga operacional<br><br>O interessante é que isso melhora a velocidade comercial sem necessariamente aumentar o time.<br><br>Achei que poderia fazer sentido aí também.</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- DIA 6 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon" style="background:var(--n-100);color:var(--n-400);">D6</div>
+       <div><div class="card-title">Dia 6 — Break Estratégico</div><div class="card-subtitle"><span style="background:var(--n-100);color:var(--n-400);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Nenhuma ação</span></div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="tip-box">
+       <strong>Segundo break.</strong><br>
+       Após 5 dias de contato, o lead precisa respirar. O próximo contato (dia 7) será suave — sem pressão. O break reforça que não é spam.
+     </div>
+   </div>
+ </div>
+
+ <!-- DIA 7 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">D7</div>
+       <div>
+         <div class="card-title">Dia 7 — Soft Follow-up</div>
+         <div class="card-subtitle">
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">WhatsApp</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Email</span>
+         </div>
+       </div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'dia7-tab')">💬 WhatsApp</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia7-tab')">✉️ Email</button>
+     </div>
+     <div class="inner-content dia7-tab active">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp 4 — Soft Follow-up</div>
+         <div class="script-text">Oi, [Nome].<br><br>Talvez isso não seja prioridade agora aí, e tudo bem.<br><br>Só quis insistir um pouco porque estamos vendo muitas imobiliárias reduzirem bastante lead perdido melhorando atendimento e acompanhamento.<br><br>Se fizer sentido entender depois, fico à disposição 🙂</div>
+       </div>
+     </div>
+     <div class="inner-content dia7-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Assunto: Talvez não seja prioridade agora</div>
+         <div class="script-text">Oi, [Nome].<br><br>Talvez isso não seja prioridade aí neste momento, e tudo bem.<br><br>Só quis insistir um pouco porque estamos vendo muitas imobiliárias reduzirem bastante lead perdido melhorando atendimento e acompanhamento.<br><br>Se fizer sentido entender depois, fico à disposição.</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- DIA 8 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon" style="background:var(--n-100);color:var(--n-400);">D8</div>
+       <div><div class="card-title">Dia 8 — Break Estratégico</div><div class="card-subtitle"><span style="background:var(--n-100);color:var(--n-400);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Nenhuma ação</span></div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="tip-box">
+       <strong>Break final antes do encerramento.</strong><br>
+       Último respiro antes da mensagem de break-up. Reforça que o processo foi respeitoso e não agressivo.
+     </div>
+   </div>
+ </div>
+
+ <!-- DIA 9 -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon" style="background:var(--red-soft);color:var(--red);">D9</div>
+       <div>
+         <div class="card-title">Dia 9 — Break-up</div>
+         <div class="card-subtitle">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">Ligação</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">WhatsApp</span>
+           <span style="background:var(--red-soft);color:var(--red);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Email Break-up</span>
+         </div>
+       </div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="alert-box" style="margin-bottom:16px;"><strong>Encerramento da cadência.</strong> Última tentativa. Tom: respeitoso, sem pressão. Registrar no CRM como "Inbound — sem conversão" após essa etapa.</div>
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'dia9-tab')">📞 Ligação</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia9-tab')">💬 WhatsApp</button>
+       <button class="inner-tab" onclick="switchTab(this,'dia9-tab')">✉️ Email</button>
+     </div>
+     <div class="inner-content dia9-tab active">
+       <div class="info-box"><strong>Tom:</strong> Não insistir. Dar abertura para o lead decidir. Se não atender, deixar recado e encerrar.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-rapport">Última Tentativa</div>
+         <div class="script-text">"Fala, [Nome], aqui é o Luiz da Captei.<br><br>Estou encerrando meu contato por aqui — não quero ficar sendo insistente.<br><br>Se em algum momento fizer sentido entender melhor como o Copiloto automatiza atendimento e follow-up dos leads, fico à disposição.<br><br>Sucesso!"</div>
+       </div>
+     </div>
+     <div class="inner-content dia9-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp 5 — Break-up</div>
+         <div class="script-text">[Nome], prometo que essa é minha última mensagem 😅<br><br>Como não consegui falar com você, vou encerrar meu contato por aqui para não ficar insistindo.<br><br>Mas, se em algum momento quiser entender melhor como o Copiloto automatiza atendimento e follow-up dos leads, fico à disposição.</div>
+       </div>
+     </div>
+     <div class="inner-content dia9-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Assunto: Posso encerrar por aqui?</div>
+         <div class="script-text">Oi, [Nome].<br><br>Como não consegui falar com você até agora, imagino que talvez não seja prioridade neste momento.<br><br>Vou encerrar meu contato por aqui para não ficar insistindo.<br><br>Mas, se ainda fizer sentido entender como o Copiloto automatiza atendimento e follow-up dos leads da imobiliária, fico à disposição.<br><br>Obrigado pelo tempo.</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- OBJEÇÕES -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon amber">!</div>
+       <div><div class="card-title">Objeções Comuns — Como Responder</div><div class="card-subtitle">Respostas validadas para as objeções mais frequentes</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-dor">"Hoje fazemos manualmente."</div>
+       <div class="script-text">"Perfeito, e isso é super comum.<br><br>O que mais temos visto é justamente dificuldade de manter constância no follow-up quando a operação começa a crescer."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-dor">"Já respondemos rápido."</div>
+       <div class="script-text">"Muito bom.<br><br>Normalmente o ponto que começa a pesar depois é conseguir manter todos os follow-ups ativos sem depender totalmente do corretor."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-dor">"Agora não é prioridade."</div>
+       <div class="script-text">"Claro, faz total sentido.<br><br>A ideia aqui era mais entender se isso já virou um gargalo operacional para vocês ou não."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-dor">"Me manda material."</div>
+       <div class="script-text">"Posso sim.<br><br>Mas acho que em 10/15 minutos consigo te mostrar de forma muito mais prática como as imobiliárias estão usando hoje."</div>
+     </div>
+   </div>
+ </div>
+
+ <!-- WHATSAPP + LINGUAGEM -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">WPP</div>
+       <div><div class="card-title">Estratégia de WhatsApp e Linguagem Ideal</div><div class="card-subtitle">O que fazer, o que evitar e como soar humano</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+       <div class="tip-box" style="margin:0;">
+         <strong>O WhatsApp deve:</strong>
+         <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9;">
+           <li>Parecer humano</li>
+           <li>Parecer continuação de conversa</li>
+           <li>Ser curto e direto</li>
+           <li>Gerar resposta rápida</li>
+           <li>Evitar cara de automação</li>
+         </ul>
+       </div>
+       <div class="alert-box" style="margin:0;">
+         <strong>Evitar no WhatsApp:</strong>
+         <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9;">
+           <li>Textão</li>
+           <li>Excesso de emojis</li>
+           <li>Links na primeira mensagem</li>
+           <li>Linguagem institucional</li>
+           <li>Excesso de IA no discurso</li>
+         </ul>
+       </div>
+     </div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+       <div class="tip-box" style="margin:0;">
+         <strong>Linguagem — usar:</strong>
+         <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9;">
+           <li>Responder lead rápido</li>
+           <li>Atendimento automático</li>
+           <li>Follow-up ativo</li>
+           <li>Não perder oportunidade</li>
+           <li>Velocidade no atendimento</li>
+         </ul>
+       </div>
+       <div class="alert-box" style="margin:0;">
+         <strong>Linguagem — evitar:</strong>
+         <ul style="margin:8px 0 0;padding-left:18px;line-height:1.9;">
+           <li>Automação inteligente</li>
+           <li>Plataforma omnichannel</li>
+           <li>IA generativa</li>
+           <li>Machine learning</li>
+           <li>Linguagem técnica</li>
+         </ul>
+       </div>
+     </div>
+     <div class="info-box">
+       <strong>Áudio no WhatsApp (recomendado: 20–40s)</strong><br>
+       Humaniza, aumenta taxa de resposta e quebra percepção de automação. Script sugerido:<br><br>
+       <em>"Fala, [Nome], tudo bem? Aqui é o Luiz, da Captei. Vi que vocês tinham demonstrado interesse no Copiloto e queria só retomar contigo rapidinho. Estamos ajudando imobiliárias principalmente na parte de atendimento automático e follow-up dos leads, para evitar perda de oportunidade no dia a dia. Achei que poderia fazer sentido aí também. Depois me diz se vale conversarmos 🙂"</em>
+     </div>
+   </div>
+ </div>
+
+ <!-- DORES TRABALHADAS -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon" style="background:var(--red-soft);color:var(--red);">DOR</div>
+       <div><div class="card-title">Principais Dores Trabalhadas</div><div class="card-subtitle">Gatilhos de dor para usar ao longo da cadência</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">⏱ Demora na resposta ao lead</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">🧊 Lead esfriando sem contato</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">🔁 Corretor sem follow-up ativo</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">📉 Perda de oportunidade comercial</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">🛠 Operação manual e dependente</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">🌙 Atendimento fora do horário</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">📥 Volume de leads difícil de operar</div>
+       <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--n-700);">📊 Falta de constância operacional</div>
      </div>
    </div>
  </div>
