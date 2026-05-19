@@ -2525,14 +2525,15 @@ function clearSettingsModal() {
 
       <div class="s-rule"></div>
 
-      <!-- CAPTAÇÃO ATIVA -->
-      <div class="s-group">
-        <div class="s-group-header open" onclick="toggleProduct(this)">
+      <!-- CAPTAÇÃO ATIVA (LOCKED) -->
+      <div class="s-group locked" id="nav-ca">
+        <div class="s-group-header" onclick="handleLockedGroup('ca', this)">
           <div class="s-group-icon t-orange">CA</div>
           <div class="s-group-text">
             <div class="s-group-name">Captação Ativa</div>
             <div class="s-group-sub">Processo completo de vendas</div>
           </div>
+          <span class="s-lock-icon">🔒</span>
           <span class="s-chev">&#9660;</span>
         </div>
         <div class="s-group-body open">
@@ -2563,14 +2564,15 @@ function clearSettingsModal() {
 
       <div class="s-rule"></div>
 
-      <!-- INDICA+ -->
-      <div class="s-group">
-        <div class="s-group-header" onclick="toggleProduct(this)">
+      <!-- INDICA+ (LOCKED) -->
+      <div class="s-group locked" id="nav-indica">
+        <div class="s-group-header" onclick="handleLockedGroup('indica', this)">
           <div class="s-group-icon t-blue">I+</div>
           <div class="s-group-text">
             <div class="s-group-name">Indica+</div>
             <div class="s-group-sub">Programa de indicação estruturado</div>
           </div>
+          <span class="s-lock-icon">🔒</span>
           <span class="s-chev">&#9660;</span>
         </div>
         <div class="s-group-body">
@@ -2624,15 +2626,14 @@ function clearSettingsModal() {
 
       <div class="s-rule"></div>
 
-      <!-- SALESOPS (LOCKED) -->
-      <div class="s-group locked" id="nav-salesops">
-        <div class="s-group-header" onclick="handleLockedGroup('salesops', this)">
+      <!-- SALESOPS -->
+      <div class="s-group" id="nav-salesops">
+        <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-red">SO</div>
           <div class="s-group-text">
             <div class="s-group-name">SalesOps</div>
             <div class="s-group-sub">Operações e estratégia comercial</div>
           </div>
-          <span class="s-lock-icon">🔒</span>
           <span class="s-chev">&#9660;</span>
         </div>
         <div class="s-group-body">
@@ -2663,15 +2664,14 @@ function clearSettingsModal() {
         </div>
       </div>
 
-      <!-- SUPERVISOR COMERCIAL (LOCKED) -->
-      <div class="s-group locked" id="nav-supervisor">
-        <div class="s-group-header" onclick="handleLockedGroup('supervisor', this)">
+      <!-- SUPERVISOR COMERCIAL -->
+      <div class="s-group" id="nav-supervisor">
+        <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-green">SC</div>
           <div class="s-group-text">
             <div class="s-group-name">Supervisor Comercial</div>
             <div class="s-group-sub">Gestão e liderança do time</div>
           </div>
-          <span class="s-lock-icon">🔒</span>
           <span class="s-chev">&#9660;</span>
         </div>
         <div class="s-group-body">
@@ -16293,8 +16293,8 @@ function clearSettingsModal() {
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ===== LOCK SYSTEM ===== */
 const LOCK_PASSWORDS = {
-  salesops: 'sales@captei',
-  supervisor: 'super@captei'
+  ca:     'ca@captei',
+  indica: 'indica@captei'
 };
 let currentLockTarget = null;
 
