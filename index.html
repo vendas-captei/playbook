@@ -16910,7 +16910,7 @@ function toggleObjection(item) {
 
 function switchTab(btn, groupClass) {
   const tabs = btn.parentElement;
-  const card = tabs.closest('.card-body');
+  const card = tabs.closest('.card-body') || tabs.parentElement;
   const tabIndex = Array.from(tabs.children).indexOf(btn);
   tabs.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
