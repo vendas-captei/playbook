@@ -8583,6 +8583,7 @@ function clearSettingsModal() {
          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);margin-bottom:6px;">DIA 3</div>
          <div style="display:flex;flex-direction:column;gap:3px;align-items:center;">
            <span style="background:var(--blue-soft);color:var(--blue);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">Lig.</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:2px 5px;border-radius:3px;font-size:10px;font-weight:600;">WPP</span>
          </div>
        </div>
        <div style="background:var(--n-50);border-radius:8px;padding:10px 4px;border:1px solid var(--n-100);opacity:0.55;">
@@ -8693,22 +8694,39 @@ function clearSettingsModal() {
        <div class="card-icon blue">D3</div>
        <div>
          <div class="card-title">Dia 3 — Segunda Ligação</div>
-         <div class="card-subtitle"><span style="background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Ligação</span></div>
+         <div class="card-subtitle">
+           <span style="background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">Ligação</span>
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">WhatsApp</span>
+         </div>
        </div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="info-box"><strong>Tentar em horário diferente do D1.</strong> Se manhã no D1, tentar tarde no D3 — e vice-versa.</div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-rapport">Abertura</div>
-       <div class="script-text">"Fala, [Nome], tudo bem?<br><br>Aqui é o [Seu Nome] da Captei novamente. Tentei falar com você alguns dias atrás mas não consegui conectar.<br><br>Você ainda tem interesse em conhecer o Copiloto?"</div>
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'n-d3-tab')">📞 Ligação</button>
+       <button class="inner-tab" onclick="switchTab(this,'n-d3-tab')">💬 WhatsApp</button>
      </div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor">Ângulo de Dor</div>
-       <div class="script-text">"Uma coisa que temos visto bastante: imobiliárias com bom volume de leads acabam perdendo oportunidades porque o atendimento não dá conta — especialmente fora do horário comercial.<br><br>Isso é algo que acontece aí também?"</div>
+     <div class="inner-content n-d3-tab active">
+       <div class="info-box"><strong>Tentar em horário diferente do D1.</strong> Se manhã no D1, tentar tarde no D3 — e vice-versa.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-rapport">Abertura</div>
+         <div class="script-text">"Fala, [Nome], tudo bem?<br><br>Aqui é o [Seu Nome] da Captei novamente. Tentei falar com você alguns dias atrás mas não consegui conectar.<br><br>Você ainda tem interesse em conhecer o Copiloto?"</div>
+       </div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-dor">Ângulo de Dor</div>
+         <div class="script-text">"Uma coisa que temos visto bastante: imobiliárias com bom volume de leads acabam perdendo oportunidades porque o atendimento não dá conta — especialmente fora do horário comercial.<br><br>Isso é algo que acontece aí também?"</div>
+       </div>
+     </div>
+     <div class="inner-content n-d3-tab">
+       <div class="info-box"><strong>Se não atendeu a ligação:</strong> enviar WPP logo depois. Mudar o ângulo — trazer um dado ou insight, não apenas "tentei falar".</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp — D3 (não atendeu)</div>
+         <div class="script-text">Oi, [Nome]! Tentei te ligar agora mas não consegui.<br><br>Só queria compartilhar algo: imobiliárias que usam o Copiloto costumam recuperar uma parte significativa dos leads que antes iam a zero — especialmente os que entram fora do horário comercial e ficam sem resposta.<br><br>Vale 20 minutos pra você ver isso funcionando ao vivo? Manda um horário bom 🙂</div>
+       </div>
      </div>
    </div>
  </div>
