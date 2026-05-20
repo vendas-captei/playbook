@@ -677,6 +677,48 @@ body::before {
 
 .copy-btn:hover { background: var(--n-950); color: #fff; border-color: var(--n-950); }
 
+.edit-btn {
+  position: absolute; top: 12px; right: 72px;
+  background: var(--n-0); border: 1px solid var(--n-100);
+  padding: 4px 10px; border-radius: var(--r-xs);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500; color: var(--n-400);
+  cursor: pointer; transition: all 0.12s var(--ease);
+  letter-spacing: 0.3px;
+}
+.edit-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+.edit-btn.saving { background: var(--green); color: #fff; border-color: var(--green); }
+.edit-btn.active-edit { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+.reset-btn {
+  position: absolute; top: 12px; right: 136px;
+  background: var(--n-0); border: 1px solid var(--n-100);
+  padding: 4px 10px; border-radius: var(--r-xs);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 500; color: var(--red);
+  cursor: pointer; transition: all 0.12s var(--ease);
+  letter-spacing: 0.3px;
+}
+.reset-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+.script-textarea {
+  width: 100%; min-height: 120px;
+  background: #f8fafc; border: 1.5px solid var(--blue);
+  border-radius: var(--r-sm); padding: 12px 14px;
+  font-family: 'Inter', sans-serif; font-size: 13.5px;
+  line-height: 1.7; color: var(--n-700);
+  resize: vertical; box-sizing: border-box;
+  outline: none; transition: border-color 0.15s;
+  margin-bottom: 4px;
+}
+.script-textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+.script-block.has-edit .script-text {
+  border-left: 2px solid var(--blue);
+  padding-left: 10px;
+}
+.script-block.has-edit .edit-btn { color: var(--blue); border-color: var(--blue-soft); }
+
 /* ═══════════════════════════════════════════
    BOXES
    ═══════════════════════════════════════════ */
@@ -17149,6 +17191,126 @@ function copyBlock(btn) {
     }, 1500);
   });
 }
+
+/* ─── Script Editor ─────────────────────────────── */
+function initScriptEditor() {
+  document.querySelectorAll('.script-block').forEach(function(block, i) {
+    var key = 'script-' + i;
+    block.dataset.scriptKey = key;
+
+    var scriptText = block.querySelector('.script-text');
+    if (!scriptText) return;
+
+    // Guardar original
+    scriptText.dataset.original = scriptText.innerHTML;
+
+    // Restaurar edição salva
+    var saved = localStorage.getItem(key);
+    if (saved) {
+      scriptText.innerHTML = saved;
+      block.classList.add('has-edit');
+    }
+
+    // Botão editar
+    var editBtn = document.createElement('button');
+    editBtn.className = 'edit-btn';
+    editBtn.textContent = 'editar';
+    editBtn.onclick = function() { toggleEditScript(this); };
+    block.appendChild(editBtn);
+
+    // Botão resetar (só se tiver edição salva)
+    if (saved) _addResetBtn(block);
+  });
+}
+
+function _addResetBtn(block) {
+  if (block.querySelector('.reset-btn')) return;
+  var rb = document.createElement('button');
+  rb.className = 'reset-btn';
+  rb.textContent = 'resetar';
+  rb.onclick = function() { resetScript(this); };
+  block.appendChild(rb);
+}
+
+function toggleEditScript(btn) {
+  var block = btn.closest('.script-block');
+  var scriptText = block.querySelector('.script-text');
+
+  if (block.classList.contains('editing')) {
+    // ── SALVAR ──
+    var textarea = block.querySelector('.script-textarea');
+    var newHTML = textarea.value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+
+    scriptText.innerHTML = newHTML;
+    scriptText.style.display = '';
+    textarea.remove();
+    block.classList.remove('editing');
+    btn.classList.remove('active-edit');
+
+    // Persistir
+    var key = block.dataset.scriptKey;
+    localStorage.setItem(key, newHTML);
+    block.classList.add('has-edit');
+    _addResetBtn(block);
+
+    // Feedback visual
+    btn.classList.add('saving');
+    btn.textContent = 'salvo ✓';
+    setTimeout(function() {
+      btn.classList.remove('saving');
+      btn.textContent = 'editar';
+    }, 1500);
+
+  } else {
+    // ── ENTRAR EM EDIÇÃO ──
+    var currentHTML = scriptText.innerHTML;
+    var currentText = currentHTML
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/<[^>]+>/g, '');
+
+    var textarea = document.createElement('textarea');
+    textarea.className = 'script-textarea';
+    textarea.value = currentText;
+    scriptText.style.display = 'none';
+    block.insertBefore(textarea, scriptText);
+    block.classList.add('editing');
+    btn.classList.add('active-edit');
+    btn.textContent = 'salvar';
+    textarea.focus();
+    // Posicionar cursor no fim
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  }
+}
+
+function resetScript(btn) {
+  var block = btn.closest('.script-block');
+  var scriptText = block.querySelector('.script-text');
+  var key = block.dataset.scriptKey;
+
+  if (!confirm('Resetar para o texto original?')) return;
+
+  localStorage.removeItem(key);
+  scriptText.innerHTML = scriptText.dataset.original;
+  block.classList.remove('has-edit', 'editing');
+
+  var ta = block.querySelector('.script-textarea');
+  if (ta) { ta.remove(); scriptText.style.display = ''; }
+
+  var editBtn = block.querySelector('.edit-btn');
+  if (editBtn) { editBtn.textContent = 'editar'; editBtn.classList.remove('active-edit', 'saving'); }
+
+  btn.remove();
+}
+
+document.addEventListener('DOMContentLoaded', initScriptEditor);
+/* ─────────────────────────────────────────────────── */
 
 function copyRapport(card) {
   if (event.target.closest('.rapport-delete')) return;
