@@ -2855,51 +2855,134 @@ function clearSettingsModal() {
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div style="display:flex; flex-direction:column; align-items:center; gap:0; padding:20px 0;">
+     <!-- ORGANOGRAMA -->
+     <div style="padding:24px 8px 8px; overflow-x:auto;">
+     <div style="min-width:680px; max-width:760px; margin:0 auto; font-family:'Cabinet Grotesk',sans-serif;">
 
-       <!-- Head Comercial -->
-       <div style="background:var(--ink-05); color:white; padding:14px 32px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; text-align:center; min-width:240px;">
-         Head Comercial
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Liderança estratégica da operação comercial</div>
+       <!-- ── NÍVEL 1: HEAD ── -->
+       <div style="display:flex; justify-content:center; margin-bottom:0;">
+         <div style="background:#111827; color:white; padding:13px 44px; border-radius:10px; font-weight:800; font-size:15px; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.22); letter-spacing:0.01em;">
+           Head Comercial
+           <div style="font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:400; opacity:0.55; margin-top:4px; letter-spacing:0.03em;">Liderança estratégica da operação comercial</div>
+         </div>
        </div>
 
-       <!-- Linha com SalesOps pendurado no meio -->
-       <div style="display:flex; align-items:center; gap:0;">
-         <!-- Coluna central: linha vertical superior + linha vertical inferior -->
-         <div style="display:flex; flex-direction:column; align-items:center;">
-           <div style="width:2px; height:20px; background:var(--n-200);"></div>
-           <div style="width:2px; height:20px; background:var(--n-200);"></div>
+       <!-- Conector Head → SalesOps -->
+       <div style="display:flex; justify-content:center;"><div style="width:2px; height:22px; background:var(--n-300);"></div></div>
+
+       <!-- ── NÍVEL 2: SALESOPS ── -->
+       <div style="display:flex; justify-content:center; margin-bottom:0;">
+         <div style="background:var(--purple); color:white; padding:10px 28px; border-radius:10px; font-weight:700; font-size:13px; text-align:center; box-shadow:0 3px 10px rgba(0,0,0,0.15); border:1.5px dashed rgba(255,255,255,0.3);">
+           SalesOps
+           <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.65; margin-top:3px; letter-spacing:0.03em;">Dados & inteligência comercial</div>
          </div>
-         <!-- Linha horizontal saindo do meio + SalesOps -->
-         <div style="display:flex; align-items:center; margin-bottom:20px;">
-           <div style="width:28px; height:2px; background:var(--n-300);"></div>
-           <div style="background:var(--purple); color:white; padding:10px 18px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; text-align:center; min-width:150px; border:2px dashed rgba(255,255,255,0.25);">
-             SalesOps
-             <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.7; margin-top:4px;">Dados & inteligência comercial</div>
+       </div>
+
+       <!-- Conector SalesOps → T de bifurcação -->
+       <div style="display:flex; justify-content:center;"><div style="width:2px; height:22px; background:var(--n-300);"></div></div>
+       <!-- Barra horizontal T -->
+       <div style="width:420px; margin:0 auto; height:2px; background:var(--n-300);"></div>
+       <!-- Duas linhas verticais descendo para CAP e COP -->
+       <div style="width:420px; margin:0 auto; display:flex; justify-content:space-between;">
+         <div style="width:2px; height:22px; background:var(--n-300);"></div>
+         <div style="width:2px; height:22px; background:var(--n-300);"></div>
+       </div>
+
+       <!-- ── NÍVEL 3: TIMES CAP + COP ── -->
+       <div style="width:420px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
+
+         <!-- ═══ COLUNA CAP ═══ -->
+         <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:0;">
+
+           <!-- Time CAP -->
+           <div style="background:var(--blue); color:white; padding:10px 16px; border-radius:10px; font-weight:700; font-size:13px; text-align:center; width:100%; box-sizing:border-box; box-shadow:0 3px 10px rgba(0,0,0,0.12);">
+             Time CAP
+             <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.65; margin-top:3px;">Captação Ativa</div>
            </div>
-         </div>
-       </div>
 
-       <!-- Supervisor Comercial -->
-       <div style="background:var(--blue); color:white; padding:14px 32px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; text-align:center; min-width:220px;">
-         Supervisor Comercial
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Estratégia, metas e resultados do time</div>
-       </div>
-       <div style="width:2px; height:20px; background:var(--n-200);"></div>
+           <!-- Conector CAP → Supervisor -->
+           <div style="width:2px; height:20px; background:var(--n-300);"></div>
 
-       <!-- Inside Sales + BDRs -->
-       <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
-         <div style="background:var(--accent); color:white; padding:14px 24px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; text-align:center; min-width:160px;">
-           Inside Sales
-           <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Júnior I → Sênior III</div>
+           <!-- Supervisor -->
+           <div style="background:#0369a1; color:white; padding:9px 14px; border-radius:9px; font-weight:700; font-size:12px; text-align:center; width:100%; box-sizing:border-box; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+             Supervisor
+             <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.65; margin-top:3px;">Gestão & metas do time</div>
+           </div>
+
+           <!-- Conector Supervisor → 3 Insides -->
+           <div style="width:2px; height:16px; background:var(--n-300);"></div>
+           <div style="width:152px; height:2px; background:var(--n-300);"></div>
+           <div style="width:152px; display:flex; justify-content:space-between;">
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+           </div>
+
+           <!-- 3 Inside Sales CAP -->
+           <div style="width:152px; display:flex; justify-content:space-between; gap:4px;">
+             <div style="flex:1; background:#3b82f6; color:white; padding:9px 4px; border-radius:8px; font-weight:700; font-size:10.5px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               Inside<br><span style="font-family:'IBM Plex Mono',monospace; font-size:8px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+             <div style="flex:1; background:#3b82f6; color:white; padding:9px 4px; border-radius:8px; font-weight:700; font-size:10.5px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               Inside<br><span style="font-family:'IBM Plex Mono',monospace; font-size:8px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+             <div style="flex:1; background:#3b82f6; color:white; padding:9px 4px; border-radius:8px; font-weight:700; font-size:10.5px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               Inside<br><span style="font-family:'IBM Plex Mono',monospace; font-size:8px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+           </div>
+
          </div>
-         <div style="background:var(--green); color:white; padding:14px 24px; border-radius:10px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; text-align:center; min-width:160px;">
-           BDRs
-           <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:400; opacity:0.7; margin-top:4px;">Prospecção & geração de demanda</div>
+         <!-- / COLUNA CAP -->
+
+         <!-- ═══ COLUNA COP ═══ -->
+         <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:0;">
+
+           <!-- Time COP (com badge "Direto ao Head") -->
+           <div style="background:var(--accent); color:white; padding:10px 16px; border-radius:10px; font-weight:700; font-size:13px; text-align:center; width:100%; box-sizing:border-box; box-shadow:0 3px 10px rgba(0,0,0,0.12); position:relative;">
+             Time COP
+             <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:400; opacity:0.65; margin-top:3px;">Copiloto Inbound</div>
+             <div style="position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:#dc2626; color:white; font-size:7.5px; font-weight:700; padding:2px 7px; border-radius:4px; font-family:'IBM Plex Mono',monospace; white-space:nowrap; letter-spacing:0.04em;">DIRETO AO HEAD</div>
+           </div>
+
+           <!-- Conector COP → 4 Insides + BDR -->
+           <div style="width:2px; height:16px; background:var(--n-300);"></div>
+           <div style="width:178px; height:2px; background:var(--n-300);"></div>
+           <div style="width:178px; display:flex; justify-content:space-between;">
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+             <div style="width:2px; height:16px; background:var(--n-300);"></div>
+           </div>
+
+           <!-- 4 Inside Sales + 1 BDR COP -->
+           <div style="width:178px; display:flex; justify-content:space-between; gap:3px;">
+             <div style="flex:1; background:#059669; color:white; padding:9px 2px; border-radius:8px; font-weight:700; font-size:10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               IS<br><span style="font-family:'IBM Plex Mono',monospace; font-size:7.5px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+             <div style="flex:1; background:#059669; color:white; padding:9px 2px; border-radius:8px; font-weight:700; font-size:10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               IS<br><span style="font-family:'IBM Plex Mono',monospace; font-size:7.5px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+             <div style="flex:1; background:#059669; color:white; padding:9px 2px; border-radius:8px; font-weight:700; font-size:10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               IS<br><span style="font-family:'IBM Plex Mono',monospace; font-size:7.5px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+             <div style="flex:1; background:#059669; color:white; padding:9px 2px; border-radius:8px; font-weight:700; font-size:10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+               IS<br><span style="font-family:'IBM Plex Mono',monospace; font-size:7.5px; opacity:0.65; font-weight:400;">Sales</span>
+             </div>
+             <div style="flex:1; background:#16a34a; color:white; padding:9px 2px; border-radius:8px; font-weight:700; font-size:10px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); border:1.5px solid rgba(255,255,255,0.25);">
+               BDR<br><span style="font-family:'IBM Plex Mono',monospace; font-size:7.5px; opacity:0.65; font-weight:400;">Prosp.</span>
+             </div>
+           </div>
+
          </div>
+         <!-- / COLUNA COP -->
+
        </div>
+       <!-- / NÍVEL 3 -->
 
      </div>
+     </div>
+     <!-- / ORGANOGRAMA -->
    </div>
  </div>
 
