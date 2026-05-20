@@ -2607,7 +2607,7 @@ function clearSettingsModal() {
 
           <div class="s-section-label">Prospecção</div>
           <div class="s-sub" onclick="showSection('copiloto-outbound', this)">Outbound (Scripts)</div>
-          <div class="s-sub" onclick="showSection('copiloto-inbound', this)">Inbound (Lead Inscrito)</div>
+          <div class="s-sub" onclick="showSection('copiloto-inbound', this)">Inbound</div>
           <div class="s-sub" onclick="showSection('copiloto-whatsapp', this)">WhatsApp <span class="s-cnt">5</span></div>
           <div class="s-sub" onclick="showSection('copiloto-objecoes', this)">Objeções <span class="s-cnt">10</span></div>
           <div class="s-sub" onclick="showSection('copiloto-rapport', this)">Banco de Rapport <span class="s-cnt">24</span></div>
@@ -8491,14 +8491,143 @@ function clearSettingsModal() {
  </div>
 
  <!-- ============================================================ -->
- <!-- COPILOTO — INBOUND (LEAD INSCRITO) -->
+ <!-- COPILOTO — INBOUND -->
  <!-- ============================================================ -->
  <div class="section" id="sec-copiloto-inbound">
  <div class="page-header">
    <div class="crumb"><b>Copiloto</b> / Prospecção</div>
-   <h2>Cadência de Reativação — Inbound</h2>
-   <p>Leads inbound do Copiloto que demonstraram interesse e estão parados. 9 dias, multicanal. O tom é de <strong>retomada</strong> — não de cold call.</p>
+   <h2>Inbound</h2>
+   <p>Leads inbound do Copiloto. Escolha o fluxo conforme o estágio do lead: <strong>Normal</strong> para quem acabou de chegar pelo marketing, <strong>Retomada</strong> para quem demonstrou interesse e está parado.</p>
  </div>
+
+ <!-- TABS DE MODO INBOUND -->
+ <div class="inner-tabs" style="margin-bottom:20px;">
+   <button class="inner-tab active" onclick="switchTab(this,'inbound-mode-tab')">📬 Normal</button>
+   <button class="inner-tab" onclick="switchTab(this,'inbound-mode-tab')">🔄 Retomada (9 dias)</button>
+ </div>
+
+ <!-- ════════════════════════════════════════════ -->
+ <!-- TAB: NORMAL (lead quente, veio do marketing) -->
+ <!-- ════════════════════════════════════════════ -->
+ <div class="inner-content inbound-mode-tab active">
+
+ <div class="golden-rule">
+   <h3>Lead quente = ligar em menos de 5 minutos.</h3>
+   <p>O lead acabou de levantar a mão. Cada minuto sem contato reduz a chance de conversão. Velocidade é o diferencial aqui — não o script.</p>
+ </div>
+
+ <div class="info-box" style="margin-bottom:16px;">
+   <strong>Contexto do lead Normal:</strong> veio de campanha, landing page ou RD Station. Já viu algo sobre o Copiloto, mas ainda não tem contexto profundo. <strong>Não é cold call</strong> — ele levantou a mão. O objetivo é ligar rápido, qualificar e agendar a demo.
+ </div>
+
+ <!-- CALL SCRIPT NORMAL -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">01</div>
+       <div><div class="card-title">Script de Ligação — Primeiro Contato</div><div class="card-subtitle">Ligar em até 5 min após a inscrição</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-rapport">Abertura</div>
+       <div class="script-text">"Fala, [Nome], tudo bem?<br><br>Aqui é o Luiz, da Captei.<br><br>Vi que você se cadastrou para conhecer o Copiloto agora há pouco — que bom! Peguei você em um momento ruim?"</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Contexto Rápido (15 segundos)</div>
+       <div class="script-text">"O Copiloto é o nosso produto que automatiza o atendimento dos leads da imobiliária — responde, qualifica e faz follow-up automaticamente via WhatsApp.<br><br>Antes de te explicar mais, me conta: qual é o maior gargalo hoje no atendimento de vocês?"</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-dor">Diagnóstico Rápido</div>
+       <div class="script-text">• Vocês conseguem responder os leads rápido hoje?<br>• E fora do horário comercial — o que acontece com quem entra à noite ou fim de semana?<br>• Follow-up é feito manualmente ou tem algum processo automático?</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-meet">CTA — Agendar Demo</div>
+       <div class="script-text">"Faz muito sentido o que você me contou. Em 20 minutos de demo ao vivo você vê o Copiloto funcionando no WhatsApp com conversas reais — dá pra ter uma visão prática do que resolveria exatamente isso.<br><br>Qual o melhor horário pra você ainda hoje ou amanhã?"</div>
+     </div>
+     <div class="tip-box">
+       <strong>Se o decisor não está disponível agora:</strong><br>
+       "Entendo! Quem mais decisório sobre tecnologia você indicaria participar da demo? Consigo mandar o convite pra ele também."
+     </div>
+   </div>
+ </div>
+
+ <!-- WPP + EMAIL NORMAL -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">02</div>
+       <div><div class="card-title">WhatsApp + Email — Não Atendeu</div><div class="card-subtitle">Enviar imediatamente após ligação não atendida</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'inbound-normal-tab')">💬 WhatsApp</button>
+       <button class="inner-tab" onclick="switchTab(this,'inbound-normal-tab')">✉️ Email</button>
+     </div>
+     <div class="inner-content inbound-normal-tab active">
+       <div class="info-box"><strong>Enviar logo após a ligação não atendida.</strong> Tom: quente, direto, humano. Não explicar demais — gerar curiosidade e abrir conversa.</div>
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp — Imediato (não atendeu)</div>
+         <div class="script-text">Oi, [Nome], tudo bem?<br><br>Aqui é o Luiz, da Captei.<br><br>Vi que você se cadastrou para conhecer o Copiloto agora pouco — tentei te ligar mas não consegui falar.<br><br>É uma IA que automatiza o atendimento dos leads da imobiliária via WhatsApp — responde, qualifica e faz follow-up sem depender do corretor.<br><br>Qual o melhor horário pra trocar uma ideia rápida?</div>
+       </div>
+       <div class="tip-box"><strong>Dica de áudio (20–30s):</strong> "Oi, [Nome], aqui é o Luiz da Captei. Vi que você se cadastrou pro Copiloto agora há pouco e tentei te ligar. É uma IA que automatiza atendimento de leads via WhatsApp — o lead responde sozinho, qualifica, agenda. Me chama quando tiver um minutinho, quero te mostrar rapidinho."</div>
+     </div>
+     <div class="inner-content inbound-normal-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Assunto: Seu cadastro no Copiloto — próximo passo</div>
+         <div class="script-text">Oi, [Nome].<br><br>Vi que você se cadastrou para conhecer o Copiloto da Captei.<br><br>Tentei te ligar agora para entender melhor a operação de vocês e mostrar como funciona na prática.<br><br>O Copiloto automatiza o atendimento dos leads via WhatsApp — responde, qualifica e mantém follow-up ativo sem depender do corretor no dia a dia.<br><br>Tenho horário disponível ainda hoje ou amanhã para uma demo de 20 min. Qual funciona melhor pra você?</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- FLUXO RESUMIDO -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon amber">03</div>
+       <div><div class="card-title">Fluxo Resumido — Inbound Normal</div><div class="card-subtitle">O que fazer do momento da inscrição até a demo</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:flex;flex-direction:column;gap:8px;">
+       <div style="display:flex;align-items:center;gap:12px;background:var(--blue-soft);border-radius:8px;padding:12px 14px;">
+         <div style="background:var(--blue);color:white;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">1</div>
+         <div style="font-size:13.5px;color:var(--n-700);"><strong>Ligar em até 5 minutos</strong> — usar script de primeiro contato. Qualificar e propor demo.</div>
+       </div>
+       <div style="display:flex;align-items:center;gap:12px;background:var(--green-soft);border-radius:8px;padding:12px 14px;">
+         <div style="background:var(--green);color:white;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">2</div>
+         <div style="font-size:13.5px;color:var(--n-700);"><strong>Não atendeu?</strong> — Enviar WPP + Email imediatamente. Tentar nova ligação em horário diferente.</div>
+       </div>
+       <div style="display:flex;align-items:center;gap:12px;background:var(--purple-soft);border-radius:8px;padding:12px 14px;">
+         <div style="background:var(--purple);color:white;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">3</div>
+         <div style="font-size:13.5px;color:var(--n-700);"><strong>Agendou demo?</strong> — Registrar no Pipedrive, enviar confirmação, preparar contexto do lead.</div>
+       </div>
+       <div style="display:flex;align-items:center;gap:12px;background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 14px;">
+         <div style="background:var(--n-300);color:white;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">4</div>
+         <div style="font-size:13.5px;color:var(--n-700);"><strong>Não respondeu em 2 dias?</strong> — Migrar para cadência de <strong>Retomada</strong> (aba ao lado).</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ </div>
+ <!-- / TAB NORMAL -->
+
+ <!-- ════════════════════════════════════════════ -->
+ <!-- TAB: RETOMADA (cadência 9 dias) -->
+ <!-- ════════════════════════════════════════════ -->
+ <div class="inner-content inbound-mode-tab">
 
  <div class="golden-rule">
    <h3>"Estamos ajudando imobiliárias a responder e acompanhar leads automaticamente para evitar perda de oportunidades."</h3>
@@ -9060,6 +9189,10 @@ function clearSettingsModal() {
  </div>
 
  </div>
+ <!-- / TAB RETOMADA -->
+
+ </div>
+ <!-- / SEC-COPILOTO-INBOUND -->
 
  <!-- ============================================================ -->
  <!-- COPILOTO — WHATSAPP -->
