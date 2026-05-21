@@ -3129,16 +3129,97 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">CAP</div>
-       <div><div class="card-title">Captação Ativa</div><div class="card-subtitle">Metas e atividades da equipe CAP — a ser preenchido</div></div>
+       <div><div class="card-title">Captação Ativa</div><div class="card-subtitle">Metas individuais e do time — Inside Sales & SDR</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="info-box" style="text-align:center; padding:32px;">
-       <div style="font-size:28px; margin-bottom:8px;">🔧</div>
-       <strong>Em construção</strong>
-       <div style="font-size:13px; color:var(--n-500); margin-top:6px;">As metas e atividades da equipe de Captação Ativa serão definidas em breve.</div>
+
+     <!-- Números principais -->
+     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+       <div style="background:var(--blue-soft);border-radius:10px;padding:16px;text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Meta do Time</div>
+         <div style="font-size:22px;font-weight:700;color:var(--blue);">R$ 150.000</div>
+         <div style="font-size:11px;color:var(--blue);opacity:0.8;margin-top:2px;">por mês</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">ARR Médio</div>
+         <div style="font-size:22px;font-weight:700;color:var(--n-700);">R$ 3.600</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">por contrato</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rampagem</div>
+         <div style="font-size:22px;font-weight:700;color:var(--n-700);">2 meses</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">meta progressiva</div>
+       </div>
      </div>
+
+     <!-- Metas individuais por tier -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Meta Individual — Inside Sales CAP</div>
+     <div style="overflow-x:auto;margin-bottom:18px;">
+       <table style="width:100%;border-collapse:collapse;font-size:13px;">
+         <thead>
+           <tr style="background:var(--n-50);">
+             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Tier</th>
+             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Até 6 meses</th>
+             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">6 a 18 meses</th>
+             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">18 meses+</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Júnior</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 48.000</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 52.000</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 55.000</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Pleno</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 54.000</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 57.000</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 60.000</td>
+           </tr>
+           <tr>
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Sênior</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 55.000</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 58.000</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 62.000</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+     <div class="tip-box" style="font-size:12.5px;">A meta evolui automaticamente com o tempo de casa — independente de promoção formal.</div>
+
+     <!-- Rampagem -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin:18px 0 10px;">Período de Rampagem</div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 1</div>
+         <div style="font-size:15px;font-weight:700;color:var(--n-700);">40% da meta</div>
+         <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo a partir de 50%</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 2</div>
+         <div style="font-size:15px;font-weight:700;color:var(--n-700);">65% da meta</div>
+         <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo a partir de 60%</div>
+       </div>
+     </div>
+
+     <!-- SDR -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Meta SDR CAP</div>
+     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+       <div style="background:var(--green-soft);border-radius:8px;padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--green);margin-bottom:4px;">META MENSAL</div>
+         <div style="font-size:20px;font-weight:700;color:var(--green);">15 contratos</div>
+         <div style="font-size:11px;color:var(--green);opacity:0.8;margin-top:2px;">gerados pelo SDR</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:4px;">OTE NA META</div>
+         <div style="font-size:20px;font-weight:700;color:var(--n-700);">R$ 4.700</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">base R$ 3.500 + comissão</div>
+       </div>
+     </div>
+
    </div>
  </div>
 
@@ -3147,16 +3228,87 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon purple">COP</div>
-       <div><div class="card-title">Copiloto</div><div class="card-subtitle">Metas e atividades da equipe COP — a ser preenchido</div></div>
+       <div><div class="card-title">Copiloto</div><div class="card-subtitle">Metas individuais por perfil — produto premium</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="info-box" style="text-align:center; padding:32px;">
-       <div style="font-size:28px; margin-bottom:8px;">🔧</div>
-       <strong>Em construção</strong>
-       <div style="font-size:13px; color:var(--n-500); margin-top:6px;">As metas e atividades da equipe de Copiloto serão definidas em breve.</div>
+
+     <!-- Números principais -->
+     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+       <div style="background:var(--purple-soft);border-radius:10px;padding:16px;text-align:center;">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Meta do Time</div>
+         <div style="font-size:22px;font-weight:700;color:var(--purple);">A definir</div>
+         <div style="font-size:11px;color:var(--purple);opacity:0.8;margin-top:2px;">produto em expansão</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">ARR Médio</div>
+         <div style="font-size:22px;font-weight:700;color:var(--n-700);">R$ 21.600</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">por contrato</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rampagem</div>
+         <div style="font-size:22px;font-weight:700;color:var(--n-700);">3 meses</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">ciclo consultivo</div>
+       </div>
      </div>
+
+     <!-- Perfis e metas -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Perfis do Time COP</div>
+     <div style="overflow-x:auto;margin-bottom:18px;">
+       <table style="width:100%;border-collapse:collapse;font-size:13px;">
+         <thead>
+           <tr style="background:var(--n-50);">
+             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Perfil</th>
+             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Qtd</th>
+             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Salário Base</th>
+             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Atuação</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">IS Sênior / Especialista</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">×1</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 7.000</td>
+             <td style="padding:10px 14px;color:var(--n-500);font-size:12px;">Ponta a ponta + especialista de produto</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">IS Sênior</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">×2</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 6.000</td>
+             <td style="padding:10px 14px;color:var(--n-500);font-size:12px;">Ponta a ponta + leads BDR</td>
+           </tr>
+           <tr>
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">BDR</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">×1</td>
+             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 5.000</td>
+             <td style="padding:10px 14px;color:var(--n-500);font-size:12px;">Qualificação e repasse de leads</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+
+     <!-- Rampagem -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Período de Rampagem</div>
+     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
+       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 1</div>
+         <div style="font-size:15px;font-weight:700;color:var(--n-700);">40% da meta</div>
+         <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 50%</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 2</div>
+         <div style="font-size:15px;font-weight:700;color:var(--n-700);">65% da meta</div>
+         <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 3</div>
+         <div style="font-size:15px;font-weight:700;color:var(--n-700);">80% da meta</div>
+         <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+       </div>
+     </div>
+     <div class="tip-box" style="font-size:12.5px;">Ticket elevado e ciclo consultivo justificam rampagem mais longa. Referência de mercado para mid-market SaaS: 3 a 6 meses.</div>
+
    </div>
  </div>
 
