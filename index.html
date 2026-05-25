@@ -3514,55 +3514,78 @@ function clearSettingsModal() {
      </div>
      <div class="tip-box" style="font-size:12px;">Ticket elevado e ciclo consultivo justificam rampagem mais longa. Referência de mercado para mid-market SaaS: 3 a 6 meses.</div>
 
-     <!-- Funil Inbound -->
-     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin:20px 0 10px;">Funil Inbound — Mídia Paga</div>
-     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
-       <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Investimento</div>
-         <div style="font-size:18px;font-weight:700;color:var(--n-700);">R$ 5.000</div>
-         <div style="font-size:10px;color:var(--n-400);margin-top:2px;">CPL R$ 15 · ~330 leads</div>
+     <!-- Tabs SDR / BDR -->
+     <div style="margin-top:20px;">
+       <div class="inner-tabs">
+         <button class="inner-tab active" onclick="switchTab(this,'cop-role-tab')">📥 SDR — Inbound</button>
+         <button class="inner-tab" onclick="switchTab(this,'cop-role-tab')">📤 BDR — Outbound</button>
        </div>
-       <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">CAC</div>
-         <div style="font-size:18px;font-weight:700;color:var(--n-700);">~R$ 385</div>
-         <div style="font-size:10px;color:var(--n-400);margin-top:2px;">por contrato fechado</div>
-       </div>
-       <div style="background:var(--purple-soft);border-radius:10px;padding:14px;text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Contratos/mês</div>
-         <div style="font-size:18px;font-weight:700;color:var(--purple);">~13</div>
-         <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:2px;">só via inbound</div>
-       </div>
-       <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">ARR/mês</div>
-         <div style="font-size:18px;font-weight:700;color:var(--green);">~R$ 280k</div>
-         <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">13 × R$ 21.600</div>
-       </div>
-     </div>
 
-     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:12px;">
-       <div style="background:var(--n-50);border:1px solid var(--n-100);border-right:none;border-radius:8px 0 0 8px;padding:14px;text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--n-400);text-transform:uppercase;margin-bottom:6px;">Leads</div>
-         <div style="font-size:24px;font-weight:700;color:var(--n-700);">330</div>
-         <div style="font-size:10px;color:var(--n-400);margin-top:3px;">gerados pela mídia</div>
-         <div style="margin-top:8px;font-size:10px;background:var(--n-100);color:var(--n-500);border-radius:3px;padding:2px 6px;display:inline-block;">Lead → Reunião</div>
-         <div style="font-size:11px;font-weight:700;color:var(--n-600);margin-top:3px;">10%</div>
+       <!-- ── TAB SDR INBOUND ── -->
+       <div class="inner-content cop-role-tab active">
+
+         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Investimento</div>
+             <div style="font-size:18px;font-weight:700;color:var(--n-700);">R$ 5.000</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">CPL R$ 15 · ~330 leads</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">CAC</div>
+             <div style="font-size:18px;font-weight:700;color:var(--n-700);">~R$ 833</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">por contrato fechado</div>
+           </div>
+           <div style="background:var(--purple-soft);border-radius:10px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Contratos/mês</div>
+             <div style="font-size:18px;font-weight:700;color:var(--purple);">~6</div>
+             <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:2px;">via inbound</div>
+           </div>
+           <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">ARR/mês</div>
+             <div style="font-size:18px;font-weight:700;color:var(--green);">~R$ 130k</div>
+             <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">6 × R$ 21.600</div>
+           </div>
+         </div>
+
+         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:12px;">
+           <div style="background:var(--n-50);border:1px solid var(--n-100);border-right:none;border-radius:8px 0 0 8px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--n-400);text-transform:uppercase;margin-bottom:6px;">Leads</div>
+             <div style="font-size:24px;font-weight:700;color:var(--n-700);">330</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:3px;">gerados pela mídia</div>
+             <div style="margin-top:8px;font-size:10px;background:var(--n-100);color:var(--n-500);border-radius:3px;padding:2px 6px;display:inline-block;">Lead → Reunião</div>
+             <div style="font-size:11px;font-weight:700;color:var(--n-600);margin-top:3px;">5%</div>
+           </div>
+           <div style="background:var(--purple-soft);border:1px solid rgba(124,58,237,0.15);border-right:none;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Reuniões</div>
+             <div style="font-size:24px;font-weight:700;color:var(--purple);">~17</div>
+             <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:3px;">agendadas</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(124,58,237,0.15);color:var(--purple);border-radius:3px;padding:2px 6px;display:inline-block;">Reunião → Ganho</div>
+             <div style="font-size:11px;font-weight:700;color:var(--purple);margin-top:3px;">38%</div>
+           </div>
+           <div style="background:var(--green-soft);border:1px solid rgba(5,150,105,0.15);border-radius:0 8px 8px 0;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:6px;">Contratos</div>
+             <div style="font-size:24px;font-weight:700;color:var(--green);">~6</div>
+             <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:3px;">por mês</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(5,150,105,0.15);color:var(--green);border-radius:3px;padding:2px 6px;display:inline-block;">ARR gerado</div>
+             <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:3px;">~R$ 130k</div>
+           </div>
+         </div>
+         <div class="info-box" style="font-size:12px;">Copiloto IA faz o primeiro atendimento automaticamente. Leads sem interação após 24h passam para a Híbrida BDR/SDR. TC de 5% reflete qualidade de lead com CPL baixo (R$ 15).</div>
+
        </div>
-       <div style="background:var(--purple-soft);border:1px solid rgba(124,58,237,0.15);border-right:none;padding:14px;text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Reuniões</div>
-         <div style="font-size:24px;font-weight:700;color:var(--purple);">33</div>
-         <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:3px;">agendadas</div>
-         <div style="margin-top:8px;font-size:10px;background:rgba(124,58,237,0.15);color:var(--purple);border-radius:3px;padding:2px 6px;display:inline-block;">Reunião → Ganho</div>
-         <div style="font-size:11px;font-weight:700;color:var(--purple);margin-top:3px;">38%</div>
+       <!-- / TAB SDR -->
+
+       <!-- ── TAB BDR OUTBOUND ── -->
+       <div class="inner-content cop-role-tab">
+         <div class="info-box" style="text-align:center;padding:28px;">
+           <div style="font-size:22px;margin-bottom:8px;">📤</div>
+           <strong>Funil BDR — Outbound</strong>
+           <div style="font-size:13px;color:var(--n-500);margin-top:6px;">Em construção — métricas do BDR outbound serão definidas na próxima etapa.</div>
+         </div>
        </div>
-       <div style="background:var(--green-soft);border:1px solid rgba(5,150,105,0.15);border-radius:0 8px 8px 0;padding:14px;text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:6px;">Contratos</div>
-         <div style="font-size:24px;font-weight:700;color:var(--green);">~13</div>
-         <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:3px;">por mês</div>
-         <div style="margin-top:8px;font-size:10px;background:rgba(5,150,105,0.15);color:var(--green);border-radius:3px;padding:2px 6px;display:inline-block;">ARR gerado</div>
-         <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:3px;">~R$ 280k</div>
-       </div>
+       <!-- / TAB BDR -->
+
      </div>
-     <div class="info-box" style="font-size:12px;">Canal inbound gerido pelo Copiloto IA — IA faz o primeiro atendimento automaticamente. Leads sem interação após 24h passam para o atendente humano (Híbrida BDR/SDR). TC de 10% considera a qualidade do lead de CPL baixo.</div>
 
    </div>
  </div>
