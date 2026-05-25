@@ -3514,15 +3514,98 @@ function clearSettingsModal() {
      </div>
      <div class="tip-box" style="font-size:12px;">Ticket elevado e ciclo consultivo justificam rampagem mais longa. Referência de mercado para mid-market SaaS: 3 a 6 meses.</div>
 
-     <!-- Tabs SDR / BDR -->
+     <!-- Tabs IS / SDR / BDR -->
      <div style="margin-top:20px;">
        <div class="inner-tabs">
-         <button class="inner-tab active" onclick="switchTab(this,'cop-role-tab')">📥 SDR — Inbound</button>
+         <button class="inner-tab active" onclick="switchTab(this,'cop-role-tab')">🎯 IS — Closer</button>
+         <button class="inner-tab" onclick="switchTab(this,'cop-role-tab')">📥 SDR — Inbound</button>
          <button class="inner-tab" onclick="switchTab(this,'cop-role-tab')">📤 BDR — Outbound</button>
        </div>
 
-       <!-- ── TAB SDR INBOUND ── -->
+       <!-- ── TAB IS CLOSER ── -->
        <div class="inner-content cop-role-tab active">
+
+         <!-- Highlights IS -->
+         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+           <div style="background:var(--purple-soft);border-radius:10px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Meta Time</div>
+             <div style="font-size:19px;font-weight:700;color:var(--purple);">68</div>
+             <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:2px;">contratos · jun–dez</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">ARR Médio</div>
+             <div style="font-size:19px;font-weight:700;color:var(--n-700);">R$ 21.600</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">por contrato</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Contratos/IS</div>
+             <div style="font-size:19px;font-weight:700;color:var(--n-700);">~5/mês</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">no pico · ×3 IS</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Rampagem</div>
+             <div style="font-size:19px;font-weight:700;color:var(--n-700);">3 meses</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">ciclo consultivo</div>
+           </div>
+         </div>
+
+         <!-- Funil IS -->
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Funil de Atividades — Por IS / Mês (pico)</div>
+         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:16px;">
+           <div style="background:var(--n-50);border:1px solid var(--n-100);border-right:none;border-radius:8px 0 0 8px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--n-400);text-transform:uppercase;margin-bottom:6px;">Reuniões</div>
+             <div style="font-size:24px;font-weight:700;color:var(--n-700);">~12</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:3px;">por IS</div>
+             <div style="margin-top:8px;font-size:10px;background:var(--n-100);color:var(--n-500);border-radius:3px;padding:2px 6px;display:inline-block;">BDR + autogeradas</div>
+             <div style="font-size:11px;font-weight:700;color:var(--n-600);margin-top:3px;">~5 BDR · ~7 próprias</div>
+           </div>
+           <div style="background:var(--purple-soft);border:1px solid rgba(124,58,237,0.15);border-right:none;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Reun. → Ganho</div>
+             <div style="font-size:24px;font-weight:700;color:var(--purple);">38%</div>
+             <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:3px;">taxa de fechamento</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(124,58,237,0.15);color:var(--purple);border-radius:3px;padding:2px 6px;display:inline-block;">produto consultivo</div>
+             <div style="font-size:11px;font-weight:700;color:var(--purple);margin-top:3px;">ciclo médio: 2–4 sem</div>
+           </div>
+           <div style="background:var(--green-soft);border:1px solid rgba(5,150,105,0.15);border-radius:0 8px 8px 0;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:6px;">Contratos</div>
+             <div style="font-size:24px;font-weight:700;color:var(--green);">~5</div>
+             <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:3px;">por IS / mês</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(5,150,105,0.15);color:var(--green);border-radius:3px;padding:2px 6px;display:inline-block;">ARR por IS</div>
+             <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:3px;">~R$ 108k/mês</div>
+           </div>
+         </div>
+         <div style="background:var(--n-50);border:1px solid var(--n-100);border-radius:8px;padding:12px 16px;display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);align-self:center;white-space:nowrap;">TOTAIS TIME (×3)</div>
+           <div style="text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--n-700);">~36</div><div style="font-size:10px;color:var(--n-400);">reuniões</div></div>
+           <div style="text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--green);">~14</div><div style="font-size:10px;color:var(--n-400);">contratos</div></div>
+           <div style="text-align:center;"><div style="font-size:15px;font-weight:700;color:var(--purple);">~R$ 302k</div><div style="font-size:10px;color:var(--n-400);">ARR/mês no pico</div></div>
+         </div>
+
+         <!-- Rampagem IS -->
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Período de Rampagem</div>
+         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 1</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">40% da meta</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 50%</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 2</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">65% da meta</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 3</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">80% da meta</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+           </div>
+         </div>
+
+       </div>
+       <!-- / TAB IS -->
+
+       <!-- ── TAB SDR INBOUND ── -->
+       <div class="inner-content cop-role-tab">
 
          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
            <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
@@ -3570,18 +3653,109 @@ function clearSettingsModal() {
              <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:3px;">~R$ 130k</div>
            </div>
          </div>
-         <div class="info-box" style="font-size:12px;">Copiloto IA faz o primeiro atendimento automaticamente. Leads sem interação após 24h passam para a Híbrida BDR/SDR. TC de 5% reflete qualidade de lead com CPL baixo (R$ 15).</div>
+         <div class="info-box" style="font-size:12px;margin-bottom:20px;">Copiloto IA faz o primeiro atendimento automaticamente. Leads sem interação após 24h passam para a Híbrida BDR/SDR. TC de 5% reflete qualidade de lead com CPL baixo (R$ 15).</div>
+
+         <!-- Rampagem SDR -->
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Período de Rampagem</div>
+         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 1</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">40% da meta</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 50%</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 2</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">65% da meta</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 3</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">80% da meta</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+           </div>
+         </div>
 
        </div>
        <!-- / TAB SDR -->
 
        <!-- ── TAB BDR OUTBOUND ── -->
        <div class="inner-content cop-role-tab">
-         <div class="info-box" style="text-align:center;padding:28px;">
-           <div style="font-size:22px;margin-bottom:8px;">📤</div>
-           <strong>Funil BDR — Outbound</strong>
-           <div style="font-size:13px;color:var(--n-500);margin-top:6px;">Em construção — métricas do BDR outbound serão definidas na próxima etapa.</div>
+
+         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Prospectos/mês</div>
+             <div style="font-size:18px;font-weight:700;color:var(--n-700);">~300</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">em cadência ativa</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Taxa Conexão</div>
+             <div style="font-size:18px;font-weight:700;color:var(--n-700);">~8%</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:2px;">resposta ou engajamento</div>
+           </div>
+           <div style="background:var(--purple-soft);border-radius:10px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Reuniões/mês</div>
+             <div style="font-size:18px;font-weight:700;color:var(--purple);">~15</div>
+             <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:2px;">meta na maturidade</div>
+           </div>
+           <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Pipeline Gerado</div>
+             <div style="font-size:18px;font-weight:700;color:var(--green);">~R$ 324k</div>
+             <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">15 reun. × R$ 21.600</div>
+           </div>
          </div>
+
+         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:12px;">
+           <div style="background:var(--n-50);border:1px solid var(--n-100);border-right:none;border-radius:8px 0 0 8px;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--n-400);text-transform:uppercase;margin-bottom:6px;">Prospectos</div>
+             <div style="font-size:24px;font-weight:700;color:var(--n-700);">300</div>
+             <div style="font-size:10px;color:var(--n-400);margin-top:3px;">em cadência</div>
+             <div style="margin-top:8px;font-size:10px;background:var(--n-100);color:var(--n-500);border-radius:3px;padding:2px 6px;display:inline-block;">Taxa conexão</div>
+             <div style="font-size:11px;font-weight:700;color:var(--n-600);margin-top:3px;">8%</div>
+           </div>
+           <div style="background:var(--blue-soft);border:1px solid rgba(59,130,246,0.15);border-right:none;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:6px;">Conexões</div>
+             <div style="font-size:24px;font-weight:700;color:var(--blue);">~24</div>
+             <div style="font-size:10px;color:var(--blue);opacity:0.8;margin-top:3px;">engajados</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(59,130,246,0.15);color:var(--blue);border-radius:3px;padding:2px 6px;display:inline-block;">Conex. → Reun.</div>
+             <div style="font-size:11px;font-weight:700;color:var(--blue);margin-top:3px;">60%</div>
+           </div>
+           <div style="background:var(--purple-soft);border:1px solid rgba(124,58,237,0.15);border-right:none;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Reuniões</div>
+             <div style="font-size:24px;font-weight:700;color:var(--purple);">~15</div>
+             <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:3px;">agendadas</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(124,58,237,0.15);color:var(--purple);border-radius:3px;padding:2px 6px;display:inline-block;">Reunião → Ganho</div>
+             <div style="font-size:11px;font-weight:700;color:var(--purple);margin-top:3px;">38%</div>
+           </div>
+           <div style="background:var(--green-soft);border:1px solid rgba(5,150,105,0.15);border-radius:0 8px 8px 0;padding:14px;text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:6px;">Contratos</div>
+             <div style="font-size:24px;font-weight:700;color:var(--green);">~6</div>
+             <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:3px;">gerados/mês</div>
+             <div style="margin-top:8px;font-size:10px;background:rgba(5,150,105,0.15);color:var(--green);border-radius:3px;padding:2px 6px;display:inline-block;">ARR gerado</div>
+             <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:3px;">~R$ 130k</div>
+           </div>
+         </div>
+         <div class="tip-box" style="font-size:12px;margin-bottom:20px;">Prospectos do SOM mapeado (5.180 contas). Cadência multicanal: ligação + WhatsApp + email. Pipeline gerado = potencial ARR das reuniões abertas — o IS fecha.</div>
+
+         <!-- Rampagem BDR -->
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Período de Rampagem</div>
+         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 1</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">40% → ~6 reuniões</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 50%</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 2</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">65% → ~10 reuniões</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+           </div>
+           <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 3</div>
+             <div style="font-size:14px;font-weight:700;color:var(--n-700);">80% → ~12 reuniões</div>
+             <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
+           </div>
+         </div>
+
        </div>
        <!-- / TAB BDR -->
 
