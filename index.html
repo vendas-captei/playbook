@@ -3345,61 +3345,149 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon purple">COP</div>
-       <div><div class="card-title">Copiloto</div><div class="card-subtitle">Metas individuais por perfil — produto premium</div></div>
+       <div><div class="card-title">Copiloto</div><div class="card-subtitle">Metas 2026 — produto em expansão · outbound</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
 
-     <!-- Números principais -->
-     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-       <div style="background:var(--purple-soft);border-radius:10px;padding:16px;text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Meta do Time</div>
-         <div style="font-size:22px;font-weight:700;color:var(--purple);">A definir</div>
-         <div style="font-size:11px;color:var(--purple);opacity:0.8;margin-top:2px;">produto em expansão</div>
+     <!-- Contexto -->
+     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+       <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">ARR Médio</div>
+         <div style="font-size:19px;font-weight:700;color:var(--n-700);">R$ 21.600</div>
+         <div style="font-size:10px;color:var(--n-400);margin-top:2px;">por contrato</div>
        </div>
-       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">ARR Médio</div>
-         <div style="font-size:22px;font-weight:700;color:var(--n-700);">R$ 21.600</div>
-         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">por contrato</div>
+       <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">SOM</div>
+         <div style="font-size:19px;font-weight:700;color:var(--n-700);">5.180</div>
+         <div style="font-size:10px;color:var(--n-400);margin-top:2px;">contas endereçáveis</div>
        </div>
-       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rampagem</div>
-         <div style="font-size:22px;font-weight:700;color:var(--n-700);">3 meses</div>
-         <div style="font-size:11px;color:var(--n-400);margin-top:2px;">ciclo consultivo</div>
+       <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Janela 2026</div>
+         <div style="font-size:19px;font-weight:700;color:var(--n-700);">7 meses</div>
+         <div style="font-size:10px;color:var(--n-400);margin-top:2px;">jun → dez</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Rampagem</div>
+         <div style="font-size:19px;font-weight:700;color:var(--n-700);">3 meses</div>
+         <div style="font-size:10px;color:var(--n-400);margin-top:2px;">ciclo consultivo</div>
        </div>
      </div>
 
-     <!-- Perfis e metas -->
+     <!-- 3 Tiers de meta -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Metas 2026 — Jun a Dez</div>
+     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🏢 Diretoria</div>
+         <div style="font-size:28px;font-weight:700;color:var(--n-700);">55</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:3px;">contratos · meta reportada</div>
+       </div>
+       <div style="background:var(--purple-soft);border-radius:10px;padding:16px;text-align:center;border:2px solid var(--purple);position:relative;">
+         <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;">META DO TIME</div>
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💪 Vendedores</div>
+         <div style="font-size:28px;font-weight:700;color:var(--purple);">68</div>
+         <div style="font-size:11px;color:var(--purple);opacity:0.8;margin-top:3px;">contratos · meta do time</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🚀 Super Meta</div>
+         <div style="font-size:28px;font-weight:700;color:var(--n-700);">80</div>
+         <div style="font-size:11px;color:var(--n-400);margin-top:3px;">contratos · SPIF / celebração</div>
+       </div>
+     </div>
+
+     <!-- Ramp mensal -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Ramp Mensal por Tier</div>
+     <div style="overflow-x:auto;margin-bottom:18px;">
+       <table style="width:100%;border-collapse:collapse;font-size:13px;">
+         <thead>
+           <tr style="background:var(--n-50);">
+             <th style="padding:9px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Mês</th>
+             <th style="padding:9px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">🏢 Diretoria</th>
+             <th style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);border-bottom:1px solid var(--n-100);">💪 Vendedores</th>
+             <th style="padding:9px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">🚀 Super Meta</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Junho</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">3</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">4</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">5</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Julho</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">5</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">6</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">7</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Agosto</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">7</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">8</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">10</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Setembro</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">8</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">10</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">12</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Outubro</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">10</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">12</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">14</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Novembro</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">11</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">14</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">16</td>
+           </tr>
+           <tr style="border-bottom:2px solid var(--n-200);">
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-600);">Dezembro</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">11</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:600;color:var(--purple);">14</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">16</td>
+           </tr>
+           <tr style="background:var(--n-50);">
+             <td style="padding:9px 14px;font-weight:700;color:var(--n-700);">Total</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--n-700);">55</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--purple);">68</td>
+             <td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--n-700);">80</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+     <div class="info-box" style="font-size:12.5px;margin-bottom:20px;">O time comercial trabalha com a meta de <strong>Vendedores (68)</strong>. A meta da Diretoria é reportada ao board. Super Meta ativa SPIF e celebração de time.</div>
+
+     <!-- Perfis -->
      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Perfis do Time COP</div>
      <div style="overflow-x:auto;margin-bottom:18px;">
        <table style="width:100%;border-collapse:collapse;font-size:13px;">
          <thead>
            <tr style="background:var(--n-50);">
-             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Perfil</th>
-             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Qtd</th>
-             <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Salário Base</th>
-             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Atuação</th>
+             <th style="padding:9px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Perfil</th>
+             <th style="padding:9px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Qtd</th>
+             <th style="padding:9px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Atuação</th>
            </tr>
          </thead>
          <tbody>
            <tr style="border-bottom:1px solid var(--n-100);">
-             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">IS Sênior / Especialista</td>
-             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">×1</td>
-             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 7.000</td>
-             <td style="padding:10px 14px;color:var(--n-500);font-size:12px;">Ponta a ponta + especialista de produto</td>
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-700);">IS Sênior / Especialista</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">×1</td>
+             <td style="padding:9px 14px;color:var(--n-500);font-size:12px;">Ponta a ponta + referência técnica do time</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-100);">
-             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">IS Sênior</td>
-             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">×2</td>
-             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 6.000</td>
-             <td style="padding:10px 14px;color:var(--n-500);font-size:12px;">Ponta a ponta + leads BDR</td>
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-700);">IS Sênior</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">×2</td>
+             <td style="padding:9px 14px;color:var(--n-500);font-size:12px;">Ponta a ponta + aproveitamento de leads BDR</td>
            </tr>
            <tr>
-             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">BDR</td>
-             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">×1</td>
-             <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 5.000</td>
-             <td style="padding:10px 14px;color:var(--n-500);font-size:12px;">Qualificação e repasse de leads</td>
+             <td style="padding:9px 14px;font-weight:600;color:var(--n-700);">BDR</td>
+             <td style="padding:9px 14px;text-align:center;color:var(--n-600);">×1</td>
+             <td style="padding:9px 14px;color:var(--n-500);font-size:12px;">Prospecção ativa, qualificação e repasse ao IS</td>
            </tr>
          </tbody>
        </table>
@@ -3407,24 +3495,24 @@ function clearSettingsModal() {
 
      <!-- Rampagem -->
      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Período de Rampagem</div>
-     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
-       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 1</div>
+     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+       <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 1</div>
          <div style="font-size:15px;font-weight:700;color:var(--n-700);">40% da meta</div>
          <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 50%</div>
        </div>
-       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 2</div>
+       <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 2</div>
          <div style="font-size:15px;font-weight:700;color:var(--n-700);">65% da meta</div>
          <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
        </div>
-       <div style="background:var(--n-50);border-radius:8px;padding:14px;border:1px solid var(--n-100);">
-         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:6px;">MÊS 3</div>
+       <div style="background:var(--n-50);border-radius:8px;padding:13px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);margin-bottom:5px;">MÊS 3</div>
          <div style="font-size:15px;font-weight:700;color:var(--n-700);">80% da meta</div>
          <div style="font-size:12px;color:var(--n-500);margin-top:3px;">Gatilho mínimo: 60%</div>
        </div>
      </div>
-     <div class="tip-box" style="font-size:12.5px;">Ticket elevado e ciclo consultivo justificam rampagem mais longa. Referência de mercado para mid-market SaaS: 3 a 6 meses.</div>
+     <div class="tip-box" style="font-size:12px;">Ticket elevado e ciclo consultivo justificam rampagem mais longa. Referência de mercado para mid-market SaaS: 3 a 6 meses.</div>
 
    </div>
  </div>
