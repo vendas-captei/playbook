@@ -18228,6 +18228,7 @@ function toggleProduct(el) {
 function showSection(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.s-sub, .s-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.card.open').forEach(c => c.classList.remove('open'));
   const sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
   if (el) el.classList.add('active');
