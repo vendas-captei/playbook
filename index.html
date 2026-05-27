@@ -3168,38 +3168,55 @@ function clearSettingsModal() {
        <!-- Aceleradores por Tier e Tempo de Casa -->
        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Aceleradores por Tier e Tempo de Casa</div>
        <div style="overflow-x:auto;margin-bottom:16px;">
-         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+         <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
            <thead>
-             <tr style="background:var(--purple-soft);">
-               <th style="padding:10px 14px;text-align:left;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">Tier</th>
-               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">Até 6 meses</th>
-               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">6 a 18 meses</th>
-               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">18 meses+</th>
+             <tr style="background:var(--n-50);">
+               <th rowspan="2" style="padding:10px 14px;text-align:left;font-weight:700;color:var(--n-600);border-bottom:1px solid var(--n-200);border-right:1px solid var(--n-100);vertical-align:middle;">Tier</th>
+               <th colspan="2" style="padding:8px 14px;text-align:center;font-weight:700;color:var(--n-500);border-bottom:1px solid var(--n-200);border-right:1px solid var(--n-100);">Até 6 meses</th>
+               <th colspan="2" style="padding:8px 14px;text-align:center;font-weight:700;color:var(--n-500);border-bottom:1px solid var(--n-200);border-right:1px solid var(--n-100);">6 a 18 meses</th>
+               <th colspan="2" style="padding:8px 14px;text-align:center;font-weight:700;color:var(--n-500);border-bottom:1px solid var(--n-200);">18 meses+</th>
+             </tr>
+             <tr style="background:var(--n-50);">
+               <th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--green);border-bottom:2px solid var(--n-200);">Acel I<br><span style="font-weight:400;color:var(--n-400);">110–119%</span></th>
+               <th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--purple);border-bottom:2px solid var(--n-200);border-right:1px solid var(--n-100);">Acel II<br><span style="font-weight:400;color:var(--n-400);">120%+</span></th>
+               <th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--green);border-bottom:2px solid var(--n-200);">Acel I<br><span style="font-weight:400;color:var(--n-400);">110–119%</span></th>
+               <th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--purple);border-bottom:2px solid var(--n-200);border-right:1px solid var(--n-100);">Acel II<br><span style="font-weight:400;color:var(--n-400);">120%+</span></th>
+               <th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--green);border-bottom:2px solid var(--n-200);">Acel I<br><span style="font-weight:400;color:var(--n-400);">110–119%</span></th>
+               <th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--purple);border-bottom:2px solid var(--n-200);">Acel II<br><span style="font-weight:400;color:var(--n-400);">120%+</span></th>
              </tr>
            </thead>
            <tbody>
              <tr style="border-bottom:1px solid var(--n-100);">
-               <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Júnior</td>
-               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+5%</td>
-               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+8%</td>
-               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+10%</td>
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-700);border-right:1px solid var(--n-100);">Júnior</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--green);">+5%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--purple);border-right:1px solid var(--n-100);">+12%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--green);">+8%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--purple);border-right:1px solid var(--n-100);">+15%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--green);">+10%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--purple);">+17%</td>
              </tr>
              <tr style="border-bottom:1px solid var(--n-100);">
-               <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Pleno</td>
-               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+10%</td>
-               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+13%</td>
-               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+15%</td>
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-700);border-right:1px solid var(--n-100);">Pleno</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--green);">+10%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--purple);border-right:1px solid var(--n-100);">+17%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--green);">+13%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--purple);border-right:1px solid var(--n-100);">+20%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--green);">+15%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:600;color:var(--purple);">+22%</td>
              </tr>
              <tr>
-               <td style="padding:10px 14px;font-weight:700;color:var(--blue);">Sênior</td>
-               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--blue);">+15%</td>
-               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--blue);">+20%</td>
-               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--blue);">+25%</td>
+               <td style="padding:10px 14px;font-weight:700;color:var(--blue);border-right:1px solid var(--n-100);">Sênior</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--green);">+15%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--purple);border-right:1px solid var(--n-100);">+22%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--green);">+20%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--purple);border-right:1px solid var(--n-100);">+27%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--green);">+25%</td>
+               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--purple);">+32%</td>
              </tr>
            </tbody>
          </table>
        </div>
-       <div class="tip-box" style="font-size:12px;">Aceleradores se aplicam a partir de <b style="font-weight:700;color:var(--accent);">110% da meta</b> (Acelerador I) e <b style="font-weight:700;color:var(--accent);">120%+</b> (Acelerador II), conforme tier e tempo de casa. A rampagem segue os mesmos gatilhos com metas reduzidas (M1 40%, M2 65%).</div>
+       <div class="tip-box" style="font-size:12px;"><b style="font-weight:700;color:var(--green);">Acelerador I (110–119%)</b> e <b style="font-weight:700;color:var(--purple);">Acelerador II (120%+)</b> aplicam-se sobre a comissão base, conforme tier e tempo de casa. Acelerador II = Acelerador I + 7pp. Rampagem segue os mesmos gatilhos com metas reduzidas (M1 40%, M2 65%).</div>
 
      </div>
      <!-- / IS CAP -->
