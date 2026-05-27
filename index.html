@@ -3028,6 +3028,516 @@ function clearSettingsModal() {
    </div>
  </div>
 
+ <!-- ── CARD 02: REGRAS GERAIS ── -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon" style="background:var(--n-600);">02</div>
+       <div><div class="card-title">Regras Gerais de Comissionamento</div><div class="card-subtitle">Princípios, prazos e condições válidos para todo o time</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;">
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">📅 Pagamento</div>
+         <div style="font-size:13px;color:var(--n-700);line-height:1.6;">Comissões pagas junto à folha do <strong>mês seguinte</strong> ao fechamento, após confirmação do pagamento da 1ª mensalidade pelo cliente.</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">⏱ Janela de Clawback — 90 dias</div>
+         <div style="font-size:13px;color:var(--n-700);line-height:1.6;">Distrato ou inadimplência dentro de <strong>90 dias</strong> da ativação implica estorno proporcional da comissão. Válido para CAP e COP.</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">📋 Base de Cálculo</div>
+         <div style="font-size:13px;color:var(--n-700);line-height:1.6;">Comissão calculada sempre sobre o <strong>valor da 1ª mensalidade</strong> do contrato fechado, independente da duração do plano.</div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🔗 Cross-Sell & CRM</div>
+         <div style="font-size:13px;color:var(--n-700);line-height:1.6;">Para receber incentivo de cross-sell, o lead deve estar <strong>registrado no CRM antes do 1º contato</strong>. Sem registro = sem comissão, sem exceções.</div>
+       </div>
+     </div>
+     <div class="tip-box" style="font-size:12.5px;">Alterações nesta política serão comunicadas com <strong>30 dias de antecedência</strong>. Vendas realizadas por outros vendedores ou pelo Head não contam para comissão individual.</div>
+   </div>
+ </div>
+
+ <!-- ── CARD 03: CAP COMISSIONAMENTO ── -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">03</div>
+       <div><div class="card-title">CAP — Captação Ativa</div><div class="card-subtitle">Comissionamento por cargo · Inside Sales & SDR</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'cargos-cap-tab')">🎯 IS — Inside Sales</button>
+       <button class="inner-tab" onclick="switchTab(this,'cargos-cap-tab')">📞 SDR</button>
+     </div>
+
+     <!-- ── IS CAP ── -->
+     <div class="inner-content cargos-cap-tab active">
+
+       <div class="info-box" style="margin-bottom:20px;font-size:12.5px;">
+         <strong>Fórmula:</strong> Comissão = Valor 1ª Mensalidade × % do Plano × % do Gatilho × (1 + Acelerador)
+       </div>
+
+       <!-- Comissão por Tipo de Plano -->
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Comissão por Tipo de Plano</div>
+       <div style="overflow-x:auto;margin-bottom:24px;">
+         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+           <thead>
+             <tr style="background:var(--blue-soft);">
+               <th style="padding:10px 14px;text-align:left;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(0,119,182,0.15);">Tipo de Plano</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(0,119,182,0.15);">% sobre 1ª Mensalidade</th>
+               <th style="padding:10px 14px;text-align:left;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(0,119,182,0.15);">Observação</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">Mensal</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-600);">30%</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Raramente vendido</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">Trimestral</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-600);">45%</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">—</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">Semestral</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-600);">60%</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">—</td>
+             </tr>
+             <tr>
+               <td style="padding:10px 14px;font-weight:700;color:var(--blue);">Anual</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--blue);">80%</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--blue);font-weight:600;">⭐ Plano incentivado</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+
+       <!-- Gatilhos de Pagamento -->
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Gatilhos de Pagamento</div>
+       <div style="overflow-x:auto;margin-bottom:24px;">
+         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+           <thead>
+             <tr style="background:var(--n-50);">
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Faixa de Atingimento</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">% da Comissão</th>
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Nível</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff5f5;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--red);">Abaixo de 70%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--red);">0%</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--red);">Sem comissão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff8f0;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">70% a 84%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">60% da base</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Básico</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">85% a 99%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">80% da base</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Padrão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--green-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--green);">100% a 109%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--green);">100% da base</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--green);">✅ Meta atingida</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">110% a 119%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">100% + Acelerador I</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀 Acelerador I</td>
+             </tr>
+             <tr style="background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">Acima de 120%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">100% + Acelerador II</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀🚀 Acelerador II</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+
+       <!-- Aceleradores por Tier e Tempo de Casa -->
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Aceleradores por Tier e Tempo de Casa</div>
+       <div style="overflow-x:auto;margin-bottom:16px;">
+         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+           <thead>
+             <tr style="background:var(--purple-soft);">
+               <th style="padding:10px 14px;text-align:left;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">Tier</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">Até 6 meses</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">6 a 18 meses</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(124,58,237,0.15);">18 meses+</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Júnior</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+5%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+8%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+10%</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Pleno</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+10%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+13%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">+15%</td>
+             </tr>
+             <tr>
+               <td style="padding:10px 14px;font-weight:700;color:var(--blue);">Sênior</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--blue);">+15%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--blue);">+20%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--blue);">+25%</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+       <div class="tip-box" style="font-size:12px;">Aceleradores se aplicam a partir de <strong>110% da meta</strong> (Acelerador I) e <strong>120%+</strong> (Acelerador II), conforme tier e tempo de casa. A rampagem segue os mesmos gatilhos com metas reduzidas (M1 40%, M2 65%).</div>
+
+     </div>
+     <!-- / IS CAP -->
+
+     <!-- ── SDR CAP ── -->
+     <div class="inner-content cargos-cap-tab">
+
+       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+         <div style="background:var(--blue-soft);border-radius:10px;padding:14px;text-align:center;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão Base</div>
+           <div style="font-size:22px;font-weight:700;color:var(--blue);">R$ 80</div>
+           <div style="font-size:10px;color:var(--blue);opacity:0.8;margin-top:2px;">fixo por contrato fechado</div>
+         </div>
+         <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Meta Mensal</div>
+           <div style="font-size:22px;font-weight:700;color:var(--n-700);">20</div>
+           <div style="font-size:10px;color:var(--n-400);margin-top:2px;">contratos gerados</div>
+         </div>
+         <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão no Pico</div>
+           <div style="font-size:22px;font-weight:700;color:var(--green);">R$ 1.600</div>
+           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">20 contratos × R$80</div>
+         </div>
+       </div>
+
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Gatilhos — SDR CAP (meta: 20 contratos)</div>
+       <div style="overflow-x:auto;margin-bottom:16px;">
+         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+           <thead>
+             <tr style="background:var(--n-50);">
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Faixa</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Contratos/mês</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Comissão por Contrato</th>
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Nível</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff5f5;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--red);">Abaixo de 70%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--red);">Menos de 14</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--red);">R$ 0</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--red);">Sem comissão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff8f0;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">70% a 84%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">14 a 16</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">R$ 48</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Básico (60%)</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">85% a 99%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">17 a 19</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">R$ 64</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Padrão (80%)</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--green-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--green);">100% a 109%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--green);">20 a 21</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--green);">R$ 80</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--green);">✅ Meta atingida</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">110% a 119%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--purple);">22 a 23</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">R$ 86,40</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀 Acelerador I (+8%)</td>
+             </tr>
+             <tr style="background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">Acima de 120%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--purple);">24+</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">R$ 92</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀🚀 Acelerador II (+15%)</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+       <div class="info-box" style="font-size:12px;">Comissão do SDR é ativada apenas quando o <strong>contrato fechado pelo IS é originado do lead gerado pelo SDR</strong>. Registro no CRM é obrigatório para atribuição.</div>
+
+     </div>
+     <!-- / SDR CAP -->
+
+   </div>
+ </div>
+
+ <!-- ── CARD 04: COP COMISSIONAMENTO ── -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">04</div>
+       <div><div class="card-title">COP — Copiloto</div><div class="card-subtitle">Comissionamento por cargo · IS Closer & BDR</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'cargos-cop-tab')">🎯 IS — Closer</button>
+       <button class="inner-tab" onclick="switchTab(this,'cargos-cop-tab')">📤 BDR</button>
+     </div>
+
+     <!-- ── IS COP ── -->
+     <div class="inner-content cargos-cop-tab active">
+
+       <div class="info-box" style="margin-bottom:20px;font-size:12.5px;">
+         <strong>Fórmula IS:</strong> Comissão = Valor 1ª Mensalidade × 70% × % do Gatilho × (1 + Acelerador)
+       </div>
+
+       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+         <div style="background:var(--purple-soft);border-radius:10px;padding:14px;text-align:center;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão Base</div>
+           <div style="font-size:22px;font-weight:700;color:var(--purple);">70%</div>
+           <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:2px;">da 1ª mensalidade</div>
+         </div>
+         <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">ARR Médio</div>
+           <div style="font-size:22px;font-weight:700;color:var(--n-700);">R$ 21.600</div>
+           <div style="font-size:10px;color:var(--n-400);margin-top:2px;">1ª mensalidade = R$ 1.800</div>
+         </div>
+         <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão / Contrato</div>
+           <div style="font-size:22px;font-weight:700;color:var(--green);">R$ 1.260</div>
+           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">a 100% da meta</div>
+         </div>
+       </div>
+
+       <!-- Gatilhos COP IS -->
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Gatilhos de Pagamento — IS COP</div>
+       <div style="overflow-x:auto;margin-bottom:24px;">
+         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+           <thead>
+             <tr style="background:var(--n-50);">
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Faixa de Atingimento</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">% da Comissão</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Exemplo (R$ 1.800)</th>
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Nível</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff5f5;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--red);">Abaixo de 60%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--red);">0%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--red);">—</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--red);">Sem comissão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff8f0;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">60% a 79%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">50% da base</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 630</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Básico</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">80% a 99%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">70% da base</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 882</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Padrão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--green-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--green);">100% a 109%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--green);">100% da base</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--green);">R$ 1.260</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--green);">✅ Meta atingida</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">110% a 119%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">100% + 4%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--purple);">R$ 1.310</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀 Acelerador I</td>
+             </tr>
+             <tr style="background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">Acima de 120%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">100% + 7,5%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--purple);">R$ 1.355</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀🚀 Acelerador II</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+
+       <!-- Bônus Especialista -->
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">⭐ Bônus de Especialista de Produto</div>
+       <div style="background:var(--purple-soft);border:1.5px solid var(--purple);border-radius:10px;padding:16px 20px;margin-bottom:16px;">
+         <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+           <div style="text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:4px;">Perfil elegível</div>
+             <div style="font-size:14px;font-weight:700;color:var(--purple);">IS Sênior / Especialista</div>
+           </div>
+           <div style="text-align:center;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:4px;">Bônus mensal</div>
+             <div style="font-size:14px;font-weight:700;color:var(--purple);">+3% do total COP</div>
+           </div>
+           <div style="flex:1;min-width:180px;">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:4px;">Exemplo</div>
+             <div style="font-size:12.5px;color:var(--purple);">Time COP gera R$ 20.000 em comissões → bônus de <strong>R$ 600</strong></div>
+           </div>
+         </div>
+       </div>
+       <div class="tip-box" style="font-size:12px;">Os gatilhos do COP partem de 60% (vs 70% no CAP) mas os aceleradores são menores em percentual — equivalentes em valor absoluto dado o ticket mais alto. Rampagem: M1 40%, M2 65%, M3 80% com mesmos gatilhos.</div>
+
+     </div>
+     <!-- / IS COP -->
+
+     <!-- ── BDR COP ── -->
+     <div class="inner-content cargos-cop-tab">
+
+       <div class="info-box" style="margin-bottom:20px;font-size:12.5px;">
+         <strong>Fórmula BDR:</strong> Comissão = Valor 1ª Mensalidade × 10% × % do Gatilho × (1 + Acelerador)
+       </div>
+
+       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+         <div style="background:var(--blue-soft);border-radius:10px;padding:14px;text-align:center;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão Base</div>
+           <div style="font-size:22px;font-weight:700;color:var(--blue);">10%</div>
+           <div style="font-size:10px;color:var(--blue);opacity:0.8;margin-top:2px;">da 1ª mensalidade</div>
+         </div>
+         <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Função</div>
+           <div style="font-size:14px;font-weight:700;color:var(--n-700);">Prospecção</div>
+           <div style="font-size:10px;color:var(--n-400);margin-top:2px;">qualificação e repasse ao IS</div>
+         </div>
+         <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão / Contrato</div>
+           <div style="font-size:22px;font-weight:700;color:var(--green);">R$ 180</div>
+           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">a 100% · 1ª mens. R$ 1.800</div>
+         </div>
+       </div>
+
+       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Gatilhos de Pagamento — BDR COP</div>
+       <div style="overflow-x:auto;margin-bottom:16px;">
+         <table style="width:100%;border-collapse:collapse;font-size:13px;">
+           <thead>
+             <tr style="background:var(--n-50);">
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Faixa de Atingimento</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">% da Comissão</th>
+               <th style="padding:10px 14px;text-align:center;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Exemplo (R$ 1.800)</th>
+               <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Nível</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff5f5;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--red);">Abaixo de 60%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--red);">0%</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--red);">—</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--red);">Sem comissão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:#fff8f0;">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">60% a 79%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">50% da base</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 90</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Básico</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);">
+               <td style="padding:10px 14px;font-weight:600;color:var(--n-600);">80% a 99%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--n-700);">70% da base</td>
+               <td style="padding:10px 14px;text-align:center;color:var(--n-600);">R$ 126</td>
+               <td style="padding:10px 14px;font-size:12px;color:var(--n-400);">Padrão</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--green-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--green);">100% a 109%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--green);">100% da base</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--green);">R$ 180</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--green);">✅ Meta atingida</td>
+             </tr>
+             <tr style="border-bottom:1px solid var(--n-100);background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">110% a 119%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">100% + 4%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--purple);">R$ 187</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀 Acelerador I</td>
+             </tr>
+             <tr style="background:var(--purple-soft);">
+               <td style="padding:10px 14px;font-weight:700;color:var(--purple);">Acima de 120%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:700;color:var(--purple);">100% + 7,5%</td>
+               <td style="padding:10px 14px;text-align:center;font-weight:600;color:var(--purple);">R$ 194</td>
+               <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--purple);">🚀🚀 Acelerador II</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+       <div class="info-box" style="font-size:12px;">Comissão do BDR é ativada somente quando o lead qualificado e repassado resulta em <strong>contrato fechado pelo IS</strong>. A meta do BDR é medida em reuniões agendadas e contratos gerados.</div>
+
+     </div>
+     <!-- / BDR COP -->
+
+   </div>
+ </div>
+
+ <!-- ── CARD 05: CROSS-SELL ── -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">05</div>
+       <div><div class="card-title">Cross-Sell Entre Times</div><div class="card-subtitle">Incentivo para indicações entre CAP e COP</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;">
+       <div style="background:var(--blue-soft);border-radius:10px;padding:18px;border:1.5px solid rgba(0,119,182,0.2);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">CAP indica para COP</div>
+         <div style="font-size:26px;font-weight:700;color:var(--blue);margin-bottom:4px;">R$ 150</div>
+         <div style="font-size:12px;color:var(--blue);opacity:0.8;">fixo · por contrato COP fechado</div>
+       </div>
+       <div style="background:var(--purple-soft);border-radius:10px;padding:18px;border:1.5px solid rgba(124,58,237,0.2);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">COP indica para CAP</div>
+         <div style="font-size:26px;font-weight:700;color:var(--purple);margin-bottom:4px;">R$ 40</div>
+         <div style="font-size:12px;color:var(--purple);opacity:0.8;">fixo · por contrato CAP fechado</div>
+       </div>
+     </div>
+     <div style="overflow-x:auto;margin-bottom:16px;">
+       <table style="width:100%;border-collapse:collapse;font-size:13px;">
+         <thead>
+           <tr style="background:var(--n-50);">
+             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Regra</th>
+             <th style="padding:10px 14px;text-align:left;font-weight:600;color:var(--n-500);border-bottom:1px solid var(--n-100);">Detalhe</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Registro no CRM</td>
+             <td style="padding:10px 14px;color:var(--n-600);font-size:12.5px;">Obrigatório <strong>antes do 1º contato</strong> com o lead pelo time receptor. Sem registro = sem incentivo.</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Lead já no pipeline</td>
+             <td style="padding:10px 14px;color:var(--n-600);font-size:12.5px;">Se o lead já constar no pipeline do time receptor, a indicação não é válida.</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-100);">
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Pagamento</td>
+             <td style="padding:10px 14px;color:var(--n-600);font-size:12.5px;">Somente após confirmação do pagamento da 1ª mensalidade pelo cliente.</td>
+           </tr>
+           <tr>
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Disputas</td>
+             <td style="padding:10px 14px;color:var(--n-600);font-size:12.5px;">Resolvidas pelo Head de Vendas com base no histórico do CRM.</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+   </div>
+ </div>
+
  <!-- TABELA DE SENIORIDADE - SUPRIMIDA -->
  <div class="card open" style="display:none;">
    <div class="card-header" onclick="toggleCard(this)">
