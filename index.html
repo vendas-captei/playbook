@@ -3199,7 +3199,7 @@ function clearSettingsModal() {
            </tbody>
          </table>
        </div>
-       <div class="tip-box" style="font-size:12px;">Aceleradores se aplicam a partir de <strong>110% da meta</strong> (Acelerador I) e <strong>120%+</strong> (Acelerador II), conforme tier e tempo de casa. A rampagem segue os mesmos gatilhos com metas reduzidas (M1 40%, M2 65%).</div>
+       <div class="tip-box" style="font-size:12px;">Aceleradores se aplicam a partir de <b style="font-weight:700;color:var(--accent);">110% da meta</b> (Acelerador I) e <b style="font-weight:700;color:var(--accent);">120%+</b> (Acelerador II), conforme tier e tempo de casa. A rampagem segue os mesmos gatilhos com metas reduzidas (M1 40%, M2 65%).</div>
 
      </div>
      <!-- / IS CAP -->
@@ -3314,16 +3314,17 @@ function clearSettingsModal() {
            <div style="font-size:10px;color:var(--purple);opacity:0.8;margin-top:2px;">da 1ª mensalidade</div>
          </div>
          <div style="background:var(--n-50);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--n-100);">
-           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">ARR Médio</div>
+           <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Ticket Médio (ex.)</div>
            <div style="font-size:22px;font-weight:700;color:var(--n-700);">R$ 21.600</div>
            <div style="font-size:10px;color:var(--n-400);margin-top:2px;">1ª mensalidade = R$ 1.800</div>
          </div>
          <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão / Contrato</div>
            <div style="font-size:22px;font-weight:700;color:var(--green);">R$ 1.260</div>
-           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">a 100% da meta</div>
+           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">a 100% · baseado no ticket médio</div>
          </div>
        </div>
+       <div style="font-size:11.5px;color:var(--n-400);margin-bottom:16px;padding:8px 12px;background:var(--n-50);border-radius:6px;border-left:3px solid var(--n-200);">⚠️ Os valores em R$ são calculados sobre o <b style="font-weight:600;color:var(--n-600);">ticket médio de referência (ARR R$ 21.600)</b>. A comissão real varia conforme o valor do contrato efetivamente fechado.</div>
 
        <!-- Gatilhos COP IS -->
        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Gatilhos de Pagamento — IS COP</div>
@@ -3422,9 +3423,10 @@ function clearSettingsModal() {
          <div style="background:var(--green-soft);border-radius:10px;padding:14px;text-align:center;">
            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Comissão / Contrato</div>
            <div style="font-size:22px;font-weight:700;color:var(--green);">R$ 180</div>
-           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">a 100% · 1ª mens. R$ 1.800</div>
+           <div style="font-size:10px;color:var(--green);opacity:0.8;margin-top:2px;">a 100% · baseado no ticket médio</div>
          </div>
        </div>
+       <div style="font-size:11.5px;color:var(--n-400);margin-bottom:16px;padding:8px 12px;background:var(--n-50);border-radius:6px;border-left:3px solid var(--n-200);">⚠️ Os valores em R$ são calculados sobre o <b style="font-weight:600;color:var(--n-600);">ticket médio de referência (ARR R$ 21.600)</b>. A comissão real varia conforme o valor do contrato efetivamente fechado.</div>
 
        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Gatilhos de Pagamento — BDR COP</div>
        <div style="overflow-x:auto;margin-bottom:16px;">
@@ -3477,7 +3479,7 @@ function clearSettingsModal() {
            </tbody>
          </table>
        </div>
-       <div class="info-box" style="font-size:12px;">Comissão do BDR é ativada somente quando o lead qualificado e repassado resulta em <strong>contrato fechado pelo IS</strong>. A meta do BDR é medida em reuniões agendadas e contratos gerados.</div>
+       <div class="info-box" style="font-size:12px;">Comissão do BDR é ativada somente quando o lead qualificado e repassado resulta em <b style="font-weight:700;color:var(--blue);">contrato fechado pelo IS</b>. A meta do BDR é medida em reuniões agendadas e contratos gerados.</div>
 
      </div>
      <!-- / BDR COP -->
@@ -3507,6 +3509,35 @@ function clearSettingsModal() {
          <div style="font-size:12px;color:var(--purple);opacity:0.8;">fixo · por contrato CAP fechado</div>
        </div>
      </div>
+
+     <!-- Como registrar no CRM -->
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">📋 Como Registrar no CRM (Pipedrive)</div>
+     <div style="display:grid;grid-template-columns:repeat(1,1fr);gap:10px;margin-bottom:20px;">
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Campo obrigatório</div>
+         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+           <div style="background:var(--blue);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;white-space:nowrap;">Produto de Interesse</div>
+           <div style="font-size:13px;color:var(--n-600);">Preencher com o produto sendo indicado (ex: <b style="font-weight:600;">Copiloto</b> ou <b style="font-weight:600;">Captação Ativa</b>)</div>
+         </div>
+       </div>
+       <div style="background:var(--n-50);border-radius:10px;padding:16px;border:1px solid var(--n-100);">
+         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Funil de destino</div>
+         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+           <div style="background:var(--blue-soft);border-radius:8px;padding:12px;border:1px solid rgba(0,119,182,0.15);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:6px;">Captação Ativa · Indica+</div>
+             <div style="font-size:12.5px;color:var(--n-700);margin-bottom:4px;">Funil: <b style="font-weight:700;color:var(--blue);">"Captação Ativa"</b></div>
+             <div style="font-size:12.5px;color:var(--n-700);">Etapa: <b style="font-weight:700;color:var(--blue);">"Entrada"</b></div>
+           </div>
+           <div style="background:var(--purple-soft);border-radius:8px;padding:12px;border:1px solid rgba(124,58,237,0.15);">
+             <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Copiloto</div>
+             <div style="font-size:12.5px;color:var(--n-700);margin-bottom:4px;">Funil: <b style="font-weight:700;color:var(--purple);">"IA Copiloto"</b></div>
+             <div style="font-size:12.5px;color:var(--n-700);">Etapa: <b style="font-weight:700;color:var(--purple);">"Entrada"</b></div>
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--n-400);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Regras</div>
      <div style="overflow-x:auto;margin-bottom:16px;">
        <table style="width:100%;border-collapse:collapse;font-size:13px;">
          <thead>
@@ -3517,8 +3548,8 @@ function clearSettingsModal() {
          </thead>
          <tbody>
            <tr style="border-bottom:1px solid var(--n-100);">
-             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Registro no CRM</td>
-             <td style="padding:10px 14px;color:var(--n-600);font-size:12.5px;">Obrigatório <strong>antes do 1º contato</strong> com o lead pelo time receptor. Sem registro = sem incentivo.</td>
+             <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Timing do registro</td>
+             <td style="padding:10px 14px;color:var(--n-600);font-size:12.5px;"><b style="font-weight:700;color:var(--n-700);">Antes do 1º contato</b> com o lead pelo time receptor. Sem registro = sem incentivo.</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-100);">
              <td style="padding:10px 14px;font-weight:600;color:var(--n-700);">Lead já no pipeline</td>
