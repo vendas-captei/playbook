@@ -6021,11 +6021,10 @@ function clearSettingsModal() {
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
+     <div class="info-box" style="margin-bottom:12px;"><b style="font-weight:700;color:var(--blue);">E-mail é o menor canal</b> — apenas 2 toques: boas-vindas automático no Dia 0 e break-up no Dia 12.</div>
      <div class="inner-tabs">
-       <button class="inner-tab active" onclick="switchTab(this, 'inbound-email-tab')">Dia 0</button>
-       <button class="inner-tab" onclick="switchTab(this, 'inbound-email-tab')">Dia 2</button>
-       <button class="inner-tab" onclick="switchTab(this, 'inbound-email-tab')">Dia 5</button>
-       <button class="inner-tab" onclick="switchTab(this, 'inbound-email-tab')">Dia 8</button>
+       <button class="inner-tab active" onclick="switchTab(this, 'inbound-email-tab')">📧 Dia 0 — Boas-vindas</button>
+       <button class="inner-tab" onclick="switchTab(this, 'inbound-email-tab')">📧 Dia 12 — Break-up</button>
      </div>
 
      <div class="inner-content inbound-email-tab active">
@@ -6035,59 +6034,26 @@ function clearSettingsModal() {
            <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
            Oi <span class="placeholder">[Nome]</span>, tudo bem?<br><br>
            Vi que você se inscreveu para conhecer a Captei - que bom ter você aqui!<br><br>
-           A Captei ajuda imobiliárias a captar imóveis com previsibilidade. Mapeamos imóveis disponíveis para captação em cada bairro, com contato validado do proprietário. Nossa base e 100% IPTU, o que nos da uma assertividade muito superior a concorrentes que usam Serasa.<br><br>
+           A Captei ajuda imobiliárias a captar imóveis com previsibilidade. Mapeamos imóveis disponíveis para captação em cada bairro, com contato validado do proprietário. Nossa base é 100% IPTU, o que nos dá uma assertividade muito superior a concorrentes que usam Serasa.<br><br>
            <strong>Próximo passo:</strong> separe de 3 a 5 endereços de bairros onde vocês mais atuam. Em 30 minutos no Meet, eu mostro ao vivo o que a Captei encontra. Sem custo, sem compromisso.<br><br>
            Tenho <span class="placeholder">[horário]</span> disponível amanhã. Funciona?<br><br>
-           Abraco,<br>
-           <span class="placeholder">[Seu Nome]</span> - Captei
+           Abraço,<br>
+           <span class="placeholder">[Seu Nome]</span> — Captei
          </div>
        </div>
      </div>
 
      <div class="inner-content inbound-email-tab">
        <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Você viu imóveis que estao passando despercebidos?</span></div>
-         <div class="email-body-preview">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <span class="placeholder">[Nome]</span>, uma pergunta rápida:<br><br>
-           Você sabia que a maioria dos imóveis disponíveis para captação em <span class="placeholder">[cidade]</span> não aparece em portais? Sao proprietários que ainda não anunciaram é que podem ser abordados diretamente pela sua equipe.<br><br>
-           Imobiliarias que usam essa inteligência captam com mais velocidade e exclusividade. A demonstração leva 30 minutos, ao vivo no Meet, e você ve o resultado com os bairros da sua região.<br><br>
-           Qual o melhor horário para você nesta semana?<br><br>
-           Abraco,<br>
-           <span class="placeholder">[Seu Nome]</span> - Captei
-         </div>
-       </div>
-     </div>
-
-     <div class="inner-content inbound-email-tab">
-       <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Como a <span class="placeholder">[imobiliária referencia]</span> otimizou a captação</span></div>
-         <div class="email-body-preview">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <span class="placeholder">[Nome]</span>,<br><br>
-           Queria compartilhar como imobiliárias da sua região estao usando a Captei:<br><br>
-           Antes: corretores dependiam de portais e indicação, captação imprevisível.<br>
-           Depois: acesso direto a imóveis disponíveis por bairro, contato validado do proprietário, captação com previsibilidade e velocidade.<br><br>
-           O diferencial é que nossa base e 100% IPTU - enquanto a maioria dos concorrentes usa Serasa, o que resulta em assertividade muito baixa.<br><br>
-           O teste é simples: você traz endereços reais, eu mostro ao vivo o resultado. 30 minutos no Meet.<br><br>
-           Posso agendar para <span class="placeholder">[data]</span>?<br><br>
-           Abraco,<br>
-           <span class="placeholder">[Seu Nome]</span> - Captei
-         </div>
-       </div>
-     </div>
-
-     <div class="inner-content inbound-email-tab">
-       <div class="email-preview">
-         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Ultimo contato - porta aberta</span></div>
+         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Último contato — porta aberta</span></div>
          <div class="email-body-preview">
            <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
            <span class="placeholder">[Nome]</span>, não quero tomar mais o seu tempo.<br><br>
-           Se captação com previsibilidade não e prioridade agora, entendo totalmente. Mas se em algum momento quiser validar como funciona na sua região, a porta esta aberta.<br><br>
-           O teste é gratuito, leva 30 minutos, e já ajudamos dezenas de imobiliárias a captar com mais assertividade.<br><br>
-           Sucesso e até a proxima!<br><br>
-           Abraco,<br>
-           <span class="placeholder">[Seu Nome]</span> - Captei
+           Tentei entrar em contato algumas vezes ao longo dos últimos dias, mas entendo que o timing pode não ser o ideal agora.<br><br>
+           Se captação com previsibilidade entrar na agenda da <span class="placeholder">[imobiliária]</span>, a porta está aberta. O teste é gratuito, leva 30 minutos, e já ajudamos dezenas de imobiliárias a captar com mais assertividade.<br><br>
+           Sucesso e até a próxima!<br><br>
+           Abraço,<br>
+           <span class="placeholder">[Seu Nome]</span> — Captei
          </div>
        </div>
      </div>
@@ -6106,7 +6072,7 @@ function clearSettingsModal() {
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:16px;">
        <strong>Regra da cadência inbound</strong>
-       O lead levantou a mão - a urgência é maior que no outbound. Velocidade no primeiro contato é tudo. A cada hora que passa sem contato, a taxa de conversão cai drasticamente.
+       O lead levantou a mão — velocidade no primeiro contato é tudo. Foco total em ligações. A cada hora sem contato, a taxa de conversão cai. E-mail é o menor canal: apenas boas-vindas e break-up.
      </div>
      <div style="overflow-x:auto;">
        <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
@@ -6119,59 +6085,65 @@ function clearSettingsModal() {
            </tr>
          </thead>
          <tbody>
-           <tr style="border-bottom:1px solid var(--n-75);">
+           <tr style="border-bottom:1px solid var(--n-75); background:rgba(37,99,235,0.03);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 0</td>
-             <td style="padding:10px 12px; color:var(--n-700);">1ª ligação (até 5 min após inscrição)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">Ligação</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Validar base de atuação antes. Usar script de abertura inbound</td>
+             <td style="padding:10px 12px; color:var(--n-700);">1ª ligação — até 5 min após inscrição</td>
+             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📞 Ligação</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Validar base antes. Script de abertura inbound</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 0</td>
              <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 1 (se não atendeu)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">WhatsApp</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Referência à inscrição: "Vi que você se inscreveu..." + propor horário</td>
+             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WhatsApp</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">"Vi que você se inscreveu..." + propor horário para ligação</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 0</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 1 - Boas-vindas</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Disparar em paralelo ao WhatsApp. Apresentação + link para agendar</td>
+             <td style="padding:10px 12px; color:var(--n-700);">E-mail 1 — Boas-vindas (auto)</td>
+             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📧 E-mail</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Disparar automático em paralelo. Apresentação + link para agendar</td>
            </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
+           <tr style="border-bottom:1px solid var(--n-75); background:rgba(37,99,235,0.03);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 1</td>
-             <td style="padding:10px 12px; color:var(--n-700);">2ª ligação (horário diferente)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">Ligação</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Se ligou de manhã no D0, ligar à tarde e vice-versa</td>
-           </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
-             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 1</td>
-             <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 2 (se não atendeu)</td>
-             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">WhatsApp</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">"Tentei te ligar, qual melhor horário para conversarmos?"</td>
+             <td style="padding:10px 12px; color:var(--n-700);">2ª ligação — horário diferente</td>
+             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📞 Ligação</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Ligou manhã no D0? Ligar à tarde. Ou vice-versa</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 2</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 2 - Valor / Dado</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Dado sobre imóveis invisíveis nos portais na região do lead</td>
+             <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 2</td>
+             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WhatsApp</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">"Tentei te ligar, qual o melhor horário para uma ligação rápida?"</td>
            </tr>
-           <tr style="border-bottom:1px solid var(--n-75);">
+           <tr style="border-bottom:1px solid var(--n-75); background:rgba(37,99,235,0.03);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 3</td>
-             <td style="padding:10px 12px; color:var(--n-700);">3ª ligação + WhatsApp 3</td>
-             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">Ligação</span> <span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">WhatsApp</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Última tentativa WhatsApp. Horário diferente das anteriores</td>
+             <td style="padding:10px 12px; color:var(--n-700);">3ª ligação</td>
+             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📞 Ligação</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Novo horário. Reforçar urgência e interesse</td>
            </tr>
            <tr style="border-bottom:1px solid var(--n-75);">
              <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 5</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 3 - Case de sucesso</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Referência a imobiliárias da região que já usam Captei</td>
+             <td style="padding:10px 12px; color:var(--n-700);">WhatsApp 3</td>
+             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WhatsApp</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Mensagem de valor curta. Gancho diferente (dado/resultado)</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-75); background:rgba(37,99,235,0.03);">
+             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 7</td>
+             <td style="padding:10px 12px; color:var(--n-700);">4ª ligação + WhatsApp 4</td>
+             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📞 Ligação</span> <span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WA</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Penúltima tentativa humana. WA referenciando a ligação</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-75); background:rgba(37,99,235,0.03);">
+             <td style="padding:10px 12px; font-weight:700; color:var(--accent);">Dia 10</td>
+             <td style="padding:10px 12px; color:var(--n-700);">5ª ligação</td>
+             <td style="padding:10px 12px;"><span style="background:var(--blue-soft); color:var(--blue); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📞 Ligação</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Última chamada humana. Tom mais direto</td>
            </tr>
            <tr>
-             <td style="padding:10px 12px; font-weight:700; color:var(--red);">Dia 8</td>
-             <td style="padding:10px 12px; color:var(--n-700);">E-mail 4 - Break-up / Porta aberta</td>
-             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">E-mail</span></td>
-             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Encerrar cadência. CRM: "Inbound - sem resposta". Reciclar em 30 dias</td>
+             <td style="padding:10px 12px; font-weight:700; color:var(--red);">Dia 12</td>
+             <td style="padding:10px 12px; color:var(--n-700);">E-mail 2 — Break-up / Porta aberta</td>
+             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📧 E-mail</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Encerrar cadência humana. CRM: "Inbound — sem resposta". Entra reativação auto</td>
            </tr>
          </tbody>
        </table>
@@ -6179,28 +6151,135 @@ function clearSettingsModal() {
 
      <!-- Resumo visual -->
      <div style="margin-top:20px; display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
-       <div style="background:var(--blue-soft); border-radius:8px; padding:12px; text-align:center;">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px; color:var(--blue);">3</div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--blue); text-transform:uppercase;">Ligações</div>
+       <div style="background:var(--blue-soft); border-radius:8px; padding:12px; text-align:center; border:2px solid var(--blue);">
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:22px; color:var(--blue);">5</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--blue); text-transform:uppercase;">📞 Ligações</div>
+         <div style="font-size:10px; color:var(--blue); margin-top:3px; opacity:0.7;">canal principal</div>
        </div>
        <div style="background:var(--green-soft); border-radius:8px; padding:12px; text-align:center;">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px; color:var(--green);">3</div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--green); text-transform:uppercase;">WhatsApp</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:22px; color:var(--green);">4</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--green); text-transform:uppercase;">💬 WhatsApp</div>
        </div>
        <div style="background:var(--purple-soft); border-radius:8px; padding:12px; text-align:center;">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px; color:var(--purple);">4</div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--purple); text-transform:uppercase;">E-mails</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:22px; color:var(--purple);">2</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--purple); text-transform:uppercase;">📧 E-mails</div>
+         <div style="font-size:10px; color:var(--purple); margin-top:3px; opacity:0.7;">menor canal</div>
        </div>
        <div style="background:var(--n-25); border-radius:8px; padding:12px; text-align:center; border:1px solid var(--n-75);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px; color:var(--n-700);">8</div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--n-500); text-transform:uppercase;">Dias Total</div>
+         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:22px; color:var(--n-700);">12</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.5px; color:var(--n-500); text-transform:uppercase;">Dias (humano)</div>
        </div>
      </div>
 
      <div class="tip-box" style="margin-top:16px;">
-       <strong>Inbound vs Outbound</strong>
-       A cadência inbound é mais curta e intensa (8 dias vs 14 dias) porque o lead já demonstrou interesse. Se em 8 dias não respondeu, provavelmente perdeu o timing - reciclar em 30 dias.
+       <b style="font-weight:700;color:var(--accent);">Inbound vs Outbound</b>
+       A cadência inbound cobre 12 dias com foco em ligações (5 tentativas). E-mail é o menor canal — só boas-vindas e break-up. Após o Dia 12 sem resposta, a cadência humana encerra e as <b style="font-weight:700;color:var(--accent);">reativações automáticas</b> assumem nos Dias 30, 45 e 60.
      </div>
+   </div>
+ </div>
+
+ <!-- REATIVAÇÕES AUTOMÁTICAS -->
+ <div class="card" style="border-left:3px solid var(--amber);">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon amber">⚡</div>
+       <div>
+         <div class="card-title">Reativações Automáticas — Dias 30, 45 e 60</div>
+         <div class="card-subtitle">Disparo automático após encerramento da cadência humana (Dia 12)</div>
+       </div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box" style="margin-bottom:16px;">
+       <b style="font-weight:700;color:var(--amber);">Automático — sem ação manual necessária</b>
+       Após o Dia 12 sem resposta, o lead entra em fluxo automático de reativação. O objetivo é resgatar leads que perderam o timing mas ainda têm potencial. Configure no Meetime ou RD Station.
+     </div>
+
+     <div style="overflow-x:auto; margin-bottom:20px;">
+       <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+         <thead>
+           <tr style="border-bottom:2px solid var(--n-100);">
+             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Dia</th>
+             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Ação</th>
+             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Canal</th>
+             <th style="padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); text-align:left;">Gancho</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr style="border-bottom:1px solid var(--n-75);">
+             <td style="padding:10px 12px; font-weight:700; color:var(--amber);">Dia 30</td>
+             <td style="padding:10px 12px; color:var(--n-700);">Reativação 1 — Lembrete suave</td>
+             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WhatsApp Auto</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Retomada leve: "Passado um mês, será que faz sentido agora?"</td>
+           </tr>
+           <tr style="border-bottom:1px solid var(--n-75);">
+             <td style="padding:10px 12px; font-weight:700; color:var(--amber);">Dia 45</td>
+             <td style="padding:10px 12px; color:var(--n-700);">Reativação 2 — Gancho novo</td>
+             <td style="padding:10px 12px;"><span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WhatsApp Auto</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Novo ângulo: dado de mercado, atualização de cobertura ou case recente</td>
+           </tr>
+           <tr>
+             <td style="padding:10px 12px; font-weight:700; color:var(--amber);">Dia 60</td>
+             <td style="padding:10px 12px; color:var(--n-700);">Reativação 3 — Última tentativa</td>
+             <td style="padding:10px 12px;"><span style="background:var(--purple-soft); color:var(--purple); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">📧 E-mail Auto</span> <span style="background:var(--green-soft); color:var(--green); padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">💬 WA</span></td>
+             <td style="padding:10px 12px; font-size:12px; color:var(--n-500);">Break-up definitivo. Se não responder, mover para "Perdido — Reativar em 6m"</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+
+     <!-- Scripts das reativações -->
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'inbound-reativ-tab')">💬 Dia 30</button>
+       <button class="inner-tab" onclick="switchTab(this,'inbound-reativ-tab')">💬 Dia 45</button>
+       <button class="inner-tab" onclick="switchTab(this,'inbound-reativ-tab')">📧 Dia 60</button>
+     </div>
+
+     <div class="inner-content inbound-reativ-tab active">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp Auto — Dia 30</div>
+         <div class="script-text">
+           Oi <span class="placeholder">[Nome]</span>! Tudo bem por aí?<br><br>
+           Faz um mês que você demonstrou interesse na Captei e não conseguimos falar. Queria saber se agora é um momento melhor para batermos um papo rápido.<br><br>
+           A demonstração é bem prática — você traz endereços reais de bairros onde atua e mostro ao vivo o que a plataforma encontra. 30 minutos no Meet.<br><br>
+           Tem algum horário essa semana?
+         </div>
+       </div>
+     </div>
+
+     <div class="inner-content inbound-reativ-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp Auto — Dia 45</div>
+         <div class="script-text">
+           <span class="placeholder">[Nome]</span>, passando com um dado rápido:<br><br>
+           Imobiliárias que usam nossa base IPTU estão captando imóveis exclusivos que não aparecem em portais — em média <span class="placeholder">[X]</span> por corretor/mês em <span class="placeholder">[cidade]</span>.<br><br>
+           Se fizer sentido validar isso na sua região, ainda consigo um horário essa semana. Vale 30 minutos.<br><br>
+           Topas?
+         </div>
+       </div>
+     </div>
+
+     <div class="inner-content inbound-reativ-tab">
+       <div class="email-preview">
+         <div class="email-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="email-subject">Última mensagem — porta sempre aberta</span></div>
+         <div class="email-body-preview">
+           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+           <span class="placeholder">[Nome]</span>, prometo que essa é a última vez que entro em contato por agora.<br><br>
+           Passamos os últimos 60 dias tentando mostrar o que a Captei pode fazer pela captação da <span class="placeholder">[imobiliária]</span>. Se o timing não está bom, entendo completamente.<br><br>
+           Quando a captação com previsibilidade entrar na sua agenda, é só me chamar — estarei aqui.<br><br>
+           Sucesso e bons negócios!<br><br>
+           Abraço,<br>
+           <span class="placeholder">[Seu Nome]</span> — Captei
+         </div>
+       </div>
+       <div class="tip-box" style="margin-top:12px;">
+         Após o Dia 60 sem resposta: CRM → <b style="font-weight:700;color:var(--accent);">"Perdido — Reativar em 6 meses"</b>. Não descartar — pode ser reativado em campanha semestral.
+       </div>
+     </div>
+
    </div>
  </div>
 
