@@ -10054,17 +10054,33 @@ function clearSettingsModal() {
        <div class="card-icon green">D5</div>
        <div>
          <div class="card-title">Dia 5 — Dado de Valor</div>
-         <div class="card-subtitle"><span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">WhatsApp</span></div>
+         <div class="card-subtitle">
+           <span style="background:var(--green-soft);color:var(--green);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;margin-right:4px;">WhatsApp</span>
+           <span style="background:var(--purple-soft);color:var(--purple);padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;">Email</span>
+         </div>
        </div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="info-box"><strong>Foco:</strong> Gerar curiosidade com dado de valor. Não é pitch — é uma informação relevante que abre conversa para a próxima ligação no D7.</div>
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-whatsapp">WhatsApp 3 — Dado de Valor</div>
-       <div class="script-text"><span class="placeholder">[Nome]</span>, dado rápido:<br><br>Imobiliárias que usam IA no atendimento respondem leads até 5× mais rápido e aumentam a taxa de conversão em média 30%.<br><br>Vale 20 minutos para ver funcionando com os dados de vocês?</div>
+     <div class="inner-tabs">
+       <button class="inner-tab active" onclick="switchTab(this,'norm-d5-tab')">💬 WhatsApp</button>
+       <button class="inner-tab" onclick="switchTab(this,'norm-d5-tab')">✉️ Email</button>
+     </div>
+     <div class="inner-content norm-d5-tab active">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-whatsapp">WhatsApp 3 — Dado de Valor</div>
+         <div class="script-text"><span class="placeholder">[Nome]</span>, dado rápido:<br><br>Imobiliárias que usam IA no atendimento respondem leads até 5× mais rápido e aumentam a taxa de conversão em média 30%.<br><br>Vale 20 minutos para ver funcionando com os dados de vocês?</div>
+       </div>
+     </div>
+     <div class="inner-content norm-d5-tab">
+       <div class="script-block">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Assunto: Como imobiliárias estão acelerando atendimento</div>
+         <div class="script-text"><span class="placeholder">[Nome]</span>, hoje o que mais temos visto no Copiloto é ganho de velocidade no atendimento.<br><br>Algumas imobiliárias estão usando para:<br><br>• responder leads em segundos<br>• manter follow-ups ativos automaticamente<br>• evitar perda de oportunidade fora do horário<br>• reduzir sobrecarga operacional<br><br>O interessante é que isso melhora a velocidade comercial sem necessariamente aumentar o time.<br><br>Achei que poderia fazer sentido aí também. Vale 20 minutos para ver funcionando?<br><br>Abraço,<br><span class="placeholder">[Seu Nome]</span> — Captei</div>
+       </div>
      </div>
    </div>
  </div>
