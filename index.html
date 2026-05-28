@@ -229,6 +229,25 @@ body::before {
 /* Product group */
 .s-group { margin-bottom: 2px; }
 
+/* Flyout nav panel */
+#nav-flyout {
+  display: none; position: fixed; z-index: 500;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  padding: 6px 0;
+  min-width: 208px;
+  max-height: 82vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+#nav-flyout::-webkit-scrollbar { width: 0; }
+#nav-flyout .s-section-label { padding: 10px 12px 3px 14px; }
+#nav-flyout .s-sub { padding: 7px 14px 7px 16px; }
+#nav-flyout .s-sub.active { background: #111113; color: #fff; }
+
 .s-group-header {
   display: flex; align-items: center; gap: 10px;
   padding: 8px 12px; margin: 2px 0;
@@ -288,9 +307,10 @@ body::before {
 .s-chev {
   font-size: 8px; color: #aaa;
   transition: transform 0.2s var(--ease);
+  transform: rotate(-90deg); /* always points right → */
 }
 
-.s-group-header.open .s-chev { transform: rotate(180deg); }
+.s-group-header.open .s-chev { transform: rotate(-90deg); }
 
 .s-group-body { max-height: 0; overflow: hidden; transition: max-height 0.3s var(--ease); }
 .s-group-body.open { max-height: 900px; }
@@ -2577,7 +2597,7 @@ function clearSettingsModal() {
           </div>
           <span class="s-chev">&#9660;</span>
         </div>
-        <div class="s-group-body open">
+        <div class="s-group-body">
           <div class="s-sub" onclick="showSection('platform', this)">Sobre a Plataforma</div>
           <div class="s-sub" onclick="showSection('base-atuacao', this)">Base de Atuação</div>
           <div class="s-sub" onclick="showSection('concorrentes', this)">Concorrentes</div>
@@ -2602,8 +2622,6 @@ function clearSettingsModal() {
           <div class="s-sub" onclick="showSection('cs', this)">Passagem de Bastão CS</div>
         </div>
       </div>
-
-      <div class="s-rule"></div>
 
       <!-- INDICA+ -->
       <div class="s-group" id="nav-indica">
@@ -2745,7 +2763,7 @@ function clearSettingsModal() {
 
       <!-- PDI & GAMIFICAÇÃO -->
       <div class="s-group" id="nav-gamificacao">
-        <div class="s-group-header open" onclick="toggleProduct(this)">
+        <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-gold">🏆</div>
           <div class="s-group-text">
             <div class="s-group-name">PDI & Gamificação</div>
@@ -2753,7 +2771,7 @@ function clearSettingsModal() {
           </div>
           <span class="s-chev">&#9660;</span>
         </div>
-        <div class="s-group-body open">
+        <div class="s-group-body">
           <div class="s-sub" onclick="showSection('tabuleiro-comercial', this)">🏆 Tabuleiro Comercial</div>
 
         </div>
@@ -21832,6 +21850,59 @@ const SKB = {
 };
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => SKB.init(), 800); });
 
+/* ── NAV FLYOUT ── */
+(function() {
+  var flyout = document.createElement('div');
+  flyout.id = 'nav-flyout';
+  document.body.appendChild(flyout);
+
+  var hideTimer = null;
+  function keepOpen() { clearTimeout(hideTimer); }
+  function scheduleHide() { hideTimer = setTimeout(function(){ flyout.style.display = 'none'; }, 140); }
+
+  flyout.addEventListener('mouseenter', keepOpen);
+  flyout.addEventListener('mouseleave', scheduleHide);
+
+  document.querySelectorAll('.s-group').forEach(function(group) {
+    var header = group.querySelector('.s-group-header');
+    var body   = group.querySelector('.s-group-body');
+    if (!header || !body) return;
+
+    // Remove click-expand; hover handles visibility
+    header.onclick = null;
+
+    header.addEventListener('mouseenter', function() {
+      keepOpen();
+      var rect = header.getBoundingClientRect();
+      flyout.innerHTML = body.innerHTML;
+
+      // Rewire .s-sub clicks so sidebar active state updates correctly
+      flyout.querySelectorAll('.s-sub').forEach(function(sub) {
+        var m = sub.getAttribute('onclick') && sub.getAttribute('onclick').match(/showSection\('([^']+)'/);
+        if (!m) return;
+        var secId = m[1];
+        sub.onclick = function() {
+          flyout.style.display = 'none';
+          // Find and pass the original sidebar item so active class lands correctly
+          var orig = document.querySelector('.s-nav .s-sub[onclick*="\'' + secId + '\'"]');
+          showSection(secId, orig || null);
+        };
+      });
+
+      flyout.style.left = (rect.right + 6) + 'px';
+      flyout.style.top  = rect.top + 'px';
+      flyout.style.display = 'block';
+
+      // Nudge up if panel overflows viewport bottom
+      var fr = flyout.getBoundingClientRect();
+      if (fr.bottom > window.innerHeight - 8) {
+        flyout.style.top = Math.max(8, window.innerHeight - fr.height - 8) + 'px';
+      }
+    });
+
+    header.addEventListener('mouseleave', scheduleHide);
+  });
+})();
 
 </script>
 <!-- Lock Modal -->
