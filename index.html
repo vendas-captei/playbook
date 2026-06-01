@@ -3072,7 +3072,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- ── CARD 03: CAP COMISSIONAMENTO ── -->
- <div class="card open">
+ <div class="card open" data-team="CAP">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon blue">03</div>
@@ -3313,7 +3313,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- ── CARD 04: COP COMISSIONAMENTO ── -->
- <div class="card open">
+ <div class="card open" data-team="COP">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon purple">04</div>
@@ -3694,7 +3694,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- CAP -->
- <div class="card open">
+ <div class="card open" data-team="CAP">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">CAP</div>
@@ -3910,7 +3910,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- COP -->
- <div class="card open">
+ <div class="card open" data-team="COP">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon purple">COP</div>
@@ -21845,6 +21845,22 @@ const SKB = {
 };
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => SKB.init(), 800); });
 
+/* ── TEAM VISIBILITY FILTER ── */
+function applyTeamFilter() {
+  try {
+    var session = JSON.parse(sessionStorage.getItem('captei_pb_session') || '{}');
+    if (!session.name) return;
+    var user = AUTH.getAllUsers().find(function(u){ return u.name === session.name; });
+    if (!user || user.admin) return; // admin sees everything
+    var team = user.team;
+    if (!team) return; // no team set = sees everything
+    document.querySelectorAll('[data-team]').forEach(function(el) {
+      el.style.display = el.getAttribute('data-team') === team ? '' : 'none';
+    });
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(applyTeamFilter, 200); });
+
 /* ── NAV FLYOUT ── */
 (function() {
   var flyout = document.createElement('div');
@@ -22003,6 +22019,7 @@ const AUTH = (() => {
     // Auto-propagate saved tokens to all modules
     if (isAdmin && typeof SETTINGS !== 'undefined') SETTINGS.autoInit();
     saveSession(name, isAdmin);
+    setTimeout(function(){ if (window.applyTeamFilter) window.applyTeamFilter(); }, 50);
 
     // Muda seção IMEDIATAMENTE para evitar flash
     if (window.showSection) window.showSection('ranking-home', null);
