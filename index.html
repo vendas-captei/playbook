@@ -229,6 +229,29 @@ body::before {
 /* Product group */
 .s-group { margin-bottom: 2px; }
 
+/* Em desenvolvimento state */
+.s-group.em-dev .s-group-header { cursor: default; position: relative; }
+.s-group.em-dev .s-group-icon,
+.s-group.em-dev .s-group-name,
+.s-group.em-dev .s-group-sub,
+.s-group.em-dev .s-chev { opacity: 0.4; }
+.s-group.em-dev .s-group-header::after {
+  content: '🚧 Em desenvolvimento';
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%; transform: translateY(-50%);
+  background: #111113; color: #fff;
+  font-size: 11px; font-weight: 600;
+  padding: 5px 11px; border-radius: 7px;
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.13s ease;
+  z-index: 400;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+.s-group.em-dev .s-group-header:hover::after { opacity: 1; }
+.s-group.em-dev .s-group-header:hover { background: transparent; }
+
 /* Flyout nav panel */
 #nav-flyout {
   display: none; position: fixed; z-index: 500;
@@ -21852,11 +21875,31 @@ function applyTeamFilter() {
     if (!session.name) return;
     var user = AUTH.getAllUsers().find(function(u){ return u.name === session.name; });
     if (!user || user.admin) return; // admin sees everything
+
     var team = user.team;
-    if (!team) return; // no team set = sees everything
+    if (!team) return; // no team = sees everything
+
+    // 1. Hide/show cards with data-team attribute
     document.querySelectorAll('[data-team]').forEach(function(el) {
       el.style.display = el.getAttribute('data-team') === team ? '' : 'none';
     });
+
+    // 2. Block SalesOps and Supervisor Comercial entirely
+    ['nav-salesops','nav-supervisor'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    // 3. Mark Captação Ativa and Indica+ as "em desenvolvimento"
+    ['nav-ca','nav-indica'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('em-dev');
+      // Remove clickability from header
+      var hdr = el.querySelector('.s-group-header');
+      if (hdr) hdr.onclick = null;
+    });
+
   } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(applyTeamFilter, 200); });
@@ -21878,6 +21921,7 @@ document.addEventListener('DOMContentLoaded', function(){ setTimeout(applyTeamFi
     var header = group.querySelector('.s-group-header');
     var body   = group.querySelector('.s-group-body');
     if (!header || !body) return;
+    if (group.classList.contains('em-dev')) return; // skip blocked groups
 
     // Remove click-expand; hover handles visibility
     header.onclick = null;
