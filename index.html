@@ -2288,8 +2288,8 @@ function clearSettingsModal() {
     <div class="lp-form-sub">Entre com suas credenciais para acessar o playbook do time.</div>
 
     <div class="lp-field">
-      <label class="lp-flabel" for="login-user">Usuário</label>
-      <input class="lp-finput" id="login-user" type="text" placeholder="Seu usuário"
+      <label class="lp-flabel" for="login-user">E-mail</label>
+      <input class="lp-finput" id="login-user" type="email" placeholder="seu@email.com"
         autocomplete="username"
         onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()" />
     </div>
@@ -2310,7 +2310,7 @@ function clearSettingsModal() {
 
     <div class="lp-error" id="login-error">
       <span>⚠️</span>
-      <span id="login-error-msg">Usuário ou senha incorretos.</span>
+      <span id="login-error-msg">E-mail ou senha incorretos.</span>
     </div>
 
     <div class="lp-footer">
@@ -2433,8 +2433,8 @@ function clearSettingsModal() {
             <input class="um-input" id="um-name" type="text" placeholder="Ex: João Silva" />
           </div>
           <div>
-            <label class="um-label">Login (usuário)</label>
-            <input class="um-input" id="um-user" type="text" placeholder="Ex: joao" />
+            <label class="um-label">E-mail (login)</label>
+            <input class="um-input" id="um-email" type="email" placeholder="Ex: joao@captei.com.br" />
           </div>
         </div>
         <div class="um-row" style="margin-bottom:14px;">
@@ -2443,23 +2443,18 @@ function clearSettingsModal() {
             <input class="um-input" id="um-pass" type="text" placeholder="Ex: senha123" />
           </div>
           <div>
-            <label class="um-label">Nível de Senioridade</label>
-            <select class="um-input" id="um-seniority" style="cursor:pointer;">
-              <option value="rampagem">🐣 Rampagem (2 meses) — Meta: R$ 25k</option>
-              <option value="junior1">🌱 Júnior I — Meta: R$ 30k</option>
-              <option value="junior2">🌱 Júnior II — Meta: R$ 35k</option>
-              <option value="junior3">🌱 Júnior III — Meta: R$ 40k</option>
-              <option value="pleno1" selected>🚀 Pleno I — Meta: R$ 45k</option>
-              <option value="pleno2">🚀 Pleno II — Meta: R$ 50k</option>
-              <option value="pleno3">🚀 Pleno III — Meta: R$ 55k</option>
-              <option value="senior1">⚡ Sênior I — Meta: R$ 60k</option>
-              <option value="senior2">⚡ Sênior II — Meta: R$ 70k</option>
-              <option value="senior3">⚡ Sênior III — Meta: R$ 80k</option>
+            <label class="um-label">Equipe</label>
+            <select class="um-input" id="um-team" style="cursor:pointer;">
+              <option value="CAP">🟠 CAP — Captação Ativa</option>
+              <option value="COP">🟣 COP — Copiloto</option>
             </select>
           </div>
         </div>
         <div class="um-row" style="margin-bottom:14px;">
-          <div style="flex:1;"></div>
+          <div style="flex:1;">
+            <label class="um-label">Meta mensal</label>
+            <input class="um-input" id="um-meta" type="text" placeholder="Ex: R$ 50.000" />
+          </div>
           <div>
             <label class="um-label">&nbsp;</label>
             <button class="um-add-btn" onclick="USERMGMT.addUser()">Adicionar usuário</button>
@@ -22030,7 +22025,7 @@ const AUTH = (() => {
     const pass = (passEl.value || '').trim();
 
     if (!user || !pass) {
-      errMsg.textContent = 'Preencha usuário e senha.';
+      errMsg.textContent = 'Preencha e-mail e senha.';
       errEl.classList.add('show');
       return;
     }
@@ -22119,10 +22114,12 @@ const USERMGMT = (() => {
   }
 
   function clearForm() {
-    ['um-name','um-user','um-pass','um-seniority'].forEach(id => {
+    ['um-name','um-email','um-pass','um-meta'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.value = id === 'um-seniority' ? 'pleno' : '';
+      if (el) el.value = '';
     });
+    const teamEl = document.getElementById('um-team');
+    if (teamEl) teamEl.value = 'CAP';
     setMsg('error', '');
     setMsg('success', '');
   }
@@ -22159,21 +22156,24 @@ const USERMGMT = (() => {
       const extraIdx = isBase ? -1 : (i - base.length);
       const rowId = `um-row-${i}`;
       const editId = `um-edit-${i}`;
+      const teamColor = u.team === 'COP' ? '#7c3aed' : 'var(--accent)';
+      const teamLabel = u.team === 'COP' ? '🟣 COP' : (u.team === 'CAP' ? '🟠 CAP' : '');
+      const metaSuffix = u.meta ? ` · ${u.meta}` : '';
 
       return `<div id="${rowId}">
         <div class="um-user-row" style="margin-bottom:0; border-radius: 10px 10px 0 0; border-bottom: none;" id="${rowId}-main">
           <div class="${avatarClass}">${getInitials(u.name)}</div>
           <div class="um-user-info">
             <div class="um-user-name">${u.name}</div>
-            <div class="um-user-login" id="${rowId}-passtext">@${u.user} · <span style="font-family:'IBM Plex Mono',monospace;">${u.pass}</span></div>
+            <div class="um-user-login" id="${rowId}-passtext">${u.user} · <span style="font-family:'IBM Plex Mono',monospace;">${u.pass}</span></div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
             <span class="um-user-badge ${badgeClass}">${badgeLabel}</span>
-            ${(()=>{const s=u.seniority||'pleno1';const sm={rampagem:'🐣 Rampagem',junior1:'🌱 Júnior I',junior2:'🌱 Júnior II',junior3:'🌱 Júnior III',pleno1:'🚀 Pleno I',pleno2:'🚀 Pleno II',pleno3:'🚀 Pleno III',senior1:'⚡ Sênior I',senior2:'⚡ Sênior II',senior3:'⚡ Sênior III',junior:'🌱 Junior',pleno:'🚀 Pleno',senior:'⚡ Sênior'};return `<span id="${rowId}-senlabel" style="font-size:10px;font-weight:700;color:var(--n-500);background:var(--ink-15);border:1px solid var(--ink-25,var(--ink-30));padding:2px 7px;border-radius:5px;">${sm[s]||s}</span>`;})()}
+            ${teamLabel ? `<span style="font-size:10px;font-weight:700;color:${teamColor};background:var(--ink-15);border:1px solid var(--ink-25,var(--ink-30));padding:2px 7px;border-radius:5px;">${teamLabel}${metaSuffix}</span>` : ''}
           </div>
           <div style="display:flex;gap:4px;flex-shrink:0;">
             <button class="um-del-btn" onclick="USERMGMT.toggleEditPass(${i}, ${extraIdx}, '${u.user}')" title="Alterar senha" style="color:var(--accent);border-color:transparent;">🔑</button>
-            <button class="um-del-btn" onclick="USERMGMT.toggleEditSen(${i}, '${u.user}')" title="Alterar senioridade" style="color:#a78bfa;border-color:transparent;">🎓</button>
+            ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.toggleEditTeam(${i}, ${extraIdx}, '${u.user}')" title="Alterar equipe/meta" style="color:#a78bfa;border-color:transparent;">✏️</button>` : ''}
             <div style="display:flex;gap:4px;flex-shrink:0;">
           <label class="um-del-btn" style="cursor:pointer;" title="Foto do usuário">📷<input type="file" accept="image/*" style="display:none;" onchange="PDI.uploadPhoto('${u.user}', this.files[0])"></label>
           ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.deleteUser(${extraIdx})" title="Remover usuário">🗑</button>` : '<div style="width:32px;"></div>'}
@@ -22183,7 +22183,7 @@ const USERMGMT = (() => {
         <div id="${editId}" style="display:none; background:var(--ink-15); border:1px solid rgba(232,98,10,0.25); border-top:none; border-radius:0 0 10px 10px; padding:12px 14px; margin-bottom:8px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <div style="flex:1;">
-              <div style="font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px;">Nova senha para @${u.user}</div>
+              <div style="font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px;">Nova senha para ${u.user}</div>
               <input class="um-input" id="${editId}-input" type="text" placeholder="Digite a nova senha (mín. 4 caracteres)" style="background:var(--ink-00);" onkeydown="if(event.key==='Enter')USERMGMT.savePass(${i},${extraIdx},'${u.user}');if(event.key==='Escape')USERMGMT.toggleEditPass(${i},${extraIdx},'${u.user}')" />
             </div>
             <div style="display:flex; gap:6px; margin-top:16px; flex-shrink:0;">
@@ -22193,67 +22193,54 @@ const USERMGMT = (() => {
           </div>
           <div id="${editId}-msg" style="font-size:12px; color:var(--green); margin-top:6px; display:none;"></div>
         </div>
-        <div id="um-sen-${i}" style="display:none; background:var(--ink-15); border:1px solid rgba(167,139,250,0.3); border-top:none; border-radius:0 0 10px 10px; padding:12px 14px; margin-bottom:8px;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div style="flex:1;">
-              <div style="font-size:10px; font-weight:700; color:#a78bfa; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Senioridade de ${u.name}</div>
-              <select class="um-input" id="um-sen-${i}-sel" style="background:var(--ink-00); cursor:pointer;">
-                <option value="rampagem" ${(u.seniority||'pleno1')==='rampagem'?'selected':''}>🐣 Rampagem — R$ 25k</option>
-                <option value="junior1"  ${(u.seniority||'pleno1')==='junior1' ?'selected':''}>🌱 Júnior I — R$ 30k</option>
-                <option value="junior2"  ${(u.seniority||'pleno1')==='junior2' ?'selected':''}>🌱 Júnior II — R$ 35k</option>
-                <option value="junior3"  ${(u.seniority||'pleno1')==='junior3' ?'selected':''}>🌱 Júnior III — R$ 40k</option>
-                <option value="pleno1"   ${(u.seniority||'pleno1')==='pleno1'  ?'selected':''}>🚀 Pleno I — R$ 45k</option>
-                <option value="pleno2"   ${(u.seniority||'pleno1')==='pleno2'  ?'selected':''}>🚀 Pleno II — R$ 50k</option>
-                <option value="pleno3"   ${(u.seniority||'pleno1')==='pleno3'  ?'selected':''}>🚀 Pleno III — R$ 55k</option>
-                <option value="senior1"  ${(u.seniority||'pleno1')==='senior1' ?'selected':''}>⚡ Sênior I — R$ 60k</option>
-                <option value="senior2"  ${(u.seniority||'pleno1')==='senior2' ?'selected':''}>⚡ Sênior II — R$ 70k</option>
-                <option value="senior3"  ${(u.seniority||'pleno1')==='senior3' ?'selected':''}>⚡ Sênior III — R$ 80k</option>
+        <div id="um-team-${i}" style="display:none; background:var(--ink-15); border:1px solid rgba(167,139,250,0.3); border-top:none; border-radius:0 0 10px 10px; padding:12px 14px; margin-bottom:8px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:10px; font-weight:700; color:#a78bfa; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px;">Equipe</div>
+              <select class="um-input" id="um-team-${i}-sel" style="background:var(--ink-00); cursor:pointer;">
+                <option value="CAP" ${(u.team||'CAP')==='CAP'?'selected':''}>🟠 CAP — Captação Ativa</option>
+                <option value="COP" ${(u.team||'CAP')==='COP'?'selected':''}>🟣 COP — Copiloto</option>
               </select>
             </div>
-            <div style="display:flex; gap:6px; margin-top:16px; flex-shrink:0;">
-              <button onclick="USERMGMT.saveSeniority(${i}, '${u.user}')" style="background:#7c3aed; color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar</button>
-              <button onclick="USERMGMT.toggleEditSen(${i}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
+            <div>
+              <div style="font-size:10px; font-weight:700; color:#a78bfa; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px;">Meta mensal</div>
+              <input class="um-input" id="um-team-${i}-meta" type="text" value="${u.meta||''}" placeholder="Ex: R$ 50.000" style="background:var(--ink-00);" />
             </div>
           </div>
-          <div id="um-sen-${i}-msg" style="font-size:12px; color:#a78bfa; margin-top:6px; display:none;"></div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="USERMGMT.saveTeam(${i}, ${extraIdx}, '${u.user}')" style="background:#7c3aed; color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar</button>
+            <button onclick="USERMGMT.toggleEditTeam(${i}, ${extraIdx}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
+          </div>
+          <div id="um-team-${i}-msg" style="font-size:12px; color:#a78bfa; margin-top:6px; display:none;"></div>
         </div>
       </div>`;
     }).join('');
   }
 
-  function toggleEditSen(i, userLogin) {
-    const senEl  = document.getElementById(`um-sen-${i}`);
+  function toggleEditTeam(i, extraIdx, userLogin) {
+    const teamEl  = document.getElementById(`um-team-${i}`);
     const rowMain = document.getElementById(`um-row-${i}-main`);
-    if (!senEl) return;
-    const isOpen = senEl.style.display !== 'none';
-    senEl.style.display = isOpen ? 'none' : 'block';
+    if (!teamEl) return;
+    const isOpen = teamEl.style.display !== 'none';
+    teamEl.style.display = isOpen ? 'none' : 'block';
     if (rowMain) {
       rowMain.style.borderRadius = isOpen ? '10px' : '10px 10px 0 0';
       rowMain.style.borderBottom = isOpen ? '' : 'none';
     }
-    if (!isOpen) {
-      const msg = document.getElementById(`um-sen-${i}-msg`);
-      if (msg) msg.style.display = 'none';
-    }
   }
 
-  function saveSeniority(i, userLogin) {
-    const sel = document.getElementById(`um-sen-${i}-sel`);
-    const msg = document.getElementById(`um-sen-${i}-msg`);
+  function saveTeam(i, extraIdx, userLogin) {
+    const sel    = document.getElementById(`um-team-${i}-sel`);
+    const metaEl = document.getElementById(`um-team-${i}-meta`);
+    const msg    = document.getElementById(`um-team-${i}-msg`);
     if (!sel) return;
-    const newSen = sel.value;
-    // Persiste override
-    AUTH.saveSenOverride(userLogin, newSen);
-    // Atualiza também no extra (se for extra user)
+    const newTeam = sel.value;
+    const newMeta = metaEl ? metaEl.value.trim() : '';
     const extra = AUTH.loadExtra();
     const ei = extra.findIndex(u => u.user === userLogin);
-    if (ei >= 0) { extra[ei].seniority = newSen; AUTH.saveExtra(extra); }
-    // Atualiza label na tela
-    const labels = {rampagem:'🐣 Rampagem',junior1:'🌱 Júnior I',junior2:'🌱 Júnior II',junior3:'🌱 Júnior III',pleno1:'🚀 Pleno I',pleno2:'🚀 Pleno II',pleno3:'🚀 Pleno III',senior1:'⚡ Sênior I',senior2:'⚡ Sênior II',senior3:'⚡ Sênior III'};
-    const labelEl = document.getElementById(`um-row-${i}-senlabel`);
-    if (labelEl) labelEl.textContent = labels[newSen] || newSen;
-    if (msg) { msg.textContent = '✅ Senioridade atualizada!'; msg.style.display = 'block'; }
-    setTimeout(() => toggleEditSen(i, userLogin), 1200);
+    if (ei >= 0) { extra[ei].team = newTeam; extra[ei].meta = newMeta; AUTH.saveExtra(extra); }
+    if (msg) { msg.textContent = '✅ Equipe e meta atualizadas!'; msg.style.display = 'block'; }
+    setTimeout(() => { toggleEditTeam(i, extraIdx, userLogin); renderList(); }, 1200);
   }
 
   function toggleEditPass(i, extraIdx, userLogin) {
@@ -22306,31 +22293,31 @@ const USERMGMT = (() => {
   }
 
   function addUser() {
-    const name      = (document.getElementById('um-name').value || '').trim();
-    const user      = (document.getElementById('um-user').value || '').trim().toLowerCase();
-    const pass      = (document.getElementById('um-pass').value || '').trim();
-    const seniority = (document.getElementById('um-seniority')?.value) || 'pleno';
+    const name  = (document.getElementById('um-name').value || '').trim();
+    const email = (document.getElementById('um-email').value || '').trim().toLowerCase();
+    const pass  = (document.getElementById('um-pass').value || '').trim();
+    const team  = (document.getElementById('um-team')?.value) || 'CAP';
+    const meta  = (document.getElementById('um-meta').value || '').trim();
 
     setMsg('error', '');
     setMsg('success', '');
 
-    if (!name || !user || !pass) { setMsg('error', 'Preencha todos os campos.'); return; }
-    if (user.length < 2) { setMsg('error', 'Login deve ter ao menos 2 caracteres.'); return; }
+    if (!name || !email || !pass) { setMsg('error', 'Preencha nome, e-mail e senha.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setMsg('error', 'E-mail inválido.'); return; }
     if (pass.length < 4) { setMsg('error', 'Senha deve ter ao menos 4 caracteres.'); return; }
 
     const all = AUTH.getAllUsers();
-    if (all.find(u => u.user === user)) {
-      setMsg('error', `Login "@${user}" já existe. Escolha outro.`);
+    if (all.find(u => u.user === email)) {
+      setMsg('error', `E-mail "${email}" já cadastrado.`);
       return;
     }
 
     const extra = AUTH.loadExtra();
-    extra.push({ user, pass, name, seniority });
+    extra.push({ user: email, pass, name, team, meta });
     AUTH.saveExtra(extra);
 
     clearForm();
-    const senLabel = {junior:'🌱 Junior', pleno:'🚀 Pleno', senior:'⚡ Sênior'}[seniority] || seniority;
-    setMsg('success', `✅ Usuário "${name}" (${senLabel}) adicionado com sucesso!`);
+    setMsg('success', `✅ Usuário "${name}" (${team}) adicionado com sucesso!`);
     renderList();
   }
 
@@ -22344,7 +22331,7 @@ const USERMGMT = (() => {
     renderList();
   }
 
-  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditSen, saveSeniority };
+  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam };
 })();
 
 /* ════════════════════════════════════════════════════════
