@@ -2470,6 +2470,7 @@ function clearSettingsModal() {
             <select class="um-input" id="um-team" style="cursor:pointer;">
               <option value="CAP">🟠 CAP — Captação Ativa</option>
               <option value="COP">🟣 COP — Copiloto</option>
+              <option value="Gestão">⚙️ Gestão — Acesso completo</option>
             </select>
           </div>
         </div>
@@ -21878,8 +21879,9 @@ function applyTeamFilter() {
 
     var team = user.team;
     if (!team) return; // no team = sees everything
+    if (team === 'Gestão') return; // Gestão vê tudo — sem restrições
 
-    // 1. Hide/show cards with data-team attribute
+    // 1. Hide/show cards with data-team attribute (CAP vê CAP, COP vê COP)
     document.querySelectorAll('[data-team]').forEach(function(el) {
       el.style.display = el.getAttribute('data-team') === team ? '' : 'none';
     });
@@ -21890,14 +21892,13 @@ function applyTeamFilter() {
       if (el) el.style.display = 'none';
     });
 
-    // 3. Mark Captação Ativa and Indica+ as "em desenvolvimento"
+    // 3. Mark Captação Ativa and Indica+ as "em desenvolvimento" (não clicável)
     ['nav-ca','nav-indica'].forEach(function(id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.classList.add('em-dev');
-      // Remove clickability from header
       var hdr = el.querySelector('.s-group-header');
-      if (hdr) hdr.onclick = null;
+      if (hdr) { hdr.onclick = null; hdr.style.pointerEvents = 'auto'; }
     });
 
   } catch(e) {}
@@ -21921,12 +21922,12 @@ document.addEventListener('DOMContentLoaded', function(){ setTimeout(applyTeamFi
     var header = group.querySelector('.s-group-header');
     var body   = group.querySelector('.s-group-body');
     if (!header || !body) return;
-    if (group.classList.contains('em-dev')) return; // skip blocked groups
 
     // Remove click-expand; hover handles visibility
     header.onclick = null;
 
     header.addEventListener('mouseenter', function() {
+      if (group.classList.contains('em-dev')) return; // skip at runtime (added after init)
       keepOpen();
       var rect = header.getBoundingClientRect();
       flyout.innerHTML = body.innerHTML;
@@ -22217,8 +22218,8 @@ const USERMGMT = (() => {
       const extraIdx = isBase ? -1 : (i - base.length);
       const rowId = `um-row-${i}`;
       const editId = `um-edit-${i}`;
-      const teamColor = u.team === 'COP' ? '#7c3aed' : 'var(--accent)';
-      const teamLabel = u.team === 'COP' ? '🟣 COP' : (u.team === 'CAP' ? '🟠 CAP' : '');
+      const teamColor = u.team === 'COP' ? '#7c3aed' : (u.team === 'Gestão' ? '#0369a1' : 'var(--accent)');
+      const teamLabel = u.team === 'COP' ? '🟣 COP' : (u.team === 'CAP' ? '🟠 CAP' : (u.team === 'Gestão' ? '⚙️ Gestão' : ''));
       const metaSuffix = u.meta ? ` · ${u.meta}` : '';
 
       return `<div id="${rowId}">
@@ -22261,6 +22262,7 @@ const USERMGMT = (() => {
               <select class="um-input" id="um-team-${i}-sel" style="background:var(--ink-00); cursor:pointer;">
                 <option value="CAP" ${(u.team||'CAP')==='CAP'?'selected':''}>🟠 CAP — Captação Ativa</option>
                 <option value="COP" ${(u.team||'CAP')==='COP'?'selected':''}>🟣 COP — Copiloto</option>
+                <option value="Gestão" ${(u.team||'')==='Gestão'?'selected':''}>⚙️ Gestão — Acesso completo</option>
               </select>
             </div>
             <div>
