@@ -24281,13 +24281,17 @@ const TB = (() => {
                   return au.name?.toLowerCase() === n || au.user?.toLowerCase() === n.split(' ')[0];
                 }))
           : null;
+        // Meta: usa o valor cadastrado no painel de usuários (campo meta), se existir
+        const authMetaNum = authUser?.meta
+          ? (parseInt(String(authUser.meta).replace(/[^0-9]/g, '')) || 0)
+          : 0;
         const senKey   = (authUser?.seniority) ||
                          ((typeof AT !== 'undefined') ? AT.metaLevels?.[u.id] : null) ||
                          'pleno1';
         const senLevel = (typeof AT !== 'undefined' && AT.SENIORITY_LEVELS?.[senKey])
                          ? AT.SENIORITY_LEVELS[senKey]
                          : { label: senKey, meta: 45000 };
-        const metaMonth       = senLevel.meta;
+        const metaMonth = authMetaNum > 0 ? authMetaNum : senLevel.meta;
         const needToday       = Math.max(0, metaMonth - revenue);
         const neededPerBizDay = bizLeft > 0 ? needToday / bizLeft : 0;
         const paceStatus = revenue >= metaMonth ? 'done'
