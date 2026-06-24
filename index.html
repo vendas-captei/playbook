@@ -24317,7 +24317,11 @@ const TB = (() => {
           senKey, senLevel, metaMonth, neededPerBizDay, needToday, paceStatus,
         };
       })
-      .sort((a, b) => b.revenue - a.revenue);
+      .sort((a, b) => {
+        const pctA = a.metaMonth > 0 ? a.revenue / a.metaMonth : 0;
+        const pctB = b.metaMonth > 0 ? b.revenue / b.metaMonth : 0;
+        return pctB - pctA;
+      });
 
     if (!state.selectedUser && state.playerData.length > 0) {
       state.selectedUser = state.playerData[0].id;
