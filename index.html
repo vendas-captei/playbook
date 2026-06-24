@@ -22565,8 +22565,8 @@ const AUTH = (() => {
   }
 
   /* ── Salvar sessão ──────────────────────────────────── */
-  function saveSession(name, isAdmin) {
-    const s = { name, isAdmin: !!isAdmin, expires: Date.now() + SESSION_TTL };
+  function saveSession(name, isAdmin, team) {
+    const s = { name, isAdmin: !!isAdmin, team: team || '', expires: Date.now() + SESSION_TTL };
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(s));
   }
 
@@ -22588,8 +22588,14 @@ const AUTH = (() => {
       document.body.style.overflow = '';
     }
 
-    if (loggedName) loggedName.textContent = name;
+    // Primeiro nome para exibição
+    const firstName = (name || '').split(' ')[0];
+    if (loggedName) loggedName.textContent = firstName;
     if (logoutBtn) logoutBtn.style.display = 'flex';
+
+    // Mensagem de boas-vindas no ranking
+    const welcomeEl = document.getElementById('rh-welcome');
+    if (welcomeEl) welcomeEl.textContent = `Olá, ${firstName}! Seja bem-vindo ao Playbook da Captei.`;
 
     // Painel admin na sidebar — apenas Gestão
     const isGestao = isAdmin || team === 'Gestão';
@@ -22597,7 +22603,7 @@ const AUTH = (() => {
     if (sidebarAdmin && isGestao) sidebarAdmin.style.display = 'block';
 
     if (isGestao && typeof SETTINGS !== 'undefined') SETTINGS.autoInit();
-    saveSession(name, isAdmin);
+    saveSession(name, isAdmin, team);
     setTimeout(function(){ if (window.applyTeamFilter) window.applyTeamFilter(); if (window.initPresUpload) window.initPresUpload(); }, 50);
 
     // Muda seção IMEDIATAMENTE para evitar flash
@@ -22680,7 +22686,7 @@ const AUTH = (() => {
     // Checar sessão já existente
     const session = checkSession();
     if (session) {
-      grantAccess(session.name, session.isAdmin);
+      grantAccess(session.name, session.isAdmin, session.team);
     } else {
       // Playbook invisível até login
       document.body.style.overflow = 'hidden';
@@ -24654,7 +24660,7 @@ window.AUTH = AUTH;
   <!-- Header -->
   <div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;position:relative;">
     <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:2px;">Captei · Comercial</div>
+      <div id="rh-welcome" style="font-size:12px;font-weight:600;color:#E8620A;margin-bottom:2px;"></div>
       <div style="font-size:22px;font-weight:900;color:#111;">🏆 Ranking de Receita</div>
     </div>
     <div id="rh-period" style="position:absolute;left:50%;transform:translateX(-50%);font-size:13px;font-weight:700;color:#555;background:#f5f5f7;padding:6px 16px;border-radius:20px;"></div>
