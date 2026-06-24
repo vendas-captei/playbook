@@ -9284,191 +9284,244 @@ function clearSettingsModal() {
  <div class="section" id="sec-copiloto-platform">
  <div class="page-header">
    <div class="crumb"><b>Copiloto</b></div>
-   <h2>Sobre o Copiloto Captei</h2>
-   <p>A primeira IA 360° feita POR quem trabalha COM imobiliárias há mais de 6 anos. Não é chatbot. É uma Imobiliária Autônoma 24/7.</p>
+   <h2>Sobre o Copiloto by Captei</h2>
+   <p>IA especializada no mercado imobiliário que atende, qualifica e direciona oportunidades para a equipe comercial, além de apoiar demandas operacionais como locação, financeiro e manutenção.</p>
  </div>
 
- <div class="golden-rule">
-   <h3>Não diga "chatbot". Diga "Imobiliária Autônoma 24/7".</h3>
-   <p>Nossos concorrentes vêm do mercado financeiro e focam só no comercial. A Captei é do mercado imobiliário — 6 anos vendo as mesmas dores acontecerem. Por isso criamos uma IA que resolve TUDO, não só comercial.</p>
+ <!-- Frase-chave no topo -->
+ <div class="info-box" style="margin-bottom:20px;">
+   <div style="font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:8px;">Como explicar em uma frase</div>
+   <div style="font-size:15px; font-weight:600; color:var(--n-800); line-height:1.6;">"O Copiloto é uma IA especializada no mercado imobiliário que atende, qualifica e direciona oportunidades 24 horas por dia, ajudando a imobiliária a aproveitar melhor cada contato que recebe."</div>
  </div>
 
+ <!-- Stats -->
  <div class="overview-grid">
    <div class="stat-card">
-     <div class="stat-value">360°</div>
-     <div class="stat-label">Todas as áreas da imobiliária</div>
-   </div>
-   <div class="stat-card">
-     <div class="stat-value">24/7</div>
-     <div class="stat-label">Sempre ativo, sem faltar, sem errar</div>
-   </div>
-   <div class="stat-card">
-     <div class="stat-value">6 anos</div>
+     <div class="stat-value">8 anos</div>
      <div class="stat-label">No mercado imobiliário</div>
    </div>
    <div class="stat-card">
+     <div class="stat-value">24h</div>
+     <div class="stat-label">Atendimento contínuo</div>
+   </div>
+   <div class="stat-card">
      <div class="stat-value">WhatsApp</div>
-     <div class="stat-label">Atendimento direto no canal do cliente</div>
+     <div class="stat-label">Canal principal de atendimento</div>
+   </div>
+   <div class="stat-card">
+     <div class="stat-value">5 áreas</div>
+     <div class="stat-label">Comercial · Locação · Financeiro · Manutenção · Gestão</div>
    </div>
  </div>
 
- <!-- O que é -->
+ <!-- Posicionamento -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon purple">01</div>
-       <div><div class="card-title">O Que é o Copiloto Captei?</div><div class="card-subtitle">Explicação que o vendedor precisa dominar</div></div>
+       <div><div class="card-title">Posicionamento</div><div class="card-subtitle">A origem e o propósito do Copiloto</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="golden-rule" style="margin:0 0 16px;">
+       <h3>Não foi criado por tecnologia tentando entrar no imobiliário.</h3>
+       <p>Foi criado por uma empresa que há mais de 8 anos vive o mercado imobiliário e acompanha diariamente os desafios de atendimento, conversão e operação de milhares de imobiliárias.</p>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Frase-chave para usar na reunião</div>
+       <div class="script-text">"O corretor continua vendendo. O Copiloto garante que oportunidades não fiquem esperando alguém estar disponível para começar o atendimento."</div>
+     </div>
+   </div>
+ </div>
+
+ <!-- O Problema -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">02</div>
+       <div><div class="card-title">O Problema que Resolvemos</div><div class="card-subtitle">Por que o mercado perde oportunidades — não por falta de marketing</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box" style="margin-bottom:16px;">
+       O mercado aprendeu a gerar leads. Ainda não aprendeu a atender todos eles com velocidade e consistência.
+     </div>
+     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+       <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--n-25); border:1px solid var(--n-100); border-left:3px solid #EF4444; border-radius:var(--r-sm);">
+         <span style="color:#EF4444; font-weight:700; font-size:16px; flex-shrink:0;">✕</span>
+         <span style="font-size:13px; color:var(--n-700);">O lead demora para ser respondido</span>
+       </div>
+       <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--n-25); border:1px solid var(--n-100); border-left:3px solid #EF4444; border-radius:var(--r-sm);">
+         <span style="color:#EF4444; font-weight:700; font-size:16px; flex-shrink:0;">✕</span>
+         <span style="font-size:13px; color:var(--n-700);">O corretor está ocupado</span>
+       </div>
+       <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--n-25); border:1px solid var(--n-100); border-left:3px solid #EF4444; border-radius:var(--r-sm);">
+         <span style="color:#EF4444; font-weight:700; font-size:16px; flex-shrink:0;">✕</span>
+         <span style="font-size:13px; color:var(--n-700);">O atendimento acontece apenas em horário comercial</span>
+       </div>
+       <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--n-25); border:1px solid var(--n-100); border-left:3px solid #EF4444; border-radius:var(--r-sm);">
+         <span style="color:#EF4444; font-weight:700; font-size:16px; flex-shrink:0;">✕</span>
+         <span style="font-size:13px; color:var(--n-700);">Informações se perdem no processo</span>
+       </div>
+       <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; background:var(--n-25); border:1px solid var(--n-100); border-left:3px solid #EF4444; border-radius:var(--r-sm);">
+         <span style="color:#EF4444; font-weight:700; font-size:16px; flex-shrink:0;">✕</span>
+         <span style="font-size:13px; color:var(--n-700);">A operação depende demais das pessoas</span>
+       </div>
+     </div>
+     <div style="padding:14px 16px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2); border-radius:var(--r-sm);">
+       <span style="font-size:13px; font-weight:600; color:var(--green);">O Copiloto nasceu para resolver exatamente esse gargalo.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- O Que É -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon accent">03</div>
+       <div><div class="card-title">O Que É o Copiloto</div><div class="card-subtitle">Como apresentar para o cliente</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-contexto"> Explicação para o Lead</div>
-       <div class="script-text">"Imagina ter uma pessoa trabalhando 24 horas por dia, 7 dias por semana, sem errar, sem faltar, sempre respondendo na velocidade que o cliente espera."<br><br>"Isso é o Copiloto. Ele atende pelo WhatsApp — que é onde o cliente já está — e resolve tudo: comercial, financeiro, locação, manutenção, administrativo."<br><br>"É literalmente colocar a imobiliária inteira pra funcionar 24 horas."</div>
+       <div class="script-label label-contexto">Explicação para o lead</div>
+       <div class="script-text">"O Copiloto funciona como uma camada inteligente de atendimento da imobiliária."<br><br>"Ele atende pelo WhatsApp, entende o contexto da conversa, coleta informações, qualifica o contato e encaminha a oportunidade para a pessoa certa no momento certo."<br><br>"O objetivo não é substituir o corretor. É fazer com que o corretor passe mais tempo vendendo e menos tempo executando tarefas repetitivas."</div>
      </div>
-
      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
        <div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:12px; padding-bottom:6px; border-bottom:2px solid rgba(239,68,68,0.15);">Nunca diga</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid rgba(239,68,68,0.15);">Nunca diga</div>
          <div style="display:flex; flex-direction:column; gap:6px;">
            <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(239,68,68,0.04); border-radius:6px; border-left:3px solid var(--red);">"É um chatbot melhorado"</div>
-           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(239,68,68,0.04); border-radius:6px; border-left:3px solid var(--red);">"É uma inteligência artificial"</div>
            <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(239,68,68,0.04); border-radius:6px; border-left:3px solid var(--red);">"É um robô de atendimento"</div>
+           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(239,68,68,0.04); border-radius:6px; border-left:3px solid var(--red);">"Vai substituir seu time"</div>
          </div>
        </div>
        <div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:12px; padding-bottom:6px; border-bottom:2px solid rgba(34,197,94,0.15);">Sempre diga</div>
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid rgba(34,197,94,0.15);">Sempre diga</div>
          <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(34,197,94,0.04); border-radius:6px; border-left:3px solid var(--green);">"É uma Imobiliária Autônoma 24/7"</div>
-           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(34,197,94,0.04); border-radius:6px; border-left:3px solid var(--green);">"É como ter uma equipe inteira que nunca para"</div>
-           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(34,197,94,0.04); border-radius:6px; border-left:3px solid var(--green);">"Custa menos que um estagiário e trabalha 24h"</div>
+           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(34,197,94,0.04); border-radius:6px; border-left:3px solid var(--green);">"É uma camada inteligente de atendimento"</div>
+           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(34,197,94,0.04); border-radius:6px; border-left:3px solid var(--green);">"Faz o corretor vender mais, não menos"</div>
+           <div style="font-size:12.5px; color:var(--n-600); padding:8px 10px; background:rgba(34,197,94,0.04); border-radius:6px; border-left:3px solid var(--green);">"Atende 24h sem depender de ninguém estar disponível"</div>
          </div>
        </div>
      </div>
    </div>
  </div>
 
- <!-- 6 Áreas -->
- <div class="card open">
-   <div class="card-header" onclick="toggleCard(this)">
-     <div class="card-header-left">
-       <div class="card-icon accent">02</div>
-       <div><div class="card-title">As 6 Áreas que o Copiloto Resolve</div><div class="card-subtitle">O diferencial: concorrentes fazem só comercial — nós fazemos TUDO</div></div>
-     </div>
-     <span class="card-chevron">&#9660;</span>
-   </div>
-   <div class="card-body">
-     <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;">
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px; border-left:4px solid var(--blue);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; color:var(--n-900); margin-bottom:6px;">1. Comercial</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Atende leads automaticamente no WhatsApp. Qualifica, agenda visitas, coleta dados completos, cria card no CRM e distribui para o corretor certo.</div>
-         <div style="margin-top:8px; font-size:11px; padding:6px 10px; background:var(--blue-soft); border-radius:5px; color:var(--blue); font-weight:600;">Resultado: Zero lead perdido</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px; border-left:4px solid var(--green);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; color:var(--n-900); margin-bottom:6px;">2. Financeiro</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Emite segunda via de boletos, envia comprovantes, coleta dados para o setor financeiro e organiza todas as solicitações.</div>
-         <div style="margin-top:8px; font-size:11px; padding:6px 10px; background:var(--green-soft); border-radius:5px; color:var(--green); font-weight:600;">Resultado: Financeiro desafogado</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px; border-left:4px solid var(--accent);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; color:var(--n-900); margin-bottom:6px;">3. Locação</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Atende inquilinos, responde dúvidas sobre contratos, boletos, reajustes e encaminha demandas específicas para o setor responsável.</div>
-         <div style="margin-top:8px; font-size:11px; padding:6px 10px; background:var(--accent-soft); border-radius:5px; color:var(--accent); font-weight:600;">Resultado: Inquilino satisfeito</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px; border-left:4px solid var(--purple);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; color:var(--n-900); margin-bottom:6px;">4. Manutenção</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Abre chamados automaticamente, coleta fotos e detalhes do problema, organiza prioridades e acompanha status de cada solicitação.</div>
-         <div style="margin-top:8px; font-size:11px; padding:6px 10px; background:var(--purple-soft); border-radius:5px; color:var(--purple); font-weight:600;">Resultado: Manutenção organizada</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px; border-left:4px solid var(--ink-05);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; color:var(--n-900); margin-bottom:6px;">5. Administrativo</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Documenta TUDO automaticamente. Cada conversa, cada solicitação, cada ação. Nada se perde — tudo registrado e acessível.</div>
-         <div style="margin-top:8px; font-size:11px; padding:6px 10px; background:var(--n-75); border-radius:5px; color:var(--n-700); font-weight:600;">Resultado: Controle total</div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px; border-left:4px solid var(--red);">
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; color:var(--n-900); margin-bottom:6px;">6. Gestão</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Gestor vê TUDO: quem atendeu, o que foi falado, tempo de resposta, taxa de conversão, resumo de cada conversa. Visão 360°.</div>
-         <div style="margin-top:8px; font-size:11px; padding:6px 10px; background:rgba(239,68,68,0.06); border-radius:5px; color:var(--red); font-weight:600;">Resultado: Decisões baseadas em dados</div>
-       </div>
-     </div>
-     <div class="tip-box" style="margin-top:16px;">
-       <strong>Frase-chave para a call</strong>
-       "Os concorrentes fazem só comercial. O Copiloto faz TUDO. É a imobiliária inteira operando 24 horas — comercial, financeiro, locação, manutenção, administrativo e gestão."
-     </div>
-   </div>
- </div>
-
- <!-- Ancoragem de preço -->
- <div class="card open">
-   <div class="card-header" onclick="toggleCard(this)">
-     <div class="card-header-left">
-       <div class="card-icon green">03</div>
-       <div><div class="card-title">Ancoragem de Preço — Como Posicionar</div><div class="card-subtitle">Sempre comparar com custo de funcionário, nunca com software</div></div>
-     </div>
-     <span class="card-chevron">&#9660;</span>
-   </div>
-   <div class="card-body">
-     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-       <div style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.12); border-radius:10px; padding:18px; text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:10px;">1 Estagiário</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:28px; color:var(--red);">R$ 2.500+</div>
-         <div style="font-size:12px; color:var(--n-500); margin-top:6px;">Salário + encargos + férias + 13º</div>
-         <div style="font-size:11px; color:var(--n-400); margin-top:4px;">Trabalha 8h/dia, 1 área, falta, erra</div>
-       </div>
-       <div style="background:rgba(34,197,94,0.03); border:1px solid rgba(34,197,94,0.12); border-radius:10px; padding:18px; text-align:center;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:10px;">Copiloto Captei</div>
-         <div style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:28px; color:var(--green);">Menos que isso</div>
-         <div style="font-size:12px; color:var(--n-500); margin-top:6px;">Trabalha 24h/dia, 6 áreas, nunca falta</div>
-         <div style="font-size:11px; color:var(--n-400); margin-top:4px;">Não é 1 pessoa — é uma equipe inteira</div>
-       </div>
-     </div>
-     <div class="script-block" style="margin-top:16px;">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-amplifica"> Fala de Ancoragem</div>
-       <div class="script-text">"Pensa assim: hoje você paga salário, encargos, férias, 13° pra uma pessoa fazer trabalho operacional — e essa pessoa trabalha 8 horas por dia."<br><br>"O Copiloto custa menos que um estagiário e trabalha 24 horas sem parar. E não é só uma pessoa — é uma equipe inteira cobrindo todas as frentes da imobiliária."</div>
-     </div>
-   </div>
- </div>
-
- <!-- Por que somos diferentes -->
+ <!-- Por Que é Diferente -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon blue">04</div>
-       <div><div class="card-title">Por Que o Copiloto é Diferente dos Concorrentes</div><div class="card-subtitle">Os 4 diferenciais que o vendedor precisa cravar na call</div></div>
+       <div><div class="card-title">Por Que o Copiloto É Diferente</div><div class="card-subtitle">4 pilares de diferenciação</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div style="display:flex; flex-direction:column; gap:12px;">
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
-         <div style="background:var(--purple); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; flex-shrink:0;">01</div>
+     <div style="display:flex; flex-direction:column; gap:10px;">
+       <div style="background:var(--n-25); border:1px solid var(--n-100); border-radius:var(--r-md); padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
+         <div style="background:var(--accent); color:white; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:11px; flex-shrink:0; letter-spacing:0.5px;">01</div>
          <div>
-           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">6 Anos no Mercado Imobiliário</div>
-           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Não viemos do financeiro. Somos do mercado imobiliário. Vivemos as mesmas dores que o cliente vive. Sabemos exatamente o que precisa ser resolvido porque vemos isso há 6 anos.</div>
+           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">Especialização Imobiliária</div>
+           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">O Copiloto foi treinado para o contexto imobiliário — compra, venda, locação, captação, manutenção, financeiro e rotinas operacionais. Não é uma ferramenta genérica adaptada para o setor. Foi criada para o setor.</div>
          </div>
        </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
-         <div style="background:var(--purple); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; flex-shrink:0;">02</div>
+       <div style="background:var(--n-25); border:1px solid var(--n-100); border-radius:var(--r-md); padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
+         <div style="background:var(--accent); color:white; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:11px; flex-shrink:0; letter-spacing:0.5px;">02</div>
          <div>
-           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">IA 360° — Não Só Comercial</div>
-           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Concorrentes focam SÓ em comercial. Nós vimos que TODAS as áreas da imobiliária são precárias no atendimento. Comercial, financeiro, locação, manutenção — tudo resolvido numa solução só.</div>
+           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">Construído com Experiência Real</div>
+           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Antes de construir o Copiloto, a Captei observou milhões de interações dentro do mercado imobiliário. A solução nasceu da experiência prática adquirida atendendo milhares de imobiliárias em todo o Brasil por mais de 8 anos.</div>
          </div>
        </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
-         <div style="background:var(--purple); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; flex-shrink:0;">03</div>
+       <div style="background:var(--n-25); border:1px solid var(--n-100); border-radius:var(--r-md); padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
+         <div style="background:var(--accent); color:white; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:11px; flex-shrink:0; letter-spacing:0.5px;">03</div>
          <div>
-           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">Feito Para Ele CRESCER</div>
-           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Não é uma ferramenta genérica adaptada pro imobiliário. Foi criada do zero com jornadas reais de imobiliárias. O lead precisa sentir que a gente entende o dia a dia dele.</div>
+           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">Atendimento 24 Horas</div>
+           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">O cliente não escolhe quando precisa de atendimento. O Copiloto está disponível 24 horas por dia para iniciar conversas, responder solicitações, coletar informações e manter o relacionamento ativo — inclusive fins de semana e feriados.</div>
          </div>
        </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
-         <div style="background:var(--purple); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; flex-shrink:0;">04</div>
+       <div style="background:var(--n-25); border:1px solid var(--n-100); border-radius:var(--r-md); padding:16px 18px; display:flex; gap:14px; align-items:flex-start;">
+         <div style="background:var(--accent); color:white; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:11px; flex-shrink:0; letter-spacing:0.5px;">04</div>
          <div>
-           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">Entende Linguagem Real</div>
-           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">Gírias, perguntas vagas, áudios, dúvidas confusas — o Copiloto entende tudo naturalmente. Não é aquele robô que trava quando a pessoa fala diferente.</div>
+           <div style="font-weight:700; font-size:14px; color:var(--n-900); margin-bottom:4px;">Integração com a Operação</div>
+           <div style="font-size:12.5px; color:var(--n-600); line-height:1.6;">O Copiloto não trabalha isolado. Ele distribui informações, qualifica contatos e entrega contexto para a equipe humana continuar a jornada — integrando com os processos e sistemas da imobiliária.</div>
          </div>
        </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- Principais Aplicações -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon accent">05</div>
+       <div><div class="card-title">Principais Aplicações</div><div class="card-subtitle">O que o Copiloto resolve em cada área da imobiliária</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px;">
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:10px; padding:16px; border-top:3px solid var(--blue);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:10px;">Comercial</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.8;">• Atendimento inicial de leads<br>• Qualificação automática<br>• Agendamento de visitas<br>• Coleta de informações<br>• Encaminhamento para corretores</div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:10px; padding:16px; border-top:3px solid var(--accent);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">Locação</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.8;">• Dúvidas contratuais<br>• Boletos e segunda via<br>• Solicitações operacionais<br>• Direcionamento para equipe</div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:10px; padding:16px; border-top:3px solid var(--green);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:10px;">Financeiro</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.8;">• Segunda via de boletos<br>• Informações financeiras<br>• Coleta de solicitações<br>• Encaminhamento estruturado</div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:10px; padding:16px; border-top:3px solid var(--purple);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:10px;">Manutenção</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.8;">• Abertura de chamados<br>• Coleta de fotos e informações<br>• Organização das solicitações<br>• Direcionamento interno</div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:10px; padding:16px; border-top:3px solid var(--n-500);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--n-500); margin-bottom:10px;">Gestão</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.8;">• Histórico centralizado<br>• Indicadores operacionais<br>• Visibilidade sobre atendimentos<br>• Acompanhamento da operação</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- Ecossistema Captei -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">06</div>
+       <div><div class="card-title">Ecossistema Captei</div><div class="card-subtitle">Mais oportunidades entrando · Mais oportunidades sendo aproveitadas</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box" style="margin-bottom:16px;">
+       O Copiloto não é apenas uma ferramenta de atendimento. Ele faz parte do Ecossistema Captei — uma estrutura completa de geração, atendimento e conversão para a imobiliária.
+     </div>
+     <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; padding:20px; background:var(--n-25); border:1px solid var(--n-100); border-radius:var(--r-md);">
+       <div style="text-align:center; padding:12px 16px; background:var(--n-0,white); border:1px solid var(--n-100); border-radius:var(--r-sm);">
+         <div style="font-size:11px; font-weight:700; color:var(--accent); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:1px;">Captação Ativa</div>
+         <div style="font-size:11px; color:var(--n-500); margin-top:2px;">Geração</div>
+       </div>
+       <div style="font-size:18px; color:var(--n-300);">→</div>
+       <div style="text-align:center; padding:12px 16px; background:var(--n-0,white); border:1px solid var(--accent); border-radius:var(--r-sm);">
+         <div style="font-size:11px; font-weight:700; color:var(--accent); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:1px;">Copiloto</div>
+         <div style="font-size:11px; color:var(--n-500); margin-top:2px;">Atendimento e Qualificação</div>
+       </div>
+       <div style="font-size:18px; color:var(--n-300);">→</div>
+       <div style="text-align:center; padding:12px 16px; background:var(--n-0,white); border:1px solid var(--n-100); border-radius:var(--r-sm);">
+         <div style="font-size:11px; font-weight:700; color:var(--n-700); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:1px;">Corretores</div>
+         <div style="font-size:11px; color:var(--n-500); margin-top:2px;">Conversão</div>
+       </div>
+     </div>
+     <div class="tip-box" style="margin-top:14px;">
+       Determinados planos incluem acesso ao Captação Ativa, criando uma estrutura completa para a imobiliária — de geração ao fechamento.
      </div>
    </div>
  </div>
