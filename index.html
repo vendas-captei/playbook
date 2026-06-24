@@ -11843,394 +11843,469 @@ function clearSettingsModal() {
  <div class="page-header">
    <div class="crumb"><b>Copiloto</b> / Reunião</div>
    <h2>Guia da Demo — Copiloto</h2>
-   <p>Estrutura completa da reunião de 30-40 minutos. O segredo: descobrir as dores ANTES de abrir tela, e conectar CADA funcionalidade com a dor que o lead mencionou.</p>
+   <p>8 etapas para conduzir o cliente de uma jornada de descoberta ao fechamento natural. O cliente deve falar mais do que o vendedor nos momentos de diagnóstico.</p>
  </div>
 
  <div class="golden-rule">
-   <h3>Regra de Ouro: 60% ouvir, 40% falar.</h3>
-   <p>A demo é sobre ELE, não sobre você. Nunca faça tour de sistema. Nunca mostre funcionalidade sem conectar com uma dor real que o lead falou. Cada tela que você abre precisa resolver algo que ele SENTE.</p>
+   <h3>Objetivo da Apresentação</h3>
+   <p>A apresentação do Copiloto não foi construída para apresentar funcionalidades. Foi construída para conduzir o cliente por uma <strong>jornada de descoberta</strong>, onde ele reconhece sozinho que existe um problema operacional em sua imobiliária e percebe que o Copiloto é a solução mais lógica para resolvê-lo.</p>
+   <p style="margin-top:10px;">O papel do closer não é vender uma IA. O papel do closer é ajudar o cliente a enxergar o <strong>impacto financeiro e operacional</strong> da falta de atendimento rápido e consistente.</p>
  </div>
 
- <div class="pipeline">
-   <div class="pipeline-stage"><div class="stage-num">1</div><div class="stage-title">Abertura</div><div class="stage-desc">2-3 min</div></div>
-   <div class="pipeline-arrow">→</div>
-   <div class="pipeline-stage"><div class="stage-num">2</div><div class="stage-title">Descoberta</div><div class="stage-desc">8-10 min</div></div>
-   <div class="pipeline-arrow">→</div>
-   <div class="pipeline-stage"><div class="stage-num">3</div><div class="stage-title">Confirma</div><div class="stage-desc">3-4 min</div></div>
-   <div class="pipeline-arrow">→</div>
-   <div class="pipeline-stage"><div class="stage-num">4</div><div class="stage-title">Demo</div><div class="stage-desc">10-15 min</div></div>
-   <div class="pipeline-arrow">→</div>
-   <div class="pipeline-stage"><div class="stage-num">5</div><div class="stage-title">Fechar</div><div class="stage-desc">5-7 min</div></div>
+ <div class="info-box" style="margin-bottom:16px;">
+   <strong>Princípio SPIN Selling</strong>
+   <strong>S</strong>ituação → <strong>P</strong>roblema → <strong>I</strong>mplicação → <strong>N</strong>eed Payoff. O cliente deve falar mais do que o vendedor nos momentos de descoberta e diagnóstico.
  </div>
 
- <!-- ETAPA 1 -->
+ <!-- PIPELINE das 8 etapas -->
+ <div class="pipeline" style="flex-wrap:wrap; gap:6px; margin-bottom:24px;">
+   <div class="pipeline-stage"><div class="stage-num">1</div><div class="stage-title">Descoberta</div><div class="stage-desc">5-10 min</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">2</div><div class="stage-title">Diagnóstico</div><div class="stage-desc">Slides 1–7</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">3</div><div class="stage-title">Solução</div><div class="stage-desc">Slides 8–12</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">4</div><div class="stage-title">Demo</div><div class="stage-desc">Slides 13–14</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">5</div><div class="stage-title">ROI</div><div class="stage-desc">Slides 15–16</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">6</div><div class="stage-title">Recomendação</div><div class="stage-desc">Slides 17–18</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">7</div><div class="stage-title">Ecossistema</div><div class="stage-desc">Slide 19</div></div>
+   <div class="pipeline-arrow">→</div>
+   <div class="pipeline-stage"><div class="stage-num">8</div><div class="stage-title">Fechamento</div><div class="stage-desc">Slide 20</div></div>
+ </div>
+
+ <!-- ── ETAPA 1 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon purple">01</div>
-       <div><div class="card-title">Etapa 1 — Abertura e Rapport (2-3 min)</div><div class="card-subtitle">SEM TELA. Criar conexão antes de tudo.</div></div>
+       <div class="card-icon accent">1</div>
+       <div><div class="card-title">Etapa 1 — Descoberta</div><div class="card-subtitle">5–10 min · Antes de abrir qualquer slide</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-rapport"> Abertura</div>
-       <div class="script-text">"<span class="placeholder">[Nome]</span>, que bom que deu certo! Antes de te mostrar qualquer coisa, quero entender melhor a operação de vocês pra mostrar só o que faz sentido, beleza?"<br><br>"Me conta: vocês trabalham mais com venda, locação ou ambos?"<br><br>"Quantas pessoas no time?"<br><br>"Cidade principal?"</div>
-     </div>
-   </div>
- </div>
-
- <!-- ETAPA 2 -->
- <div class="card open">
-   <div class="card-header" onclick="toggleCard(this)">
-     <div class="card-header-left">
-       <div class="card-icon purple">02</div>
-       <div><div class="card-title">Etapa 2 — Descoberta de Dores (8-10 min)</div><div class="card-subtitle">A ETAPA MAIS IMPORTANTE — encontrar 2-3 dores antes da demo</div></div>
-     </div>
-     <span class="card-chevron">&#9660;</span>
-   </div>
-   <div class="card-body">
-     <div class="alert-box" style="margin-bottom:16px;">
+     <div class="info-box">
        <strong>Objetivo</strong>
-       Sair dessa etapa com pelo menos 2-3 dores claras. Sem dor, não tem demo que converte.
+       Entender a operação da imobiliária e coletar informações que serão utilizadas durante toda a reunião. O tom deve ser de conversa, não de interrogatório.
      </div>
-     <div class="script-block">
+     <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); margin:16px 0 8px;">Perguntas sugeridas</div>
+     <ul style="margin:0; padding:0 0 0 18px; color:var(--n-600); font-size:13.5px; line-height:2.2;">
+       <li>Quantos leads entram por mês hoje?</li>
+       <li>Vocês trabalham mais venda ou locação?</li>
+       <li>Quantos corretores possuem atualmente?</li>
+       <li>Quem normalmente faz o primeiro atendimento?</li>
+       <li>Utilizam CRM? Qual?</li>
+       <li>Existe alguém dedicado ao atendimento ou os próprios corretores atendem?</li>
+     </ul>
+     <div class="script-block" style="margin-top:16px;">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Perguntas Essenciais</div>
-       <div class="script-text">"O que acontece quando um lead entra às 22h?"<br><br>"Quantos leads vocês acham que perdem por responder tarde?"<br><br>"Como vocês organizam manutenção hoje? Inquilino pede por onde?"<br><br>"O gestor consegue ver o que cada corretor responde?"<br><br>"Se pudesse resolver UMA coisa na operação, qual seria?"<br><br>"Tem alguma área que vocês sentem que está mais precária no atendimento?"</div>
+       <div class="script-label label-sondagem">Pergunta Principal</div>
+       <div class="script-text">"Quando um lead entra hoje, qual é o caminho dele até chegar ao corretor?"</div>
      </div>
-     <div class="tip-box">
-       <strong>Regra de ouro</strong>
-       Faça a pergunta e fique em silêncio. O vendedor que mais ouve é o que mais vende. Anote cada dor que o lead mencionar — você vai usar na demo.
+     <div class="tip-box" style="margin-top:12px;">
+       <strong>Por que essa pergunta funciona</strong>
+       Ela costuma revelar gargalos sem parecer invasiva. O cliente descreve o processo e naturalmente expõe os pontos de atrito.
      </div>
    </div>
  </div>
 
- <!-- ETAPA 3 -->
+ <!-- ── ETAPA 2 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon purple">03</div>
-       <div><div class="card-title">Etapa 3 — Confirmar e Aprofundar Dores (3-4 min)</div><div class="card-subtitle">Repetir o que ele disse — validar e amplificar</div></div>
+       <div class="card-icon accent">2</div>
+       <div><div class="card-title">Etapa 2 — Diagnóstico</div><div class="card-subtitle">Slides 1 a 7 · Fazer o cliente reconhecer o problema</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-amplifica"> Confirmar Dores</div>
-       <div class="script-text">"Deixa eu ver se entendi: vocês estão com dificuldade em <span class="placeholder">[dor 1]</span>, sentem que <span class="placeholder">[dor 2]</span> está impactando, e o <span class="placeholder">[dor 3]</span> toma muito tempo da equipe. É isso?"<br><br><em>(Esperar confirmação.)</em><br><br>"E isso impacta diretamente no faturamento de vocês?"<br><br>"Faz quanto tempo que vocês convivem com isso?"</div>
+     <div class="alert-box">
+       <strong>Regra desta etapa</strong>
+       Não falar do Copiloto. Não apresentar funcionalidades. Não falar de IA. Apenas explorar a realidade da operação.
      </div>
-     <div class="tip-box">
-       <strong>Psicologia</strong>
-       Quando você repete a dor que o lead falou, ele sente que foi ouvido. E quando ele confirma em voz alta, a dor fica mais real. Agora a demo tem contexto.
+
+     <!-- Slide 1 -->
+     <div style="margin-top:20px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 1</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Quantos leads sua imobiliária deixa sem resposta?</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Hoje vocês conseguem medir quantos leads recebem atendimento em até cinco minutos?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 2 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 2</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">O mercado resolveu gerar leads. Ainda não resolveu responder todos.</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Hoje o desafio de vocês está mais em gerar novos leads ou em responder melhor os leads que já chegam?"</div>
+       </div>
+       <div class="tip-box" style="margin-top:10px; margin-bottom:0;">
+         <strong>Por que funciona</strong>
+         Frequentemente faz o cliente reconhecer sozinho o principal gargalo.
+       </div>
+     </div>
+
+     <!-- Slide 3 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 3</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">A imobiliária cresce. O atendimento não.</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Quando vocês aumentam o investimento em mídia, a operação consegue acompanhar o aumento da demanda?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 4 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 4</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">O problema não é o corretor.</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Perguntas (escolha uma)</div>
+         <div class="script-text">"Existem corretores que recebem muito mais leads do que outros?"<br><br>ou<br><br>"Existem diferenças grandes de velocidade de atendimento entre os corretores?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 5 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 5</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">O cliente não espera.</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"O que normalmente acontece com os leads que entram fora do horário comercial?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 6 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 6</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Seu corretor vende ou atende?</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Hoje o corretor passa mais tempo negociando ou respondendo perguntas repetitivas?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 7 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--purple);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--purple); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 7</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Quanto da sua operação depende de alguém estar online?</span>
+       </div>
+       <div style="font-size:12px; color:var(--purple); font-weight:600; margin-bottom:8px;">Fase de implicação — aqui o cliente começa a sentir o custo do problema</div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Perguntas de Implicação</div>
+         <div class="script-text">"Se a geração de leads aumentar 30% amanhã, a operação consegue absorver essa demanda?"<br><br>"Vocês acreditam que conseguem aproveitar todo o investimento feito em marketing hoje?"<br><br>"O impacto desse problema é apenas operacional ou existe impacto direto no faturamento?"</div>
+       </div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 4 -->
+ <!-- ── ETAPA 3 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon accent">04</div>
-       <div><div class="card-title">Etapa 4 — Ponte para a Solução (2 min)</div><div class="card-subtitle">Transição elegante para abrir tela</div></div>
+       <div class="card-icon accent">3</div>
+       <div><div class="card-title">Etapa 3 — Apresentação da Solução</div><div class="card-subtitle">Slides 8 a 12 · Copiloto como consequência natural</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-contexto"> Transição</div>
-       <div class="script-text">"Beleza. Agora que eu entendi a situação de vocês, deixa eu te mostrar o que a gente construiu pra resolver exatamente isso."<br><br>"Vou te mostrar o Copiloto Captei. Não vou fazer um tour de sistema — vou te mostrar como ele resolve as 3 coisas que você me falou."</div>
+     <div class="info-box">
+       <strong>Objetivo</strong>
+       Apresentar o Copiloto como consequência natural dos problemas identificados. Não apresentar funcionalidades isoladas — apresentar a lógica da solução.
+     </div>
+
+     <!-- Slide 8 -->
+     <div style="margin-top:20px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 8</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Conheça o Copiloto.</span>
+       </div>
+       <div class="script-block" style="margin:0 0 10px;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Mensagem Principal</div>
+         <div class="script-text">"O Copiloto nasceu para resolver exatamente os gargalos que acabamos de discutir."</div>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Se existisse alguém disponível 24 horas por dia para realizar esse primeiro atendimento, isso ajudaria sua operação?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 9 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 9</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Experiência da Captei.</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Mensagem Principal</div>
+         <div class="script-text">"O Copiloto não nasceu em uma empresa de tecnologia. Nasceu observando operações imobiliárias reais durante anos."</div>
+       </div>
+       <div class="tip-box" style="margin-top:10px; margin-bottom:0;">
+         Utilizar os números da Captei. Reforçar experiência de mercado.
+       </div>
+     </div>
+
+     <!-- Slide 10 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 10</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Não usamos chatbot.</span>
+       </div>
+       <div class="script-block" style="margin:0 0 10px;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Mensagem Principal</div>
+         <div class="script-text">"O objetivo não é criar respostas automáticas genéricas. O objetivo é conduzir uma conversa que gere valor."</div>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Quando você ouve falar em IA, qual é sua principal preocupação?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 11 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 11</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Fluxo do processo.</span>
+       </div>
+       <div class="script-block" style="margin:0 0 10px;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Mensagem Principal</div>
+         <div class="script-text">"O corretor não é substituído. Ele recebe um lead mais preparado."</div>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Hoje o corretor recebe esse nível de contexto antes de entrar na negociação?"</div>
+       </div>
+     </div>
+
+     <!-- Slide 12 -->
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 12</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Nem toda IA de atendimento é igual.</span>
+       </div>
+       <div class="script-block" style="margin:0 0 10px;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-contexto">Mensagem Principal</div>
+         <div class="script-text">"Responder rápido é importante. Responder com contexto é o que gera resultado."</div>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"O que seria mais valioso para vocês: responder mais rápido ou receber leads mais qualificados?"</div>
+       </div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 5 -->
+ <!-- ── ETAPA 4 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon accent">05</div>
-       <div><div class="card-title">Etapa 5 — Demo: O Que Mostrar na Tela (10-15 min)</div><div class="card-subtitle">Roteiro tela a tela — conectar CADA funcionalidade com a dor do lead</div></div>
+       <div class="card-icon accent">4</div>
+       <div><div class="card-title">Etapa 4 — Demonstração</div><div class="card-subtitle">Slides 13 e 14 · Mostrar resultado, não tecnologia</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="alert-box" style="border-color:var(--red); margin-bottom:16px;">
-       <strong>NUNCA faça tour de sistema</strong>
-       Não mostre todas as telas. Mostre APENAS o que conecta com as dores que o lead falou. Se ele falou de lead perdido, comece pelo atendimento comercial. Se falou de manutenção, comece pelos chamados. A ordem abaixo é sugestão — adapte conforme a dor principal.
+     <div class="info-box">
+       <strong>Objetivo</strong>
+       Mostrar a experiência. Não explicar tecnologia. Mostrar resultado.
      </div>
-
-     <!-- TELA 1: Lista de Conversas -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--purple); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 1</span>
-         Painel de Conversas — Visão Geral
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Abra o painel principal do Copiloto. Mostre a lista de conversas ativas — todas acontecendo em tempo real pelo WhatsApp.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-contexto"> O que falar</div>
-           <div class="script-text">"Isso aqui é o coração do Copiloto. Cada linha é uma conversa real acontecendo no WhatsApp — lead novo, inquilino pedindo boleto, chamado de manutenção. Tudo num lugar só."<br><br>"Percebe que tem conversas acontecendo fora do horário? É a IA atendendo 24 horas enquanto o time dorme."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--purple-soft); border-radius:5px;">Badge de conversa concluída (✓) — mostra que a IA finalizou atendimento sozinha</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--purple-soft); border-radius:5px;">Menu de clique direito — favoritar, concluir, arquivar, etiquetas (igual WhatsApp)</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--purple-soft); border-radius:5px;">Etiquetas visuais nas conversas — categorização automática</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--purple-soft); border-radius:5px;">Aba de Arquivadas — conversas concluídas saem da lista, painel sempre limpo</div>
-         </div>
-       </div>
+     <div style="margin-top:14px; font-size:13.5px; color:var(--n-700);">
+       <div style="font-weight:600; margin-bottom:8px; color:var(--n-800);">Demonstrar:</div>
+       <ul style="margin:0; padding:0 0 0 18px; line-height:2.1; color:var(--n-600);">
+         <li>Atendimento</li>
+         <li>Qualificação</li>
+         <li>Agendamento</li>
+         <li>Distribuição</li>
+         <li>Integrações</li>
+       </ul>
      </div>
-
-     <!-- TELA 2: Conversa Comercial -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--blue); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 2</span>
-         Atendimento Comercial — Lead Entrando
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Abra uma conversa onde a IA atendeu um lead comercial. Mostre a conversa inteira — como a IA cumprimentou, qualificou e coletou dados.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-dor"> Conectar com a dor</div>
-           <div class="script-text">"Lembra que você falou que perde lead fora do horário? Olha isso: esse lead mandou mensagem às 23h. A IA respondeu em segundos, perguntou o que ele procura, coletou os dados e já direcionou pro corretor certo."<br><br>"Se fosse antes, esse lead ia dormir e acordar falando com outra imobiliária."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">IA conversando naturalmente — sem opção 1, 2, 3 (entende gíria, pergunta vaga, áudio)</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">Dados coletados automaticamente no painel lateral (nome, telefone, interesse, valor, bairro)</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">Negócio (deal) associado à conversa com estágio no CRM + link direto</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">Timeline com pills coloridas — mostra cada ação: IA habilitada, transferência, conclusão</div>
-         </div>
-       </div>
-     </div>
-
-     <!-- TELA 3: Distribuição Inteligente -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--green); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 3</span>
-         Distribuição Inteligente de Leads
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Vá em Configurações do Agente → Distribuição → Regras de Distribuição. Mostre como os leads são direcionados automaticamente pro time certo.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-contexto"> O que falar</div>
-           <div class="script-text">"Olha que inteligente: você cria regras automáticas. Por exemplo: se o lead é de São Paulo e busca imóvel acima de 500 mil, vai direto pro Time VIP. Se é locação, vai pro setor de locação."<br><br>"A IA coleta os dados durante a conversa — cidade, interesse, valor — e a distribuição acontece sozinha. Ninguém precisa ficar triando lead manualmente."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--green-soft); border-radius:5px;">Regras em ordem de prioridade — arrastar pra reordenar</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--green-soft); border-radius:5px;">Condições: cidade, valor, tipo de imóvel, lead score, campanha de origem, UTM</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--green-soft); border-radius:5px;">Roteamento por histórico — lead que já falou com alguém volta pro mesmo atendente</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--green-soft); border-radius:5px;">Estratégia padrão: revezamento, menor carga, etc (se nenhuma regra bater)</div>
-         </div>
-       </div>
-     </div>
-
-     <!-- TELA 4: Reativação Automática -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--accent); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 4</span>
-         Reativação Automática de Conversas
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Vá em Editar Agente → Reativação de Conversas. Mostre como o sistema faz follow-up automático.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-amplifica"> O que falar</div>
-           <div class="script-text">"Sabe aquele lead que parou de responder? Hoje vocês precisam ficar olhando conversa por conversa, certo? Com o Copiloto, o sistema faz follow-up sozinho."<br><br>"Você configura: se o lead ficou 24h sem responder, manda uma mensagem automática. Se não responder em mais 24h, manda outra. Até 3 tentativas. Se responder em qualquer momento, o fluxo normal retoma."<br><br>"E a mensagem pode ser gerada pela IA — contextual, personalizada. Não é aquele textão genérico."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--accent-soft); border-radius:5px;">Horário permitido para envio (ex: 08h às 20h) — respeita o lead</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--accent-soft); border-radius:5px;">Horas de inatividade + intervalo entre tentativas + número máximo</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--accent-soft); border-radius:5px;">Mensagem por IA (contextual) ou texto fixo — escolha do gestor</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--accent-soft); border-radius:5px;">Tudo registrado na timeline — tentativas, conclusão, arquivamento</div>
-         </div>
-       </div>
-     </div>
-
-     <!-- TELA 5: Campanhas WhatsApp -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--ink-05); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 5</span>
-         Campanhas WhatsApp com Ritmo Inteligente
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Abra a seção de Campanhas. Mostre como disparar campanhas em massa pelo WhatsApp sem risco de bloqueio.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-contexto"> O que falar</div>
-           <div class="script-text">"Além de atender, o Copiloto dispara campanhas pelo WhatsApp. E faz isso de forma inteligente — simula comportamento humano pra não bloquear o número."<br><br>"Ele varia o tempo entre mensagens, faz pausas automáticas, respeita horário de envio. Tudo configurável por instância."<br><br>"Se alguma mensagem falhar, tem botão pra reenviar só os falhados. E se o número foi bloqueado, troca a instância na hora sem perder a campanha."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-500); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--n-25); border-radius:5px; border:1px solid var(--n-75);">Ritmo configurável: horário (08-22h), limite diário (200/instância), intervalo aleatório (60-90s)</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--n-25); border-radius:5px; border:1px solid var(--n-75);">Pausas automáticas: a cada 14-26 msgs, pausa de 17-33 min</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--n-25); border-radius:5px; border:1px solid var(--n-75);">Status detalhado: enviados, entregues, lidos, falhados — filtros e exportação CSV</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--n-25); border-radius:5px; border:1px solid var(--n-75);">Rotação entre instâncias — distribui envios sem sobrecarregar nenhuma</div>
-         </div>
-       </div>
-     </div>
-
-     <!-- TELA 6: CRM + Negócios -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--blue); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 6</span>
-         CRM Integrado — Negócios e Funil
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Mostre o CRM com os negócios (deals) associados às conversas. Clique num negócio e mostre o link direto pra conversa.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-contexto"> O que falar</div>
-           <div class="script-text">"Cada conversa gera automaticamente um negócio no CRM. Você vê o estágio do funil, o valor e pode clicar direto pra ver a conversa inteira."<br><br>"Do CRM também tem link pra conversa. É tudo integrado — zero trabalho manual."<br><br>"E a IA já está preparada pra identificar automaticamente em qual funil e etapa o lead deve entrar."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">Deal vinculado à conversa com estágio atual e link bidirecional</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">Funil e estágios com descrições — IA identifica onde o lead deve entrar</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:var(--blue-soft); border-radius:5px;">Acesso direto via URL: copiloto.captei.com.br/app/conversations?p=NUMERO</div>
-         </div>
-       </div>
-     </div>
-
-     <!-- TELA 7: Gestão e Controle -->
-     <div style="margin-bottom:20px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--red); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 7</span>
-         Controle do Gestor — Visão Total
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Mostre as ferramentas de gestão: habilitar/desabilitar IA por conversa, trocar agente, etiquetas, e o controle total que o gestor tem.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-amplifica"> O que falar</div>
-           <div class="script-text">"O gestor vê TUDO. Quem atendeu, o que foi falado, tempo de resposta, resumo de cada conversa. E olha essas ações rápidas:"<br><br>"Clique direito numa conversa: trocar agente, aplicar etiqueta, habilitar ou desabilitar a IA — tudo sem abrir a conversa. Igual WhatsApp."<br><br>"Quando o atendente envia mensagem manual, a IA se desabilita sozinha — assim ela nunca atropela a conversa humana."</div>
-         </div>
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:8px;">O que destacar na tela</div>
-         <div style="display:flex; flex-direction:column; gap:6px;">
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:rgba(239,68,68,0.05); border-radius:5px;">Ações rápidas no clique direito: etiquetas, trocar agente, habilitar/desabilitar IA</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:rgba(239,68,68,0.05); border-radius:5px;">IA desativa automaticamente ao enviar mensagem manual (e cancela fila)</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:rgba(239,68,68,0.05); border-radius:5px;">Timeline completa: pills coloridas com cada ação (transferência, conclusão, IA, arquivamento)</div>
-           <div style="font-size:12px; color:var(--n-600); padding:6px 10px; background:rgba(239,68,68,0.05); border-radius:5px;">IA sabe o dia da semana e hora atual — respostas contextuais</div>
-         </div>
-       </div>
-     </div>
-
-     <!-- TELA 8: App Mobile -->
-     <div style="margin-bottom:16px; border:1px solid var(--n-100); border-radius:12px; overflow:hidden;">
-       <div style="background:var(--green); color:white; padding:12px 16px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;">
-         <span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; font-size:11px; font-family:'IBM Plex Mono',monospace;">TELA 8</span>
-         App Mobile (PWA) — Gestão no Celular
-       </div>
-       <div style="padding:16px;">
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7; margin-bottom:12px;">
-           Mostre o app PWA no celular (ou simule). Demonstre que dá pra gerenciar conversas de qualquer lugar.
-         </div>
-         <div class="script-block" style="margin-bottom:12px;">
-           <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-           <div class="script-label label-meet"> O que falar</div>
-           <div class="script-text">"E tem mais: tudo isso funciona no celular. O Copiloto tem app próprio — instala como app normal, loga com a conta e pronto."<br><br>"O gestor pode acompanhar conversas, intervir quando quiser, tudo pelo celular. Não precisa estar no computador."</div>
-         </div>
-       </div>
-     </div>
-
-     <div class="tip-box">
-       <strong>Frase poderosa durante a demo</strong>
-       "É literalmente colocar uma equipe inteira trabalhando 24 horas por dia, sem errar, sem faltar, sempre respondendo na velocidade que o cliente espera. E você controla tudo pelo celular."
+     <div class="script-block" style="margin-top:16px;">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Mensagem Principal</div>
+       <div class="script-text">"O corretor entra na conversa no momento certo, com contexto e intenção já identificados."</div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 6 -->
+ <!-- ── ETAPA 5 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon green">06</div>
-       <div><div class="card-title">Etapa 6 — Mini Fechamentos (Durante a Demo)</div><div class="card-subtitle">Testar concordância a cada funcionalidade mostrada</div></div>
+       <div class="card-icon accent">5</div>
+       <div><div class="card-title">Etapa 5 — ROI</div><div class="card-subtitle">Slides 15 e 16 · Transformar a dor em valor financeiro</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
-       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-meet"> Perguntas de Concordância</div>
-       <div class="script-text">"Isso resolveria aquele problema que você comentou?"<br><br>"Faz sentido pro dia a dia de vocês?"<br><br>"Imagina isso rodando na imobiliária — o que muda?"<br><br><em>Cada "sim" é um passo pro fechamento. Se o lead concordou 3 vezes durante a demo, o preço é formalidade.</em></div>
+     <div class="info-box">
+       <strong>Objetivo</strong>
+       Transformar a dor em valor financeiro. O objetivo não é provar que o Copiloto gera dezenas de vendas — é mostrar que recuperar poucas oportunidades já justifica o investimento.
+     </div>
+
+     <div style="margin-top:16px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 15</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Qual é a comissão média de uma venda para vocês?"</div>
+       </div>
+       <div class="tip-box" style="margin-top:10px; margin-bottom:0;">
+         Utilizar o valor informado pelo cliente na calculadora do slide seguinte.
+       </div>
+     </div>
+
+     <div style="margin-top:12px; padding:16px; background:var(--n-25); border-radius:var(--r-md); border-left:3px solid var(--accent);">
+       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+         <span style="background:var(--accent); color:white; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px;">SLIDE 16</span>
+         <span style="font-weight:700; font-size:14px; color:var(--n-800);">Calculadora de ROI</span>
+       </div>
+       <div class="script-block" style="margin:0;">
+         <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+         <div class="script-label label-sondagem">Pergunta</div>
+         <div class="script-text">"Se apenas uma negociação adicional acontecesse por mês, o investimento já faria sentido?"</div>
+       </div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 7 -->
+ <!-- ── ETAPA 6 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon green">07</div>
-       <div><div class="card-title">Etapa 7 — Retomada das Dores (3-5 min)</div><div class="card-subtitle">Antes do preço — amarrar tudo</div></div>
+       <div class="card-icon accent">6</div>
+       <div><div class="card-title">Etapa 6 — Diagnóstico e Recomendação</div><div class="card-subtitle">Slides 17 e 18 · Posicionar-se como consultor</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
+     <div class="info-box">
+       <strong>Objetivo</strong>
+       Posicionar-se como consultor. Não perguntar qual plano o cliente quer — o closer recomenda.
+     </div>
+     <div class="script-block" style="margin-top:16px;">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-amplifica"> Recapitular</div>
-       <div class="script-text">"<span class="placeholder">[Nome]</span>, recapitulando: lá no começo você me disse que <span class="placeholder">[dor 1]</span>, que <span class="placeholder">[dor 2]</span> e que <span class="placeholder">[dor 3]</span>."<br><br>"Você viu que o Copiloto resolve as três. Atende 24h, organiza manutenção e dá visão total pro gestor."<br><br>"Faz sentido colocar isso pra rodar na imobiliária?"</div>
+       <div class="script-label label-contexto">Mensagem de Recomendação</div>
+       <div class="script-text">"Com base no que você compartilhou comigo no início da reunião, o plano que mais faz sentido para sua operação é o <strong>[PLANO]</strong>."</div>
+     </div>
+     <div style="margin-top:12px; font-size:13px; color:var(--n-600); line-height:1.8; padding:12px; background:var(--n-25); border-radius:var(--r-sm);">
+       <strong style="color:var(--n-800);">Após recomendar, explicar rapidamente:</strong><br>
+       Estrutura do plano · Limites incluídos · Recursos disponíveis · Investimento total
+     </div>
+     <div class="tip-box" style="margin-top:12px;">
+       Mostrar os demais planos apenas se o cliente solicitar.
      </div>
    </div>
  </div>
 
- <!-- ETAPA 8 -->
+ <!-- ── ETAPA 7 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon ink">08</div>
-       <div><div class="card-title">Etapa 8 — Fechamento (2-3 min)</div><div class="card-subtitle">Direto, seguro, sem hesitação</div></div>
+       <div class="card-icon accent">7</div>
+       <div><div class="card-title">Etapa 7 — Ecossistema Captei</div><div class="card-subtitle">Slide 19 · Aumentar percepção de valor</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div class="script-block">
+     <div class="info-box">
+       <strong>Objetivo</strong>
+       Aumentar percepção de valor. Não transformar este momento em uma segunda venda.
+     </div>
+     <div class="script-block" style="margin-top:16px;">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-meet"> Fechamento</div>
-       <div class="script-text">"Pelo que você me trouxe e pelo que viu... isso não é algo interessante. É necessário pra operação de vocês."<br><br>"Quando você quer começar a parar de perder lead e organizar a operação inteira?"</div>
+       <div class="script-label label-contexto">Mensagem Principal</div>
+       <div class="script-text">"Além do Copiloto, você passa a fazer parte do Ecossistema Captei."<br><br>"Nosso objetivo não é apenas ajudar você a responder melhor os leads. Nosso objetivo é ajudar sua imobiliária a gerar, atender e converter mais oportunidades."</div>
+     </div>
+     <div style="margin-top:12px; padding:12px 16px; background:var(--n-25); border-radius:var(--r-sm); font-size:13px; color:var(--n-700);">
+       <strong style="color:var(--n-800);">Fluxo a apresentar:</strong> Captação Ativa → Copiloto → Corretores → Vendas
+     </div>
+     <div class="script-block" style="margin-top:12px;">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-dica">Dado de Autoridade</div>
+       <div class="script-text">"Mais de 70% das reuniões da operação comercial da própria Captei são iniciadas pelo Copiloto."</div>
      </div>
    </div>
  </div>
 
- <!-- ETAPA 9 -->
+ <!-- ── ETAPA 8 ── -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon accent">09</div>
-       <div><div class="card-title">Etapa 9 — Apresentação de Preço</div><div class="card-subtitle">Curto, com ancoragem, silêncio depois</div></div>
+       <div class="card-icon accent">8</div>
+       <div><div class="card-title">Etapa 8 — Fechamento</div><div class="card-subtitle">Slide 20 · Trazer o cliente para uma decisão</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
+     <div class="alert-box">
+       <strong>Nunca finalizar com:</strong> "Tem alguma dúvida?" — Utilizar perguntas de compromisso.
+     </div>
+     <div class="script-block" style="margin-top:16px;">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-fechamento">Pergunta Principal</div>
+       <div class="script-text">"Pelo que vimos hoje, existe alguma coisa que impeça vocês de avançar?"</div>
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-400); margin:16px 0 8px;">Alternativas</div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-contexto"> Fala Ideal</div>
-       <div class="script-text">"O Copiloto hoje inclui IA completa + todas as 6 áreas + acompanhamento + configuração personalizada."<br><br>"O investimento é de R$ <span class="placeholder">[valor]</span> mensal. Pra colocar em perspectiva: é menos do que vocês gastariam com um estagiário — e o Copiloto trabalha 24 horas cobrindo a imobiliária inteira."<br><br><em>Pare de falar. Silêncio. Quem fala primeiro depois do preço perde força.</em></div>
+       <div class="script-label label-fechamento">Alternativa 1</div>
+       <div class="script-text">"O que você precisaria ver para se sentir confortável em seguir?"</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-fechamento">Alternativa 2</div>
+       <div class="script-text">"Faz sentido resolver esse gargalo agora ou existe alguma prioridade maior na operação?"</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-fechamento">Alternativa 3</div>
+       <div class="script-text">"Pelo que conversamos hoje, você acredita que esse desafio impacta os resultados da operação?"</div>
      </div>
    </div>
+ </div>
+
+ <!-- REGRA MAIS IMPORTANTE -->
+ <div class="golden-rule" style="margin-top:8px;">
+   <h3>Regra Mais Importante para Todos os Closers</h3>
+   <p>Os slides 1 a 7 <strong>não existem para apresentar o Copiloto</strong>. Eles existem para fazer o cliente admitir que existe um problema.</p>
+   <p style="margin-top:10px;">Quando isso acontece, a demonstração, o ROI, a recomendação do plano e o fechamento acontecem de forma muito mais natural.</p>
+   <p style="margin-top:10px;">O cliente não compra uma IA. O cliente compra a solução para um problema que ele mesmo reconheceu ao longo da conversa.</p>
  </div>
 
  </div>
@@ -24493,4 +24568,3 @@ const RH = (() => {
 
 </body>
 </html>
-
