@@ -12474,7 +12474,7 @@ function clearSettingsModal() {
  <div class="page-header">
    <div class="crumb"><b>Copiloto</b> / Reunião</div>
    <h2>Objeções na Reunião — Copiloto</h2>
-   <p>As 12 objeções mais comuns <strong>durante a demo/reunião</strong>, extraídas de reuniões reais. Diferente das objeções de prospecção, aqui o lead já viu valor — o trabalho é resolver o que trava a decisão.</p>
+   <p>As objeções mais comuns durante a demo, com abordagem consultiva. O objetivo não é ensinar respostas decoradas — é ensinar o closer a identificar a raiz da objeção e conduzir a conversa.</p>
  </div>
 
  <div class="golden-rule">
@@ -12482,9 +12482,24 @@ function clearSettingsModal() {
    <p>Quem não tem interesse não objeta — simplesmente desliga. Se o lead trouxe uma objeção durante a demo, ele está processando a decisão. Seu trabalho não é "vencer" a objeção, é <strong>remover o obstáculo</strong> entre ele e o resultado que ele mesmo disse querer.</p>
  </div>
 
- <div class="alert-box" style="margin-bottom:24px;">
-   <strong>⚡ Leia antes de cada reunião</strong>
-   Toda objeção na demo vem de uma de três raízes: <strong>Dinheiro</strong> (não cabe no bolso agora), <strong>Confiança</strong> (será que funciona mesmo?) ou <strong>Prioridade</strong> (não é urgente o suficiente). Identifique a raiz antes de responder — a resposta errada para a raiz errada gera mais resistência.
+ <!-- 3 raízes -->
+ <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px;">
+   <div style="padding:16px; background:var(--n-25); border:1px solid var(--n-100); border-top:3px solid #EF4444; border-radius:var(--r-md); text-align:center;">
+     <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:#EF4444; letter-spacing:1px; margin-bottom:6px;">DINHEIRO</div>
+     <div style="font-size:12.5px; color:var(--n-600);">O custo não cabe agora ou a conta não fecha</div>
+   </div>
+   <div style="padding:16px; background:var(--n-25); border:1px solid var(--n-100); border-top:3px solid var(--accent); border-radius:var(--r-md); text-align:center;">
+     <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; margin-bottom:6px;">CONFIANÇA</div>
+     <div style="font-size:12.5px; color:var(--n-600);">Dúvida se vai funcionar ou medo de frustração</div>
+   </div>
+   <div style="padding:16px; background:var(--n-25); border:1px solid var(--n-100); border-top:3px solid var(--purple); border-radius:var(--r-md); text-align:center;">
+     <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:var(--purple); letter-spacing:1px; margin-bottom:6px;">PRIORIDADE</div>
+     <div style="font-size:12.5px; color:var(--n-600);">Não é urgente o suficiente neste momento</div>
+   </div>
+ </div>
+
+ <div class="info-box" style="margin-bottom:24px;">
+   <strong>Processo para cada objeção:</strong> 1) Identificar a raiz · 2) Validar a preocupação · 3) Trazer algo que o cliente disse · 4) Mostrar o impacto de não resolver · 5) Retornar ao objetivo do cliente
  </div>
 
  <!-- OBJEÇÃO 1 -->
@@ -12492,19 +12507,28 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">01</div>
-       <div><div class="card-title">"Não é o momento, fizemos investimentos recentes"</div><div class="card-subtitle">Raiz: Dinheiro / Prioridade — O lead viu valor mas está apertado</div></div>
+       <div><div class="card-title">"Não é o momento, fizemos investimentos recentes"</div><div class="card-subtitle">Raiz: Dinheiro / Prioridade</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:12px;">
        <strong>Contexto real</strong>
-       Lead acabou de contratar funcionários, trocou sistema, investiu em marketing. Sente que não pode assumir mais um custo agora. Quer, mas acha que não pode.
+       Lead acabou de contratar funcionários, trocou sistema ou investiu em marketing. Sente que não pode assumir mais um custo. Quer, mas acha que não pode.
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Entendo total, e parabéns por estar investindo na operação. Mas deixa eu te fazer uma conta rápida:"<br><br>"Esses funcionários que você contratou — quanto tempo eles perdem hoje qualificando lead frio, respondendo WhatsApp repetitivo e fazendo follow-up manual?"<br><br>"O Copiloto não é mais um custo — ele faz esses funcionários novos renderem o dobro. É como se você tivesse contratado um time e agora está dando a ferramenta pra eles performarem de verdade."<br><br>"E olha: não tem fidelidade. Você testa um mês. Se não pagar o investimento só com os leads que parou de perder, cancela sem dor."<br><br><em>💡 Se o lead mantiver: "Vou esperar estabilizar" → travar data: "Beleza, em quanto tempo você acha que estabiliza? Março? Posso te ligar dia X pra a gente retomar?"</em></div>
+       <div class="script-label label-contexto">Validar + Recontextualizar</div>
+       <div class="script-text">"Entendo, e parabéns por estar investindo na operação — isso é sinal de que vocês estão crescendo."<br><br>"Mas deixa eu trazer um ângulo diferente: esses funcionários que você contratou — quanto tempo eles perdem hoje qualificando lead frio, respondendo WhatsApp repetitivo e fazendo follow-up manual?"<br><br>"O Copiloto não compete com esses investimentos. Ele faz com que eles rendam mais. É a ferramenta que seu time já deveria ter."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Mostrar o impacto de esperar</div>
+       <div class="script-text">"Você comentou no início que vocês recebem [X] leads por mês. Enquanto o momento 'certo' não chega, esses leads continuam chegando — e continuam sendo atendidos da forma atual."<br><br>"A questão não é se vocês vão precisar disso. A questão é quantos leads vão ser perdidos enquanto esperam."</div>
+     </div>
+     <div class="tip-box">
+       <strong>Se mantiver "vou esperar estabilizar"</strong>
+       "Faz sentido. Em quanto tempo você acredita que estabiliza? Posso te ligar em [data] pra a gente retomar com calma?"
      </div>
    </div>
  </div>
@@ -12514,19 +12538,28 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">02</div>
-       <div><div class="card-title">"Já uso outra IA/ferramenta e pago bem menos"</div><div class="card-subtitle">Raiz: Dinheiro — Comparação com concorrente barato (Harry, Lais, etc.)</div></div>
+       <div><div class="card-title">"Já uso outra IA/ferramenta e pago bem menos"</div><div class="card-subtitle">Raiz: Dinheiro — Comparação por preço sem comparar entrega</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:12px;">
        <strong>Contexto real</strong>
-       Lead usa Harry (R$200/mês), Lais (~R$900) ou ferramenta similar que faz apenas distribuição ou função básica. Compara preço sem comparar entrega.
+       Lead usa ferramenta de distribuição ou automação básica e compara pelo preço. A diferença real está no trabalho que deixa de ser feito manualmente.
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Vou ser direto contigo: não dá pra comparar. E tu mesmo acabou de me dizer isso."<br><br>"O [concorrente] distribui o lead. Ponto. O corretor ainda precisa qualificar, responder, fazer follow-up, reativar conversa — tudo manual."<br><br>"O Copiloto faz tudo isso sozinho: qualifica, agenda visita, reativa, faz campanha em massa, cria o card no CRM automaticamente e ainda atende fora do horário comercial."<br><br>"É como comparar um motoboy com uma frota de entrega completa. Os dois entregam, mas um escala o negócio."<br><br>"Me diz: quantos leads vocês perdem por semana porque ninguém respondeu rápido o suficiente? Se for UM contrato de locação que vocês salvam por mês, já pagou a ferramenta."<br><br><em>💡 Nunca fale mal do concorrente diretamente. Deixe o lead concluir sozinho que a entrega é incomparável.</em></div>
+       <div class="script-label label-contexto">Comparar por entrega, não por preço</div>
+       <div class="script-text">"A comparação mais justa não é só pelo preço — é pelo trabalho que deixa de ser feito manualmente pela equipe."<br><br>"Você me disse que trabalha com [X] corretores. Hoje, depois que a ferramenta distribui o lead, o que acontece? Quem qualifica, faz follow-up, reativa conversa parada, atende fora do horário comercial?"<br><br>"O Copiloto faz tudo isso de forma autônoma — qualifica, agenda visita, reativa, cria o card no CRM. O corretor entra na conversa quando o lead já está pronto para ser atendido."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Mostrar o impacto real</div>
+       <div class="script-text">"A diferença não está no preço da ferramenta. Está no custo do que o seu time faz manualmente hoje — e no lead que é perdido porque ninguém respondeu rápido o suficiente."<br><br>"Se um contrato a mais por mês sair de um lead que antes seria perdido, a conta já fecha."</div>
+     </div>
+     <div class="tip-box">
+       <strong>Importante</strong>
+       Nunca diminua a ferramenta do concorrente. Deixe o cliente perceber sozinho a diferença de entrega pela comparação de processo.
      </div>
    </div>
  </div>
@@ -12543,12 +12576,21 @@ function clearSettingsModal() {
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:12px;">
        <strong>Contexto real</strong>
-       Lead gostou, quer, mas o decisor final é o sócio que não participou da reunião. Risco: o lead vai tentar "vender" sem ter as respostas, o sócio diz não, e a oportunidade morre.
+       Lead gostou, quer avançar, mas o decisor final não estava na reunião. Risco: o lead vai tentar "vender" sem ter as respostas e a oportunidade morre no meio do caminho.
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Faz total sentido — decisão assim tem que estar alinhada."<br><br><strong>Passo 1 — Entender a cabeça do sócio:</strong><br>"Me conta: o que você acha que ele(a) vai questionar primeiro — valor, funcionamento ou se é prioridade agora?"<br><br><strong>Passo 2 — Armar o lead:</strong><br>"Olha, vou te dar um argumento que funciona bem: mostra pra ele(a) que a IA custa menos que um funcionário e atende a imobiliária inteira, 24h. E que não tem fidelidade — testa um mês e cancela se quiser."<br><br><strong>Passo 3 — Travar próximo passo:</strong><br>"Mas olha, pra facilitar: eu posso fazer uma call rápida de 10 minutos com vocês dois. Assim tiro as dúvidas dele(a) na hora. Que dia funciona?"<br><br><em>💡 Se o sócio não topa call: "Sem problema. Quando vocês conversam? [dia]. Posso te ligar [dia +1] de manhã pra saber o que decidiram?"</em><br><br><em>💡 Técnica extra: ofereça algo exclusivo que expire. "Se vocês fecharem até sexta, consigo [benefício]. Depois disso volta ao padrão."</em></div>
+       <div class="script-label label-contexto">Entender a cabeça do decisor</div>
+       <div class="script-text">"Faz total sentido — decisão assim precisa estar alinhada entre os sócios."<br><br>"Me conta: o que você acha que ele(a) vai questionar primeiro — o investimento, o funcionamento ou se é prioridade agora?"<br><br><em>(Ouvir a resposta e usar para preparar o lead)</em><br><br>"Isso me ajuda muito. Posso te dar os argumentos certos para essa conversa."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Propor reunião com o decisor</div>
+       <div class="script-text">"A forma mais eficiente é uma call rápida — 15 minutos com vocês dois. Assim respondo as dúvidas dele(a) na hora e vocês já saem alinhados para decidir."<br><br>"Que dia funciona pra encaixar isso?"</div>
+     </div>
+     <div class="tip-box">
+       <strong>Se o sócio não topa a call</strong>
+       "Sem problema. Quando vocês conversam sobre isso? Posso te ligar [dia seguinte] de manhã pra saber como foi?"
      </div>
    </div>
  </div>
@@ -12558,15 +12600,20 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">04</div>
-       <div><div class="card-title">"O custo é alto pra minha operação"</div><div class="card-subtitle">Raiz: Dinheiro — Não vê como encaixar no caixa</div></div>
+       <div><div class="card-title">"O custo é alto pra minha operação"</div><div class="card-subtitle">Raiz: Dinheiro — Não conecta o investimento com o retorno</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Entendo. Me deixa colocar de um jeito diferente:"<br><br>"Quanto custa UM contrato de locação pra vocês? A comissão de uma venda?"<br><br><em>(Espere a resposta — use o valor que ele trouxer.)</em><br><br>"Então um único negócio que saia da IA já paga o mês inteiro. E hoje vocês estão perdendo quantos desses por não responder rápido, não reativar, não atender fora do horário?"<br><br>"O Copiloto não é custo — é a receita que vocês estão deixando na mesa todo mês."<br><br>"E o melhor: sem fidelidade. Testa, e se em 30 dias não tiver compensado, cancela."<br><br><em>💡 Se a operação é locação: "Um contrato de R$2.500 de aluguel gera quanto de comissão? Pronto, já pagou. E a IA traz isso todo mês."</em></div>
+       <div class="script-label label-contexto">Usar os números do cliente</div>
+       <div class="script-text">"Entendo. Deixa eu colocar de um jeito diferente usando a realidade de vocês."<br><br>"Você comentou que trabalham com [vendas/locação] e que o ticket médio é em torno de [valor que o cliente mencionou]. Qual é a comissão de um negócio fechado?"<br><br><em>(Esperar a resposta — usar o número que o cliente trouxer)</em><br><br>"Então um único contrato que venha de um lead que antes seria perdido já paga o investimento do mês. A pergunta não é se o Copiloto custa caro — é quantos desses leads estão sendo perdidos hoje por não ter quem responda rápido."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Reposicionar como investimento</div>
+       <div class="script-text">"O objetivo do Copiloto não é ser mais um custo na planilha. É ser a ferramenta que faz com que os leads que vocês já pagam para gerar não sejam desperdiçados."<br><br>"Nossa meta é que o resultado apareça rápido — porque isso é o que faz a parceria fazer sentido para os dois lados."</div>
      </div>
    </div>
  </div>
@@ -12583,12 +12630,17 @@ function clearSettingsModal() {
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:12px;">
        <strong>Contexto real</strong>
-       Lead usa CRM fechado (Pilar, Kenlo, Vista, Jetimob) e já sofreu com integração em outra ferramenta. Tem trauma técnico. Não quer mais uma dor de cabeça.
+       Lead usa CRM imobiliário (Pilar, Kenlo, Vista, Jetimob) e já teve problemas com integração em outra ferramenta. Não quer repetir a experiência.
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Questão válida — e é muito bom que tu trouxe isso agora."<br><br>"A integração do Copiloto funciona via XML, que é o mesmo padrão que seu CRM usa pra enviar dados pros portais. Se ele manda pro ImóvelWeb, OLX, ZAP — ele já gera XML. É o mesmo caminho."<br><br>"Agora, se o CRM deles está travando esse acesso: isso é um problema DELES, não nosso. E temos imobiliárias do mesmo grupo que já integraram."<br><br>"Mas vou além: a gente não te larga sozinho nessa briga. Nosso CS entra junto, ajuda no processo e, se precisar, a gente busca alternativa técnica."<br><br>"E separado da questão do XML: o Copiloto já tem CRM próprio. Então enquanto a integração não rola, ele já funciona 100% — nada trava."<br><br><em>💡 Ofereça: "Se quiser, nosso time técnico pode avaliar junto contigo antes de assinar. Assim você entra sabendo exatamente o que esperar."</em></div>
+       <div class="script-label label-contexto">Validar e resolver a dúvida técnica</div>
+       <div class="script-text">"Ótimo que você trouxe isso agora — é melhor resolver antes do que descobrir depois."<br><br>"A integração do Copiloto funciona via XML, que é o mesmo padrão que o CRM já usa para enviar os imóveis aos portais. Se ele integra com ZAP, OLX ou VivaReal, já gera XML — é o mesmo caminho."<br><br>"E independente da integração: o Copiloto tem CRM próprio. Então a operação começa a funcionar imediatamente, sem travar nada."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Oferecer suporte na avaliação</div>
+       <div class="script-text">"Nosso time técnico pode fazer uma avaliação antes de assinar. Assim você entra sabendo exatamente o que esperar — sem surpresa."<br><br>"A gente não te larga nesse processo. O CS acompanha a implantação do início ao fim."</div>
      </div>
    </div>
  </div>
@@ -12598,15 +12650,20 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">06</div>
-       <div><div class="card-title">"Somos pé no chão, não damos passo maior que a perna"</div><div class="card-subtitle">Raiz: Prioridade — Conservadorismo financeiro, não falta de interesse</div></div>
+       <div><div class="card-title">"Somos conservadores, não damos passo maior que a perna"</div><div class="card-subtitle">Raiz: Prioridade — Perfil cauteloso, não falta de interesse</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"E é exatamente por isso que vocês vão crescer — gestor pé no chão constrói imobiliária sólida."<br><br>"Ser pé no chão não é não investir. É investir no que dá retorno seguro. E o Copiloto é isso: sem fidelidade, sem surpresa. Mensal. Deu resultado, continua. Não deu, cancela."<br><br>"Passo maior que a perna seria contratar três funcionários novos sem saber se vão dar resultado. A IA é o oposto: custo previsível, resultado mensurável, risco zero."<br><br>"Qual é o risco real? Um mês de mensalidade? Contra quantos leads perdidos todo mês?"<br><br><em>💡 Validar o perfil conservador é a chave. Nunca pressionar — mostrar que a decisão conservadora É contratar a IA.</em></div>
+       <div class="script-label label-contexto">Validar o perfil e reposicionar</div>
+       <div class="script-text">"E é exatamente por isso que vocês constroem uma operação sólida — essa mentalidade é o que diferencia imobiliária que cresce de imobiliária que oscila."<br><br>"Ser conservador não é não investir. É investir em coisas que geram retorno previsível e mensurável."<br><br>"O Copiloto é exatamente isso: custo fixo mensal, resultado acompanhado pelo CS, e nenhuma variável surpresa. A decisão conservadora seria investir em algo que você não consegue medir — não em uma ferramenta com resultado rastreável."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Mostrar o risco real</div>
+       <div class="script-text">"Você comentou que [dado levantado durante a descoberta — ex: recebem X leads por mês]. O risco não está em contratar o Copiloto. O risco está em continuar operando sem ele enquanto esses leads chegam e saem sem atendimento adequado."</div>
      </div>
    </div>
  </div>
@@ -12616,19 +12673,24 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">07</div>
-       <div><div class="card-title">"Já investi em outra ferramenta e me ferrei"</div><div class="card-subtitle">Raiz: Confiança — Trauma com concorrente anterior</div></div>
+       <div><div class="card-title">"Já investi em outra ferramenta e me ferrei"</div><div class="card-subtitle">Raiz: Confiança — Trauma com experiência anterior</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:12px;">
        <strong>Contexto real</strong>
-       Lead gastou R$2-5 mil com eBrokers, Lais, Harry ou similar. Não teve resultado, pós-venda péssimo, implementação demorada. Está queimado.
+       Lead já investiu em outra solução, não teve resultado ou teve suporte ruim. Está com a guarda alta e associa o risco da experiência anterior à decisão atual.
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Cara, eu lamento que tu passou por isso. E olha, tu não é o único — recebo esse relato todo santo dia."<br><br>"Mas me diz uma coisa: o que exatamente não funcionou? Foi a ferramenta em si ou o suporte?"<br><br><em>(Ouvir — quase sempre é pós-venda, implementação ou funcionalidade limitada.)</em><br><br>"Olha o que diferencia a Captei:"<br>• "Implementação em 3 dias — não 3 meses."<br>• "CS dedicado que acompanha resultado, não só abre ticket."<br>• "Sem fidelidade. Se repetir a frustração, cancela no mês."<br><br>"Eu entendo a desconfiança. Mas tu mesmo disse que PRECISA da ferramenta — a questão não é SE vai usar IA, é COM QUEM. E com quem já te deu problema, tu já sabe que não é."<br><br><em>💡 Nunca minimize a frustração. Valide, diferencie e mostre que o risco aqui é menor.</em></div>
+       <div class="script-label label-contexto">Validar e investigar a raiz</div>
+       <div class="script-text">"Lamento que você passou por isso — e entendo por que isso gera cautela agora."<br><br>"Me conta: o que exatamente não funcionou? Foi a ferramenta em si, o suporte depois da venda, ou a implementação demorou demais?"<br><br><em>(Ouvir — quase sempre é pós-venda, implementação mal feita ou funcionalidade limitada que não foi entregue como prometida)</em></div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Diferenciar com evidência concreta</div>
+       <div class="script-text">"O que diferencia aqui é o processo: implantação em até 3 dias, CS dedicado que acompanha resultado — não só abre ticket — e treinamento do time quantas vezes for necessário."<br><br>"Você mesmo disse que precisa de uma solução para [dor levantada]. A questão não é SE vai usar IA — é com quem. E com quem já te deu problema, você já sabe que não é."<br><br>"Nossa meta é que você não precise ficar dependente do contrato para continuar. O objetivo é gerar resultado rapidamente para que a permanência faça sentido por conta própria."</div>
      </div>
    </div>
  </div>
@@ -12638,15 +12700,20 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">08</div>
-       <div><div class="card-title">"O pós-venda vai ser bom mesmo?"</div><div class="card-subtitle">Raiz: Confiança — Lead já foi abandonado por outro fornecedor</div></div>
+       <div><div class="card-title">"O pós-venda vai ser bom mesmo?"</div><div class="card-subtitle">Raiz: Confiança — Medo de ser abandonado após assinar</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Te entendo 100%. Pós-venda ruim é pior que não ter a ferramenta."<br><br>"Na Captei funciona assim: tu tem um CS dedicado — uma pessoa real, com nome, WhatsApp, que acompanha teus números. Não é ticket, não é fila de espera."<br><br>"Implementação em 3 dias. Treinamento pro teu time quantas vezes precisar. Entrou corretor novo? Liga pro CS e agenda treinamento."<br><br>"E eu estou aqui também. Tu fecha comigo, meu trabalho não acaba — eu continuo sendo teu ponto de contato."<br><br>"Mas o melhor termômetro: tu já é cliente da Captação Ativa. Como é o suporte? Funciona, né? O Copiloto é a mesma empresa, mesma cultura de atendimento."<br><br><em>💡 Se o lead já é cliente Captei, usar isso como prova social interna. Se não é, mencionar tempo de mercado (6+ anos) e base de clientes.</em></div>
+       <div class="script-label label-contexto">Detalhar o processo real</div>
+       <div class="script-text">"É uma pergunta justa — pós-venda ruim anula qualquer ferramenta."<br><br>"Na Captei funciona assim: você tem um CS dedicado — uma pessoa real, com nome e WhatsApp, que acompanha seus números. Não é fila de ticket, não é resposta automática."<br><br>"A implantação acontece em até 3 dias. Depois disso, treinamento para o time sempre que precisar — entrou corretor novo, agenda com o CS e está feito."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Usar a relação com a Captei</div>
+       <div class="script-text">"Se você já é cliente da Captação Ativa: como é o suporte que você recebe? É essa mesma cultura que está no Copiloto — mesma empresa, mesma equipe."<br><br>"E eu continuo sendo seu ponto de contato depois que fechamos. Meu trabalho não termina na assinatura."</div>
      </div>
    </div>
  </div>
@@ -12656,15 +12723,20 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">09</div>
-       <div><div class="card-title">"Minha operação é muito pequena / Sou autônomo"</div><div class="card-subtitle">Raiz: Prioridade — Acha que IA é só pra imobiliária grande</div></div>
+       <div><div class="card-title">"Minha operação é muito pequena"</div><div class="card-subtitle">Raiz: Prioridade — Acha que IA é só para quem tem escala</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Na verdade, pra quem é pequeno a IA faz MAIS diferença. Sabe por quê?"<br><br>"Imobiliária grande tem secretária, time de SDR, atendente — tem gente sobrando pra dividir o trabalho. Você não tem. Você faz captação, atendimento, visita, negociação, pós-venda — TUDO."<br><br>"O Copiloto é literalmente o funcionário que você não pode contratar: atende 24h, qualifica, agenda visita, faz follow-up. Sem salário, sem CLT, sem férias."<br><br>"Tu mesmo disse que não tem tempo nem pra atender ligação. Imagina se tudo que chega no teu WhatsApp já chegasse qualificado, com visita agendada. Tu só sai pra vender."<br><br>"Operação pequena é onde o ROI é mais absurdo — porque cada lead perdido dói muito mais."</div>
+       <div class="script-label label-contexto">Inverter a lógica</div>
+       <div class="script-text">"Na verdade, para operações menores o impacto é proporcionalmente maior. Sabe por quê?"<br><br>"Imobiliária grande tem secretária, SDR, time de atendimento — tem estrutura para dividir o trabalho. Em uma operação menor, o corretor faz tudo: captação, atendimento, visita, negociação, pós-venda."<br><br>"O Copiloto resolve exatamente isso: atende 24h, qualifica, agenda visita, faz follow-up. O corretor entra quando o lead já está pronto — e só faz o que gera comissão."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Usar os dados do cliente</div>
+       <div class="script-text">"Você comentou que [dado da descoberta — ex: tem X corretores e atende Y leads por mês]. Em operações desse tamanho, cada lead perdido pesa mais — não tem volume para compensar."<br><br>"Quanto mais enxuta a equipe, mais o atendimento rápido e a qualificação automática fazem diferença na conversão."</div>
      </div>
    </div>
  </div>
@@ -12674,19 +12746,23 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">10</div>
-       <div><div class="card-title">"Quero o Pro mas o orçamento é de Start"</div><div class="card-subtitle">Raiz: Dinheiro — Quer mais mas não cabe tudo agora</div></div>
+       <div><div class="card-title">"Quero o Pró mas o orçamento é de Light"</div><div class="card-subtitle">Raiz: Dinheiro — Quer mais do que o orçamento comporta agora</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="alert-box" style="margin-bottom:12px;">
        <strong>Contexto real</strong>
-       Lead quer 3 agentes (comercial + captação + administrativo) mas o bolso comporta só 1. Fica em cima do muro entre os planos.
+       Cliente viu valor em um plano maior, mas o orçamento atual comporta só o Light. Fica em cima do muro entre os planos.
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text"><strong>Caminho 1 — Negociar upgrade:</strong><br>"Olha, eu vou tentar uma coisa contigo. Deixa eu verificar se consigo agregar [uma IA extra / captação] no Start sem custo adicional pra vocês. Não prometo, mas se eu conseguir, vocês fechariam?"<br><br><em>(Se o lead disser sim: usar como moeda de troca — "Consegui, mas preciso fechar hoje/essa semana.")</em><br><br><strong>Caminho 2 — Start como porta de entrada:</strong><br>"Começa com o Start no comercial — que é onde vocês estão sangrando lead. Em 30 dias, quando tu ver o resultado, tu mesmo vai querer expandir pro Pro."<br><br>"A maioria das imobiliárias que estão no Pro hoje começaram no Start. É natural: viu resultado, escalou."<br><br><em>💡 Nunca forçar o Pro quando o bolso é de Start. Melhor um Start fechado que um Pro perdido.</em></div>
+       <div class="script-label label-contexto">Light como porta de entrada</div>
+       <div class="script-text">"Faz sentido começar pelo Light — que resolve o problema principal que você levantou hoje: [dor específica do cliente]."<br><br>"Em 30 a 60 dias, quando você estiver vendo o resultado na operação, a conversa sobre expandir para o Pró vai ser muito mais fácil — porque você já vai ter o retorno na mão para justificar."<br><br>"A maioria das imobiliárias que estão hoje no Pró e no Business começaram pelo Light. É natural: viu resultado, escalou com confiança."</div>
+     </div>
+     <div class="tip-box">
+       <strong>Importante</strong>
+       Nunca force o plano maior quando o orçamento é de Light. Um Light fechado abre a porta. Um Pró empurrado gera arrependimento e cancelamento.
      </div>
    </div>
  </div>
@@ -12696,15 +12772,20 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon red">11</div>
-       <div><div class="card-title">"Consigo fazer manual por enquanto, time é pequeno"</div><div class="card-subtitle">Raiz: Prioridade — Não sente urgência porque "funciona"</div></div>
+       <div><div class="card-title">"Consigo fazer manual por enquanto"</div><div class="card-subtitle">Raiz: Prioridade — Não sente urgência porque "está funcionando"</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Funciona — mas a que custo?"<br><br>"Tu me disse que teu corretor de locação recebe 350 leads em 20 dias, qualifica um por um, faz simulação de seguro... Quanto tempo de venda ele perde com isso?"<br><br>"O manual funciona quando a demanda é baixa. Mas tu quer crescer, né? E quando crescer, o manual vai ser o gargalo que trava tudo."<br><br>"A melhor hora de automatizar é ANTES de estourar — não depois, quando já está perdendo lead e queimando dinheiro."<br><br>"Pensa assim: teu corretor gasta 3 horas por dia qualificando lead frio. Com a IA, ele gasta zero. São 3 horas a mais por dia pra visitar, negociar e fechar. Quanto vale isso em comissão no final do mês?"<br><br><em>💡 Use os números que o próprio lead trouxe na descoberta. "Tu mesmo falou que são 350 leads em 20 dias..." — isso é impossível de contestar.</em></div>
+       <div class="script-label label-contexto">Usar os dados do próprio cliente</div>
+       <div class="script-text">"Funciona — mas a que custo?"<br><br>"Você me disse que [dado levantado — ex: corretores recebem X leads e qualificam um por um]. Quanto tempo de venda eles perdem com isso por semana?"<br><br>"Esse tempo tem um valor: cada hora gasta qualificando lead frio é uma hora a menos em visita, negociação e fechamento. E esse custo é invisível porque não aparece em boleto — mas aparece na comissão que não vem."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Mostrar o custo de esperar crescer</div>
+       <div class="script-text">"O manual funciona enquanto o volume é administrável. Mas você quer crescer — e quando crescer, o manual vai travar tudo."<br><br>"A melhor hora de automatizar é antes de estourar, não depois. Quem espera automatizar quando já está perdendo lead paga um custo muito maior para recuperar o ritmo."</div>
      </div>
    </div>
  </div>
@@ -12721,8 +12802,93 @@ function clearSettingsModal() {
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-dor"> Resposta</div>
-       <div class="script-text">"Faz sentido pesquisar. Eu faria o mesmo."<br><br>"Só te peço uma coisa: quando for comparar, compara entrega, não preço. Pergunta pro outro:"<br>• "Faz qualificação de lead ou só distribuição?"<br>• "Funciona fora do horário comercial?"<br>• "Reativa conversa automaticamente?"<br>• "Tem CRM próprio e campanha em massa?"<br>• "Implementa em quanto tempo?"<br>• "Tem fidelidade contratual?"<br><br>"Se alguém entregar tudo isso por menos, fecha com eles — de verdade. Eu te desejo o melhor."<br><br>"Mas se ninguém entregar... me liga. Eu seguro essa condição até [data]."<br><br><em>💡 Essa técnica é poderosa: ao dar "permissão" pra pesquisar E definir os critérios de comparação, você guia a pesquisa a seu favor. Ninguém vai entregar tudo isso.</em></div>
+       <div class="script-label label-contexto">Dar permissão e definir os critérios</div>
+       <div class="script-text">"Faz todo sentido pesquisar — eu faria o mesmo antes de qualquer decisão."<br><br>"Só te peço uma coisa: quando for comparar, compara entrega, não preço. Pergunta para as outras opções:"<br>• "Faz qualificação autônoma ou só distribuição?"<br>• "Funciona fora do horário comercial no WhatsApp?"<br>• "Reativa conversa parada automaticamente?"<br>• "Tem CRM próprio integrado?"<br>• "Qual é o prazo real de implantação?"<br><br>"Se encontrar algo que entregue tudo isso por um investimento menor, faz sentido fechar com eles. De verdade."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Manter o próximo passo</div>
+       <div class="script-text">"Que tal a gente marcar um retorno em [X dias]? Assim você tem tempo de pesquisar com calma, e a gente conversa com o comparativo na mão."<br><br>"Você vai ter mais clareza sobre o que cada opção entrega de verdade — e aí a decisão fica muito mais fácil."</div>
+     </div>
+   </div>
+ </div>
+
+ <!-- OBJEÇÃO 13 -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">13</div>
+       <div><div class="card-title">"Gostei, mas preciso pensar"</div><div class="card-subtitle">Raiz: indeterminada — trazer a objeção real para a mesa</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box" style="margin-bottom:12px;">
+       "Preciso pensar" é quase sempre uma objeção não verbalizada. O trabalho é identificar qual das três raízes está por trás.
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Trazer a objeção real para a mesa</div>
+       <div class="script-text">"Perfeito. Normalmente quando alguém me diz que precisa pensar, existe uma destas três situações:"<br><br>"Ainda existe alguma dúvida sobre o funcionamento."<br>"Existe alguma preocupação que ainda não foi resolvida."<br>"Ou simplesmente não é prioridade neste momento."<br><br>"Em qual delas você se encaixa mais?"</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Depois de identificar a raiz</div>
+       <div class="script-text"><em>Se é dúvida técnica:</em> "Ótimo — me conta qual parte ficou com dúvida que a gente resolve agora."<br><br><em>Se é preocupação não dita:</em> "Faz sentido. O que especificamente te preocupa?"<br><br><em>Se não é prioridade:</em> "Entendo. Quando você imagina que isso vai ser prioridade? Posso marcar um retorno para essa data."</div>
+     </div>
+     <div class="tip-box">
+       <strong>Importante</strong>
+       Nunca aceite o "preciso pensar" sem identificar a raiz. Sair da reunião sem saber o real motivo inviabiliza qualquer follow-up eficiente.
+     </div>
+   </div>
+ </div>
+
+ <!-- OBJEÇÃO 14 -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">14</div>
+       <div><div class="card-title">"Meus corretores não vão usar"</div><div class="card-subtitle">Raiz: Confiança — Dúvida sobre adoção da equipe</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="alert-box" style="margin-bottom:12px;">
+       <strong>Contexto real</strong>
+       Muito comum no mercado imobiliário. O gestor conhece a resistência do corretor a novas ferramentas e projeta esse comportamento como barreira para contratar.
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Reposicionar o papel do corretor</div>
+       <div class="script-text">"Entendo a preocupação — corretor resiste a ferramenta nova quando ela exige mais trabalho. Mas o Copiloto funciona de forma diferente."<br><br>"O corretor não precisa operar a IA. A IA opera para ele."<br><br>"O primeiro atendimento, a qualificação e o agendamento acontecem de forma autônoma — antes mesmo de o corretor saber que o lead existe. Quando o corretor entrar na conversa, o lead já foi qualificado, já tem contexto e já está em um estágio mais avançado."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Mostrar o benefício para o corretor</div>
+       <div class="script-text">"O corretor que mais resiste a ferramenta é o que mais vai gostar do resultado: ele passa a receber leads já qualificados, com contexto, prontos para avançar. O trabalho chato fica com a IA."<br><br>"E a implantação inclui treinamento. A gente apresenta para a equipe, mostra como funciona na prática e acompanha a adaptação."</div>
+     </div>
+   </div>
+ </div>
+
+ <!-- OBJEÇÃO 15 -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">15</div>
+       <div><div class="card-title">"Tenho receio da IA falar algo errado"</div><div class="card-subtitle">Raiz: Confiança — Medo de perder controle da comunicação</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-contexto">Validar e explicar o processo</div>
+       <div class="script-text">"Essa preocupação faz todo sentido — e é exatamente por isso que o processo de implantação é personalizado."<br><br>"O Copiloto não é um chatbot genérico. Ele é configurado para a realidade da sua imobiliária: o tom de comunicação, as informações do portfólio, as respostas para as situações mais comuns do seu negócio."<br><br>"Durante a implantação, a gente trabalha junto para mapear esses cenários e calibrar a IA antes de ela entrar em operação."</div>
+     </div>
+     <div class="script-block">
+       <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
+       <div class="script-label label-amplificar">Reforçar o papel de apoio, não de substituição</div>
+       <div class="script-text">"O objetivo do Copiloto não é substituir a equipe — é apoiá-la. Situações que fogem do fluxo padrão são encaminhadas para o corretor. Você mantém o controle da operação e o CS acompanha o desempenho."<br><br>"Com o tempo, você vai ajustando e a IA vai ficando cada vez mais alinhada ao jeito que a sua imobiliária trabalha."</div>
      </div>
    </div>
  </div>
@@ -12732,26 +12898,29 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">⚡</div>
-       <div><div class="card-title">Cheat Sheet — Respostas Rápidas em Reunião</div><div class="card-subtitle">Cola rápida pra quando não dá tempo de pensar</div></div>
+       <div><div class="card-title">Cheat Sheet — Referência Rápida em Reunião</div><div class="card-subtitle">Raiz + direcionamento em uma linha por objeção</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <table class="data-table">
-       <thead><tr><th style="width:40%">Objeção</th><th>Resposta-chave (1 frase)</th></tr></thead>
+       <thead><tr><th style="width:38%">Objeção</th><th style="width:15%">Raiz</th><th>Direcionamento</th></tr></thead>
        <tbody>
-         <tr><td>"Não é o momento"</td><td>"Sem fidelidade — testa um mês e cancela se quiser."</td></tr>
-         <tr><td>"Já uso outra mais barata"</td><td>"Distribui ou qualifica? Porque distribuir qualquer planilha faz."</td></tr>
-         <tr><td>"Preciso falar com sócio"</td><td>"Posso fazer 10 min com vocês dois — que dia funciona?"</td></tr>
-         <tr><td>"Tá caro"</td><td>"Um contrato de locação no mês paga a ferramenta inteira."</td></tr>
-         <tr><td>"Integração com CRM"</td><td>"Funciona via XML — mesmo caminho dos portais. E o Copiloto tem CRM próprio."</td></tr>
-         <tr><td>"Somos conservadores"</td><td>"Sem fidelidade e custo previsível é a decisão mais conservadora possível."</td></tr>
-         <tr><td>"Me ferrei com concorrente"</td><td>"Implementação em 3 dias, CS dedicado, sem fidelidade — risco zero."</td></tr>
-         <tr><td>"Pós-venda vai ser bom?"</td><td>"Tu já é cliente da Captei — como é o suporte? É a mesma empresa."</td></tr>
-         <tr><td>"Operação muito pequena"</td><td>"Quem é pequeno sente mais cada lead perdido — IA faz mais diferença."</td></tr>
-         <tr><td>"Quero Pro mas cabe Start"</td><td>"Começa no Start, viu resultado, escala. Maioria fez assim."</td></tr>
-         <tr><td>"Faço manual por enquanto"</td><td>"Funciona — mas quanto custa em tempo e lead perdido?"</td></tr>
-         <tr><td>"Vou pesquisar outras"</td><td>"Compara entrega, não preço. Seguro essa condição até [data]."</td></tr>
+         <tr><td>"Não é o momento"</td><td>Dinheiro / Prioridade</td><td>"Quantos leads estão sendo perdidos enquanto espera o momento certo?"</td></tr>
+         <tr><td>"Já uso outra mais barata"</td><td>Dinheiro</td><td>"Compare pelo trabalho que deixa de ser feito manualmente, não pelo preço."</td></tr>
+         <tr><td>"Preciso falar com sócio"</td><td>Prioridade</td><td>"Posso fazer 15 min com vocês dois — que dia funciona?"</td></tr>
+         <tr><td>"Tá caro"</td><td>Dinheiro</td><td>"Qual a comissão de um negócio? Um contrato que vem da IA já paga o mês."</td></tr>
+         <tr><td>"Não sei se integra"</td><td>Confiança</td><td>"Funciona via XML — mesmo padrão dos portais. E tem CRM próprio."</td></tr>
+         <tr><td>"Somos conservadores"</td><td>Prioridade</td><td>"Custo fixo com resultado mensurável é a decisão mais conservadora."</td></tr>
+         <tr><td>"Me ferrei com concorrente"</td><td>Confiança</td><td>"O que não funcionou? Implantação em 3 dias, CS dedicado, resultado acompanhado."</td></tr>
+         <tr><td>"Pós-venda vai ser bom?"</td><td>Confiança</td><td>"CS com nome e WhatsApp. Se já é cliente Captei — como é o suporte?"</td></tr>
+         <tr><td>"Operação muito pequena"</td><td>Prioridade</td><td>"Quem é menor sente mais cada lead perdido — o impacto é maior."</td></tr>
+         <tr><td>"Quero Pró mas cabe Light"</td><td>Dinheiro</td><td>"Começa no Light com o problema principal. Resultado vem, aí você escala."</td></tr>
+         <tr><td>"Faço manual por enquanto"</td><td>Prioridade</td><td>"Funciona — mas quanto tempo de venda seu time perde qualificando lead frio?"</td></tr>
+         <tr><td>"Vou pesquisar outras"</td><td>Confiança</td><td>"Compare por entrega: qualifica? Funciona 24h? Reativa? CRM próprio?"</td></tr>
+         <tr><td>"Preciso pensar"</td><td>Indeterminada</td><td>"É dúvida, preocupação ou prioridade? Em qual das três você se encaixa?"</td></tr>
+         <tr><td>"Corretores não vão usar"</td><td>Confiança</td><td>"O corretor não opera a IA — ela opera para ele. Ele recebe o lead qualificado."</td></tr>
+         <tr><td>"Receio da IA falar errado"</td><td>Confiança</td><td>"Configuração personalizada + implantação guiada + CS acompanha operação."</td></tr>
        </tbody>
      </table>
    </div>
