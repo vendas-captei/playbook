@@ -24272,16 +24272,21 @@ const TB = (() => {
         const projRevenue  = dailyRevPace * lastDay;
 
         // Meta — correlaciona pelo email do Pipedrive com o cadastro de usuários
+        // No AUTH, o email de login fica em au.user (não au.email)
         const pEmail   = getPdEmail(u);
         const authUser = (typeof AUTH !== 'undefined')
           ? (pEmail
-              ? AUTH.getAllUsers().find(au => au.email && au.email.toLowerCase() === pEmail)
+              ? AUTH.getAllUsers().find(au => {
+                  const auEmail = (au.user || au.email || '').toLowerCase();
+                  return auEmail === pEmail;
+                })
               : AUTH.getAllUsers().find(au => {
                   const n = u.name.toLowerCase();
                   return au.name?.toLowerCase() === n || au.user?.toLowerCase() === n.split(' ')[0];
                 }))
           : null;
         // Meta: usa o valor cadastrado no painel de usuários (campo meta), se existir
+        // OBS: no AUTH, o e-mail fica em au.user (não au.email)
         const authMetaNum = authUser?.meta
           ? (parseInt(String(authUser.meta).replace(/[^0-9]/g, '')) || 0)
           : 0;
