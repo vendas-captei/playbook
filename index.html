@@ -11684,162 +11684,262 @@ function clearSettingsModal() {
  <!-- COPILOTO — PRÉ-REUNIÃO -->
  <!-- ============================================================ -->
  <div class="section" id="sec-copiloto-pre-reuniao">
- <div class="golden-rule" style="background: linear-gradient(135deg, var(--purple) 0%, #7C3AED 100%);">
-   <h3>Fluxo Pré-Reunião — Copiloto</h3>
-   <p>Após agendar a demo, o trabalho não para. Confirme, gere expectativa e garanta presença. Cada mensagem conta.</p>
+ <div class="page-header">
+   <div class="crumb"><b>Copiloto</b> / Reunião</div>
+   <h2>Pré-Reunião — Copiloto</h2>
+   <p>O foco do pré-reunião não é apenas confirmar presença. É entrar na demo com uma hipótese clara sobre quem é o comprador, qual é a dor, o que demonstrar primeiro e qual plano provavelmente será recomendado.</p>
  </div>
 
- <div class="flow-steps">
-   <div class="flow-step">
-     <div class="flow-step-line"><div class="flow-step-dot" style="background:var(--green);">1</div><div class="flow-step-connector"></div></div>
-     <div class="flow-step-content">
-       <div class="flow-step-title">Imediatamente após agendar</div>
-       <div class="flow-step-desc">Enviar invite por e-mail + mensagem WhatsApp confirmando a demo. Pedir informações sobre a operação (áreas prioritárias, número de corretores, volume de leads).</div>
-     </div>
+ <div class="golden-rule">
+   <h3>Quanto mais personalizada a demo, maior a percepção de valor e a taxa de conversão.</h3>
+   <p>Reuniões podem vir da IA, do SDR/BDR ou diretamente do Inside Sales. Em todos os casos, o closer deve chegar preparado — não apenas com o link do Meet, mas com inteligência sobre a operação e uma hipótese de recomendação.</p>
+ </div>
+
+ <!-- Timeline visual -->
+ <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px;">
+   <div style="padding:16px 14px; background:var(--n-25); border:1px solid var(--n-100); border-top:3px solid var(--green); border-radius:var(--r-md); display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;">
+     <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--green); letter-spacing:1px;">APÓS AGENDAR</span>
+     <span style="font-weight:700; font-size:13px; color:var(--n-800);">Confirmação</span>
+     <span style="font-size:11px; color:var(--n-500);">WhatsApp + perguntas de levantamento</span>
    </div>
-   <div class="flow-step">
-     <div class="flow-step-line"><div class="flow-step-dot" style="background:var(--blue);">2</div><div class="flow-step-connector"></div></div>
-     <div class="flow-step-content">
-       <div class="flow-step-title">Pesquisa pré-demo</div>
-       <div class="flow-step-desc">Pesquisar o site da imobiliária, redes sociais, portais de anúncio. Anotar: tamanho da carteira, áreas de atuação, se tem locação, se tem chat no site.</div>
-     </div>
+   <div style="padding:16px 14px; background:var(--n-25); border:1px solid var(--n-100); border-top:3px solid var(--accent); border-radius:var(--r-md); display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;">
+     <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--accent); letter-spacing:1px;">ANTES DA DEMO</span>
+     <span style="font-weight:700; font-size:13px; color:var(--n-800);">Preparação</span>
+     <span style="font-size:11px; color:var(--n-500);">Inteligência comercial + hipótese + plano</span>
    </div>
-   <div class="flow-step">
-     <div class="flow-step-line"><div class="flow-step-dot" style="background:var(--accent);">3</div><div class="flow-step-connector"></div></div>
-     <div class="flow-step-content">
-       <div class="flow-step-title">No dia da reunião</div>
-       <div class="flow-step-desc">Enviar mensagem WhatsApp com link da reunião + lembrete. Confirmar presença.</div>
-     </div>
-   </div>
-   <div class="flow-step">
-     <div class="flow-step-line"><div class="flow-step-dot" style="background:var(--purple);">4</div></div>
-     <div class="flow-step-content">
-       <div class="flow-step-title">Demo</div>
-       <div class="flow-step-desc">Seguir o Guia da Demo com as 9 etapas. Objetivo: fechar na call.</div>
-     </div>
+   <div style="padding:16px 14px; background:var(--n-25); border:1px solid var(--n-100); border-top:3px solid var(--purple); border-radius:var(--r-md); display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;">
+     <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--purple); letter-spacing:1px;">NO DIA</span>
+     <span style="font-weight:700; font-size:13px; color:var(--n-800);">Lembrete</span>
+     <span style="font-size:11px; color:var(--n-500);">WhatsApp 30-60 min antes + link</span>
    </div>
  </div>
 
- <!-- Invite E-mail -->
+ <!-- 01 · Confirmação do Agendamento -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon blue">01</div>
-       <div><div class="card-title">E-mail de Invite — Demo Copiloto</div><div class="card-subtitle">Enviar imediatamente após agendar</div></div>
-     </div>
-     <span class="card-chevron">&#9660;</span>
-   </div>
-   <div class="card-body">
-     <div class="email-preview">
-       <div class="email-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="email-subject">Captei - Demo do Copiloto IA | [data] às [horário]</span></div>
-       <div class="email-body-preview">
-         <button class="copy-btn" onclick="copyBlock(this)" style="position:relative; float:right; margin-bottom:10px;">copiar</button>
-         Oi <span class="placeholder">[Nome]</span>, tudo bem?<br><br>Conforme combinamos, segue o convite para a demonstração do Copiloto Captei:<br><br><strong> Data:</strong> <span class="placeholder">[data]</span><br><strong>⏰ Horário:</strong> <span class="placeholder">[horário]</span><br><strong> Link:</strong> <span class="placeholder">[link do Google Meet]</span><br><strong>⏱ Duração:</strong> ~30 minutos<br><br><strong>Como funciona:</strong> vou te mostrar ao vivo como a IA atende pelo WhatsApp — comercial, financeiro, locação, manutenção. Tudo funcionando em tempo real, sem slide e sem promessa. Só resultado na tela.<br><br>Se quiser incluir mais alguém da equipe (gerente comercial, sócio), é só encaminhar este e-mail. Quanto mais gente da operação participar, melhor a avaliação.<br><br>Até lá!<br><br><span class="placeholder">[Seu Nome]</span><br>Captei - Inteligência em Atendimento Imobiliário
-       </div>
-     </div>
-     <div class="tip-box">
-       <strong>Dica</strong>
-       Envie o invite pelo Google Agenda também. O e-mail acima é o corpo do convite. Sempre tente incluir o decisor na reunião.
-     </div>
-   </div>
- </div>
-
- <!-- WhatsApp Pós-Agendamento -->
- <div class="card open">
-   <div class="card-header" onclick="toggleCard(this)">
-     <div class="card-header-left">
-       <div class="card-icon green">02</div>
-       <div><div class="card-title">WhatsApp — Confirmação do Agendamento</div><div class="card-subtitle">Enviar logo após a ligação</div></div>
+       <div class="card-icon green">01</div>
+       <div><div class="card-title">WhatsApp — Confirmação do Agendamento</div><div class="card-subtitle">Enviar logo após agendar · confirmar + coletar dados da operação</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-whatsapp"> Confirmação + Levantamento</div>
-       <div class="script-text"><span class="placeholder">[Nome]</span>, reunião confirmada! <br><br> <span class="placeholder">[data]</span> às <span class="placeholder">[horário]</span><br> Vou enviar o link do Meet no dia<br><br>Pra eu preparar a demo certinho pra realidade de vocês, me responde rápido:<br><br>1. Quantos corretores/atendentes vocês têm hoje?<br>2. Vocês trabalham com locação também ou só vendas?<br>3. Qual o principal gargalo hoje — atendimento de lead novo, financeiro, manutenção?<br><br>Com isso eu já personalizo tudo. Até lá!</div>
+       <div class="script-label label-whatsapp">Confirmação + Levantamento</div>
+       <div class="script-text"><span class="placeholder">[Nome]</span>, reunião confirmada!<br><br><span class="placeholder">[data]</span> às <span class="placeholder">[horário]</span><br><br>Vou te enviar o link da reunião no dia.<br><br>Para eu preparar a demonstração mais próxima da realidade de vocês, me responde rapidinho:<br><br>1. Quantos corretores vocês possuem hoje?<br>2. Trabalham com vendas, locação ou ambos?<br>3. Se eu pudesse resolver apenas um problema da operação de vocês hoje, qual seria?<br><br>Com isso consigo personalizar a demonstração para o cenário de vocês.</div>
+     </div>
+     <div class="tip-box">
+       <strong>Por que as 3 perguntas?</strong>
+       Cada resposta alimenta a preparação: tamanho da equipe define porte, vendas/locação define módulos a demonstrar, e a terceira pergunta entrega a dor principal na voz do cliente — use na abertura da demo.
      </div>
    </div>
  </div>
 
- <!-- Checklist Pesquisa Pré-Demo -->
+ <!-- 02 · Inteligência Comercial -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon accent">02</div>
+       <div><div class="card-title">Inteligência Comercial</div><div class="card-subtitle">Pesquisar antes de entrar na reunião · 5 min que valem 5x na conversão</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">Operação</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.9;">
+           ☐ Possui site?<br>
+           ☐ Trabalha com vendas?<br>
+           ☐ Trabalha com locação?<br>
+           ☐ Possui chat online?<br>
+           ☐ Região principal de atuação<br>
+           ☐ Porte estimado da operação
+         </div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:10px;">Presença Digital</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.9;">
+           ☐ Instagram ativo?<br>
+           ☐ Google Meu Negócio ativo?<br>
+           ☐ Portais imobiliários utilizados?<br>
+           ☐ Diferencial percebido da empresa
+         </div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:10px;">Relação com Captei</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.9;">
+           ☐ Cliente Captação Ativa?<br>
+           ☐ Cliente Indica+?<br>
+           ☐ Ex-cliente?<br>
+           ☐ Lead novo?<br>
+           ☐ Veio por indicação?
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- 03 · Perfil do Decisor -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon purple">03</div>
-       <div><div class="card-title">Checklist — Pesquisa Pré-Demo</div><div class="card-subtitle">O que levantar antes de entrar na reunião</div></div>
+       <div><div class="card-title">Perfil do Decisor</div><div class="card-subtitle">Quem estará na reunião · adaptar a conversa ao perfil do comprador</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
-     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:8px;">Site da Imobiliária</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7;">
-           ☐ Tem chat online no site?<br>
-           ☐ Quantos imóveis no site?<br>
-           ☐ Trabalha com vendas, locação ou ambos?<br>
-           ☐ Quantidade de corretores listados
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:10px;">Registrar</div>
+         <div style="font-size:12.5px; color:var(--n-600); line-height:1.9;">
+           ☐ Nome do decisor<br>
+           ☐ Cargo<br>
+           ☐ Quem mais participará da reunião
          </div>
        </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--green); margin-bottom:8px;">Redes Sociais & Portais</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7;">
-           ☐ Instagram ativo? Quantos seguidores?<br>
-           ☐ Anúncios em portais (Zap, VivaReal)?<br>
-           ☐ Google Meu Negócio ativo?<br>
-           ☐ Avaliações (nota, reclamações recorrentes)
-         </div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">Operação</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7;">
-           ☐ Porte (pequena, média, grande)<br>
-           ☐ Região principal de atuação<br>
-           ☐ Tem departamento de locação?<br>
-           ☐ Tem equipe financeira dedicada?
-         </div>
-       </div>
-       <div style="background:white; border:1px solid var(--n-100); border-radius:8px; padding:14px;">
-         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:8px;">Rapport</div>
-         <div style="font-size:12.5px; color:var(--n-600); line-height:1.7;">
-           ☐ Cidade/bairro da imobiliária<br>
-           ☐ Nome do dono/decisor (LinkedIn?)<br>
-           ☐ Algo interessante pra conexão?<br>
-           ☐ Já é cliente Captei (CA ou Indica+)?
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:10px;">Classificar o Decisor</div>
+         <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;">
+           <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Dono</span>
+           <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Sócio</span>
+           <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Diretor</span>
+           <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Gerente Comercial</span>
+           <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Outro</span>
          </div>
        </div>
      </div>
-     <div class="tip-box" style="margin-top:14px;">
-       <strong>Por que pesquisar?</strong>
-       Uma demo genérica não fecha. Uma demo personalizada — "vi que vocês têm locação, deixa eu te mostrar como a IA resolve chamado de manutenção" — fecha. 5 minutos de pesquisa valem 5x mais na conversão.
+     <div class="info-box">
+       Donos e sócios decidem por <b>visão e risco</b>. Gerentes decidem por <b>operação e aprovação de cima</b>. Diretores equilibram os dois. Adapte o peso do argumento financeiro vs. operacional conforme o perfil.
      </div>
    </div>
  </div>
 
- <!-- WhatsApp Dia da Reunião -->
+ <!-- 04 · Hipótese Comercial -->
  <div class="card open">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
-       <div class="card-icon green">04</div>
-       <div><div class="card-title">WhatsApp — Dia da Reunião</div><div class="card-subtitle">Enviar 30-60 min antes do horário</div></div>
+       <div class="card-icon accent">04</div>
+       <div><div class="card-title">Hipótese Comercial</div><div class="card-subtitle">Registrar antes da reunião · chegar com hipótese, sair com certeza</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">Principal dor percebida</div>
+         <div style="font-size:12px; color:var(--n-400); font-style:italic;">Ex: atendimento lento de leads, sem follow-up, locação sem automação...</div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:8px;">Principal oportunidade</div>
+         <div style="font-size:12px; color:var(--n-400); font-style:italic;">Ex: têm locação mas não automatizam, têm muitos corretores mas sem distribuição...</div>
+       </div>
+     </div>
+     <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+       <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--n-500); margin-bottom:10px;">O que provavelmente mais chamará atenção</div>
+       <div style="display:flex; flex-wrap:wrap; gap:6px;">
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Atendimento de leads</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Qualificação</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Agendamento</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Distribuição</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Locação</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Financeiro</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Manutenção</span>
+         <span style="padding:4px 10px; border:1px solid var(--n-200); border-radius:99px; font-size:12px; color:var(--n-600);">Integrações</span>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- 05 · Planejamento da Demo -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">05</div>
+       <div><div class="card-title">Planejamento da Demonstração</div><div class="card-subtitle">Decidir antecipadamente · evitar demos genéricas</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:10px;">O que mostrar primeiro?</div>
+         <div style="display:flex; flex-direction:column; gap:6px;">
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Atendimento de leads</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Qualificação</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Agendamento</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Distribuição</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Locação</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Financeiro</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Manutenção</span>
+           <span style="padding:5px 10px; border:1px solid var(--n-200); border-radius:6px; font-size:12px; color:var(--n-600);">Integrações</span>
+         </div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--blue); margin-bottom:8px;">Caso de uso prioritário</div>
+         <div style="font-size:12px; color:var(--n-400); font-style:italic; margin-bottom:12px;">Ex: imobiliária com locação forte → começar pelo módulo de locação e manutenção.</div>
+         <div style="font-size:12.5px; color:var(--n-600);">A demonstração deve começar exatamente pelo cenário mais relevante para a realidade da imobiliária. Demos genéricas não fecham.</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- 06 · Recomendação Inicial -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">06</div>
+       <div><div class="card-title">Recomendação Inicial</div><div class="card-subtitle">Registrar antes da reunião · entrar com hipótese, validar na conversa</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:10px;">Plano mais provável</div>
+         <div style="display:flex; flex-wrap:wrap; gap:6px;">
+           <span style="padding:5px 14px; border:1px solid var(--n-200); border-radius:99px; font-size:13px; font-weight:600; color:var(--n-700);">Light</span>
+           <span style="padding:5px 14px; border:1px solid var(--n-200); border-radius:99px; font-size:13px; font-weight:600; color:var(--n-700);">Pró</span>
+           <span style="padding:5px 14px; border:1px solid var(--n-200); border-radius:99px; font-size:13px; font-weight:600; color:var(--n-700);">Business</span>
+           <span style="padding:5px 14px; border:1px solid var(--n-200); border-radius:99px; font-size:13px; font-weight:600; color:var(--n-700);">Enterprise</span>
+         </div>
+       </div>
+       <div style="background:var(--n-0,white); border:1px solid var(--n-100); border-radius:8px; padding:14px;">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:8px;">Justificativa</div>
+         <div style="font-size:12px; color:var(--n-400); font-style:italic;">Ex: 12 corretores + locação → Pró ou Business. Só vendas, equipe pequena → Light.</div>
+       </div>
+     </div>
+     <div class="info-box">
+       Entrar na reunião com uma hipótese de recomendação evita que você passe a reunião inteira "descobrindo" o plano. Valide a hipótese durante o diagnóstico e faça a recomendação com convicção.
+     </div>
+   </div>
+ </div>
+
+ <!-- 07 · Lembrete no Dia -->
+ <div class="card open">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">07</div>
+       <div><div class="card-title">WhatsApp — Lembrete no Dia da Reunião</div><div class="card-subtitle">Enviar 30–60 min antes do horário</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body">
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-whatsapp"> Lembrete + Link</div>
-       <div class="script-text">Oi <span class="placeholder">[Nome]</span>, bom dia! <br><br>Daqui a pouco a gente tem nossa demo às <span class="placeholder">[horário]</span>.<br><br>Segue o link: <span class="placeholder">[link do Google Meet]</span><br><br>Preparei a demonstração focada na realidade de vocês — vai ser bem direto ao ponto. Te vejo já já!</div>
+       <div class="script-label label-whatsapp">Lembrete + Link</div>
+       <div class="script-text">Oi <span class="placeholder">[Nome]</span>, bom dia!<br><br>Daqui a pouco teremos nossa demonstração às <span class="placeholder">[horário]</span>.<br><br>Segue o link: <span class="placeholder">[link]</span><br><br>Preparei a apresentação considerando o cenário da operação de vocês para irmos direto ao ponto.<br><br>Te vejo em instantes!</div>
      </div>
      <div class="script-block">
        <button class="copy-btn" onclick="copyBlock(this)">copiar</button>
-       <div class="script-label label-followup"> Se não respondeu — lembrete direto</div>
-       <div class="script-text">Oi <span class="placeholder">[Nome]</span>, segue o link da nossa demo de agora: <span class="placeholder">[link do Google Meet]</span><br><br>Te aguardo!</div>
+       <div class="script-label label-followup">Se não entrou na hora</div>
+       <div class="script-text">Oi <span class="placeholder">[Nome]</span>, estou no Meet te aguardando. Consegue entrar?</div>
      </div>
      <div class="alert-box">
        <strong>Se não aparecer</strong>
-       Espere 5 minutos. Envie: "Oi [Nome], estou no Meet te aguardando! Consegue entrar?" — Se não responder em 10 min, ligue. Registre no CRM e agende follow-up T+1 dia.
+       Aguarde 5 minutos após o horário. Envie a mensagem acima. Se não responder em 10 min, ligue. Registre no CRM e agende follow-up para o dia seguinte.
      </div>
    </div>
  </div>
