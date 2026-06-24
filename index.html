@@ -11537,12 +11537,34 @@ function clearSettingsModal() {
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">SL</div>
-       <div><div class="card-title">Apresentação — Copiloto</div><div class="card-subtitle">Deck interativo para demonstrações e reuniões</div></div>
+       <div><div class="card-title">Apresentação — Copiloto</div><div class="card-subtitle" id="pres-subtitle">Deck interativo para demonstrações e reuniões</div></div>
      </div>
      <span class="card-chevron">&#9660;</span>
    </div>
    <div class="card-body" style="padding:0; overflow:hidden; border-radius:0 0 var(--r-md) var(--r-md);">
-     <iframe src="apresentacao-copiloto.html" style="width:100%; height:680px; border:none; display:block;" allowfullscreen></iframe>
+
+     <!-- Upload area — só aparece para admin/Gestão -->
+     <div id="pres-upload-area" style="display:none; padding:14px 16px; border-bottom:1px solid var(--n-100); background:var(--n-25);">
+       <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+         <span style="font-size:13px; font-weight:600; color:var(--n-700);">📎 Atualizar apresentação:</span>
+         <label for="pres-file-input" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:white; padding:7px 16px; border-radius:var(--r-sm); font-size:13px; font-weight:600; font-family:'Satoshi',sans-serif;">
+           Selecionar arquivo HTML
+         </label>
+         <input type="file" id="pres-file-input" accept=".html" style="display:none;">
+         <span id="pres-upload-status" style="font-size:12px; color:var(--n-500);"></span>
+       </div>
+     </div>
+
+     <!-- Placeholder quando não há arquivo -->
+     <div id="pres-placeholder" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:300px; gap:12px; color:var(--n-400);">
+       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+       <span style="font-size:14px;">Nenhuma apresentação carregada ainda.</span>
+       <span style="font-size:12px;" id="pres-placeholder-hint">Faça login como admin para fazer o upload.</span>
+     </div>
+
+     <!-- Iframe (oculto até ter arquivo) -->
+     <iframe id="pres-iframe" src="" style="display:none; width:100%; height:700px; border:none;" allowfullscreen></iframe>
+
    </div>
  </div>
 
@@ -21881,6 +21903,103 @@ function applyTeamFilter() {
 }
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(applyTeamFilter, 200); });
 
+/* ── APRESENTAÇÃO COPILOTO — UPLOAD & INDEXEDDB ── */
+(function() {
+  var DB_NAME = 'captei_pres_db', DB_VER = 1, STORE = 'files', KEY = 'apresentacao';
+
+  function openDB() {
+    return new Promise(function(res, rej) {
+      var r = indexedDB.open(DB_NAME, DB_VER);
+      r.onupgradeneeded = function(e) { e.target.result.createObjectStore(STORE); };
+      r.onsuccess = function(e) { res(e.target.result); };
+      r.onerror = function() { rej(r.error); };
+    });
+  }
+
+  function saveBlob(blob) {
+    return openDB().then(function(db) {
+      return new Promise(function(res, rej) {
+        var tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(blob, KEY);
+        tx.oncomplete = res;
+        tx.onerror = function() { rej(tx.error); };
+      });
+    });
+  }
+
+  function loadBlob() {
+    return openDB().then(function(db) {
+      return new Promise(function(res, rej) {
+        var tx = db.transaction(STORE, 'readonly');
+        var req = tx.objectStore(STORE).get(KEY);
+        req.onsuccess = function(e) { res(e.target.result || null); };
+        req.onerror = function() { rej(req.error); };
+      });
+    });
+  }
+
+  function mountIframe(blob) {
+    var url = URL.createObjectURL(blob);
+    var iframe = document.getElementById('pres-iframe');
+    var placeholder = document.getElementById('pres-placeholder');
+    if (!iframe) return;
+    iframe.src = url;
+    iframe.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+    var sub = document.getElementById('pres-subtitle');
+    if (sub) sub.textContent = 'Deck interativo para demonstrações e reuniões';
+  }
+
+  function showUploadArea() {
+    var area = document.getElementById('pres-upload-area');
+    var hint = document.getElementById('pres-placeholder-hint');
+    if (area) area.style.display = 'block';
+    if (hint) hint.textContent = 'Selecione o arquivo HTML da apresentação acima.';
+  }
+
+  function isAdminUser() {
+    try {
+      var session = JSON.parse(sessionStorage.getItem('captei_pb_session') || '{}');
+      if (!session.name) return false;
+      var user = AUTH.getAllUsers().find(function(u) { return u.name === session.name; });
+      return user && (user.admin || user.team === 'Gestão');
+    } catch(e) { return false; }
+  }
+
+  // Load stored presentation on init
+  loadBlob().then(function(blob) {
+    if (blob) mountIframe(blob);
+  }).catch(function() {});
+
+  // File input handler
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('pres-file-input');
+    if (!input) return;
+    input.addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var status = document.getElementById('pres-upload-status');
+      if (status) status.textContent = 'Salvando...';
+      saveBlob(file).then(function() {
+        mountIframe(file);
+        if (status) { status.textContent = '✓ Apresentação atualizada!'; setTimeout(function() { status.textContent = ''; }, 4000); }
+      }).catch(function() {
+        if (status) status.textContent = '✗ Erro ao salvar. Tente novamente.';
+      });
+      input.value = '';
+    });
+  });
+
+  // Called after login to show upload area for admins
+  window.initPresUpload = function() {
+    if (isAdminUser()) showUploadArea();
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() { if (isAdminUser()) showUploadArea(); }, 350);
+  });
+})();
+
 /* ── NAV FLYOUT ── */
 (function() {
   var flyout = document.createElement('div');
@@ -22040,7 +22159,7 @@ const AUTH = (() => {
     // Auto-propagate saved tokens to all modules
     if (isAdmin && typeof SETTINGS !== 'undefined') SETTINGS.autoInit();
     saveSession(name, isAdmin);
-    setTimeout(function(){ if (window.applyTeamFilter) window.applyTeamFilter(); }, 50);
+    setTimeout(function(){ if (window.applyTeamFilter) window.applyTeamFilter(); if (window.initPresUpload) window.initPresUpload(); }, 50);
 
     // Muda seção IMEDIATAMENTE para evitar flash
     if (window.showSection) window.showSection('ranking-home', null);
