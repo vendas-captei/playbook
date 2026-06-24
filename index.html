@@ -23923,7 +23923,6 @@ window.SETTINGS = SETTINGS;
 const TB = (() => {
 
   // ─── Revenue → square mapping (30 casas, escala progressiva) ───
-  // 0k=1, 5k=5, 10k=10, 20k=15, 30k=19, 40k=22, 50k=25, 70k=28, 100k=30
   const BREAKPOINTS = [
     { rev: 0,      sq: 1  },
     { rev: 5000,   sq: 5  },
@@ -23948,6 +23947,20 @@ const TB = (() => {
     return 30;
   }
 
+  // Dias úteis restantes no mês (a partir de hoje, inclusive)
+  function countBizDaysLeft(year, month) {
+    const today = new Date();
+    const lastDay = new Date(year, month, 0).getDate();
+    const startDay = (today.getFullYear() === year && (today.getMonth()+1) === month)
+      ? today.getDate() : 1;
+    let n = 0;
+    for (let d = startDay; d <= lastDay; d++) {
+      const dow = new Date(year, month-1, d).getDay();
+      if (dow > 0 && dow < 6) n++;
+    }
+    return n;
+  }
+
   // Square labels
   const SQ_LABELS = {
     1:'início',3:'ritmo',5:'⭐meta',8:'cadência',10:'🥈10k',
@@ -23970,8 +23983,9 @@ const TB = (() => {
   let state = {
     token: '', month: new Date().getMonth()+1, year: new Date().getFullYear(),
     users: [], deals: [], activities: [], stages: [], pipelines: [],
-    playerData: [], // [{id,name,initials,revenue,sq,calls,meetings,proposals,dealsWon,openPipeline,ticket,daysLeft}]
+    playerData: [],
     selectedUser: null,
+    selectedSellers: null, // null = todos; Set<id> quando filtrado
   };
 
   // ─── Config persistence ───
@@ -23982,7 +23996,10 @@ const TB = (() => {
     if (t) state.token = t.value;
     if (m) state.month = parseInt(m.value);
     if (y) state.year  = parseInt(y.value);
-    localStorage.setItem('captei_tb_config', JSON.stringify({token:state.token, month:state.month, year:state.year}));
+    localStorage.setItem('captei_tb_config', JSON.stringify({
+      token: state.token, month: state.month, year: state.year,
+      selectedSellers: state.selectedSellers ? [...state.selectedSellers] : null,
+    }));
   }
 
   function loadConfig() {
@@ -23991,6 +24008,7 @@ const TB = (() => {
       if (cfg.token) state.token = cfg.token;
       if (cfg.month) state.month = cfg.month;
       if (cfg.year)  state.year  = cfg.year;
+      if (Array.isArray(cfg.selectedSellers)) state.selectedSellers = new Set(cfg.selectedSellers);
     } catch(e) {}
   }
 
@@ -24155,10 +24173,15 @@ const TB = (() => {
       }
 
       buildPlayerData();
+      // Inicializa filtro com todos os jogadores se ainda não definido
+      if (!state.selectedSellers) {
+        state.selectedSellers = new Set(state.playerData.map(p => p.id));
+      }
+      renderSellerFilter();
       renderBoard();
       const hh = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       const uCount = state.users.filter(u=>u.active_flag).length;
-      setStatus(`✅ ${hh} · ${uCount} usuários · ${state.deals.length} deals · ${state.activities.length} atividades`, '#10b981');
+      setStatus(`✅ ${hh} · ${uCount} usuários · ${state.deals.length} deals`, '#10b981');
       if (btn) { btn.disabled = false; btn.innerHTML = '🔄 Atualizar'; }
 
     } catch(e) {
@@ -24190,12 +24213,24 @@ const TB = (() => {
     buildPlayerData();
   }
 
+  // ─── Get primary email from Pipedrive user ───
+  function getPdEmail(u) {
+    if (!u.email) return '';
+    if (typeof u.email === 'string') return u.email.toLowerCase();
+    if (Array.isArray(u.email)) {
+      const prim = u.email.find(e => e.primary);
+      return ((prim?.value) || u.email[0]?.value || '').toLowerCase();
+    }
+    return '';
+  }
+
   // ─── Build per-player data ───
   function buildPlayerData() {
     const today    = new Date();
     const lastDay  = new Date(state.year, state.month, 0).getDate();
     const elapsed  = Math.min(today.getDate(), lastDay);
     const daysLeft = Math.max(0, lastDay - elapsed);
+    const bizLeft  = countBizDaysLeft(state.year, state.month);
 
     state.playerData = state.users
       .filter(u => u.active_flag)
@@ -24205,12 +24240,9 @@ const TB = (() => {
           const uid = typeof d.user_id === 'object' ? d.user_id?.id : d.user_id;
           return uid === u.id;
         });
-        const revenue = myDeals.reduce((s, d) => {
-          // value já vem em BRL no Pipedrive (valor nominal do deal)
-          return s + (parseFloat(d.value) || 0);
-        }, 0);
+        const revenue  = myDeals.reduce((s, d) => s + (parseFloat(d.value) || 0), 0);
         const dealsWon = myDeals.length;
-        const ticket = dealsWon > 0 ? revenue / dealsWon : 0;
+        const ticket   = dealsWon > 0 ? revenue / dealsWon : 0;
 
         // Open pipeline
         const myOpen = (state.openDeals||[]).filter(d => {
@@ -24218,18 +24250,17 @@ const TB = (() => {
           return uid === u.id;
         });
         const openPipeline = myOpen.reduce((s, d) => {
-          const sid = d.stage_id;
-          const st  = state.stages[sid] || {};
-          const w   = (st.deal_probability || 50) / 100;
+          const st = state.stages[d.stage_id] || {};
+          const w  = (st.deal_probability || 50) / 100;
           return s + (d.value || 0) * w;
         }, 0);
 
-        // Activities — usa AT.categorize() para consistência com o painel de atividades
+        // Activities
         const myActs = state.activities.filter(a => {
           const uid = typeof a.user_id === 'object' ? a.user_id?.id : a.user_id;
           return uid === u.id;
         });
-        const catOf = (a) => (typeof AT !== 'undefined') ? AT.categorize(a.type) : '';
+        const catOf  = (a) => (typeof AT !== 'undefined') ? AT.categorize(a.type) : '';
         const calls     = myActs.filter(a => catOf(a) === 'prospeccao').length;
         const meetings  = myActs.filter(a => catOf(a) === 'apresentacoes').length;
         const proposals = myActs.filter(a => catOf(a) === 'avanco').length;
@@ -24240,27 +24271,30 @@ const TB = (() => {
         const dailyRevPace = elapsed > 0 ? revenue / elapsed : 0;
         const projRevenue  = dailyRevPace * lastDay;
 
-        // Seniority — busca via AUTH (override localStorage) ou AT.metaLevels
-        const authUser   = (typeof AUTH !== 'undefined') ? AUTH.getAllUsers().find(au => {
-          const pName = u.name.toLowerCase();
-          return au.name?.toLowerCase() === pName || au.user?.toLowerCase() === pName.split(' ')[0];
-        }) : null;
-        const senKey     = (authUser?.seniority) ||
-                           ((typeof AT !== 'undefined') ? AT.metaLevels?.[u.id] : null) ||
-                           'pleno1';
-        const senLevel   = (typeof AT !== 'undefined' && AT.SENIORITY_LEVELS?.[senKey])
-                           ? AT.SENIORITY_LEVELS[senKey]
-                           : { label: senKey, meta: 45000 };
-        const metaMonth  = senLevel.meta;
-        const metaPerDay = metaMonth / lastDay;          // quanto precisa por dia para bater a meta
-        const needToday  = Math.max(0, metaMonth - revenue); // quanto falta
-        const neededPerDay = daysLeft > 0 ? needToday / daysLeft : 0; // ritmo necessário daqui pra frente
-        const paceStatus = neededPerDay <= 0 ? 'done'
-                         : dailyRevPace >= neededPerDay * 1.05 ? 'ahead'
-                         : dailyRevPace >= neededPerDay * 0.85 ? 'on'
+        // Meta — correlaciona pelo email do Pipedrive com o cadastro de usuários
+        const pEmail   = getPdEmail(u);
+        const authUser = (typeof AUTH !== 'undefined')
+          ? (pEmail
+              ? AUTH.getAllUsers().find(au => au.email && au.email.toLowerCase() === pEmail)
+              : AUTH.getAllUsers().find(au => {
+                  const n = u.name.toLowerCase();
+                  return au.name?.toLowerCase() === n || au.user?.toLowerCase() === n.split(' ')[0];
+                }))
+          : null;
+        const senKey   = (authUser?.seniority) ||
+                         ((typeof AT !== 'undefined') ? AT.metaLevels?.[u.id] : null) ||
+                         'pleno1';
+        const senLevel = (typeof AT !== 'undefined' && AT.SENIORITY_LEVELS?.[senKey])
+                         ? AT.SENIORITY_LEVELS[senKey]
+                         : { label: senKey, meta: 45000 };
+        const metaMonth       = senLevel.meta;
+        const needToday       = Math.max(0, metaMonth - revenue);
+        const neededPerBizDay = bizLeft > 0 ? needToday / bizLeft : 0;
+        const paceStatus = revenue >= metaMonth ? 'done'
+                         : dailyRevPace >= neededPerBizDay * 1.05 ? 'ahead'
+                         : dailyRevPace >= neededPerBizDay * 0.85 ? 'on'
                          : 'behind';
 
-        // Square
         const sq = revenueToSquare(revenue);
 
         return {
@@ -24269,17 +24303,52 @@ const TB = (() => {
           initials: (u.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(),
           revenue, sq, dealsWon, ticket, openPipeline,
           calls, meetings, proposals, wpp, totalActs,
-          daysLeft, elapsed, lastDay,
+          daysLeft, bizLeft, elapsed, lastDay,
           dailyRevPace, projRevenue,
-          senKey, senLevel, metaMonth, metaPerDay, neededPerDay, needToday, paceStatus,
+          senKey, senLevel, metaMonth, neededPerBizDay, needToday, paceStatus,
         };
       })
-      // Mostra todos os usuários ativos do Pipedrive (não esconde inativos)
       .sort((a, b) => b.revenue - a.revenue);
 
     if (!state.selectedUser && state.playerData.length > 0) {
       state.selectedUser = state.playerData[0].id;
     }
+  }
+
+  // ─── Filtro de vendedores visíveis ───
+  function getVisiblePlayers() {
+    if (!state.selectedSellers || state.selectedSellers.size === 0) return state.playerData;
+    return state.playerData.filter(p => state.selectedSellers.has(p.id));
+  }
+
+  function toggleSeller(id) {
+    if (!state.selectedSellers) state.selectedSellers = new Set(state.playerData.map(p => p.id));
+    if (state.selectedSellers.has(id)) {
+      if (state.selectedSellers.size > 1) state.selectedSellers.delete(id);
+    } else {
+      state.selectedSellers.add(id);
+    }
+    saveConfig();
+    renderSellerFilter();
+    renderBoard();
+  }
+
+  function renderSellerFilter() {
+    const wrap = document.getElementById('tb-seller-filter-wrap');
+    const cont = document.getElementById('tb-seller-filter');
+    if (!wrap || !cont) return;
+    if (state.playerData.length === 0) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    let html = '';
+    state.playerData.forEach(p => {
+      const on = !state.selectedSellers || state.selectedSellers.has(p.id);
+      const ph = getPhase(p.sq);
+      html += `<button onclick="TB.toggleSeller(${p.id})" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1.5px solid ${on ? ph.color : '#ddd'};background:${on ? ph.bg : '#f5f5f5'};color:${on ? '#111' : '#aaa'};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin:0 6px 6px 0;transition:all .15s;">
+        <span style="width:20px;height:20px;border-radius:50%;background:${on ? ph.color : '#ccc'};color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;">${p.initials}</span>
+        ${p.name.split(' ')[0]}
+      </button>`;
+    });
+    cont.innerHTML = html;
   }
 
   // ─── Render board ───
@@ -24291,7 +24360,9 @@ const TB = (() => {
     const motorEl = document.getElementById('tb-motor');
     if (!shell || !grid) return;
 
-    if (state.playerData.length === 0) {
+    const visible = getVisiblePlayers();
+
+    if (visible.length === 0) {
       shell.style.display = 'none';
       if (empty) { empty.style.display = 'block'; }
       return;
@@ -24300,19 +24371,16 @@ const TB = (() => {
     shell.style.display = 'block';
     if (empty) empty.style.display = 'none';
 
-    // Period chip
     const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     const chip = document.getElementById('tb-period-chip');
     if (chip) chip.textContent = `Board ${months[state.month-1]}/${state.year}`;
 
-    // Map sq → players
     const sqMap = {};
-    state.playerData.forEach(p => {
+    visible.forEach(p => {
       if (!sqMap[p.sq]) sqMap[p.sq] = [];
       sqMap[p.sq].push(p);
     });
 
-    // Build 30 tiles
     let html = '';
     for (let i = 1; i <= 30; i++) {
       const phase = getPhase(i);
@@ -24327,8 +24395,8 @@ const TB = (() => {
 
       html += `<div style="${tileStyle}">`;
       html += `<div style="display:flex;justify-content:space-between;align-items:center;">`;
-      html += `<span style="font-size:11px;font-weight:800;color:${i===1?'#10b981':i===30?'#FFD700':phase.color};opacity:.9;">${String(i).padStart(2,'0')}</span>`;
-      if (label) html += `<span style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);">${label}</span>`;
+      html += `<span style="font-size:11px;font-weight:800;color:${i===1?'#10b981':i===30?'#b8860b':phase.color};opacity:.9;">${String(i).padStart(2,'0')}</span>`;
+      if (label) html += `<span style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${phase.color};opacity:.5;">${label}</span>`;
       html += `</div>`;
 
       if (players.length > 0) {
@@ -24339,8 +24407,8 @@ const TB = (() => {
               ${p.initials}
             </div>
             <div style="min-width:0;">
-              <div style="font-size:10px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name.split(' ')[0]}</div>
-              <div style="font-size:9px;color:rgba(255,255,255,.55);">R$ ${fmtK(p.revenue)}</div>
+              <div style="font-size:10px;font-weight:700;color:#111113;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name.split(' ')[0]}</div>
+              <div style="font-size:9px;color:#555;">R$ ${fmtK(p.revenue)}</div>
             </div>
           </div>`;
         });
@@ -24349,10 +24417,7 @@ const TB = (() => {
     }
     grid.innerHTML = html;
 
-    // Ranking
     renderRanking(rankEl);
-
-    // Motor
     renderMotor(motorEl);
   }
 
@@ -24360,133 +24425,124 @@ const TB = (() => {
   function renderRanking(el) {
     if (!el) return;
     const paceLabels = {
-      done:   { icon: '🏆', text: 'Meta batida!',     color: '#FFD700' },
+      done:   { icon: '🏆', text: 'Meta batida!',     color: '#10b981' },
       ahead:  { icon: '🚀', text: 'Adiantado',        color: '#10b981' },
       on:     { icon: '✅', text: 'No ritmo',          color: '#3b82f6' },
       behind: { icon: '⚠️', text: 'Precisa acelerar', color: '#ef4444' },
     };
+    const visible = getVisiblePlayers();
     let html = '';
-    state.playerData.forEach((p, i) => {
-      const phase  = getPhase(p.sq);
-      const isSel  = p.id === state.selectedUser;
-      const pace   = paceLabels[p.paceStatus] || paceLabels.on;
-      const metaPct = p.metaMonth > 0 ? Math.min(100, Math.round((p.revenue / p.metaMonth) * 100)) : 0;
-      const senLabel = p.senLevel?.label || p.senKey || '—';
+    visible.forEach((p, i) => {
+      const phase    = getPhase(p.sq);
+      const isSel    = p.id === state.selectedUser;
+      const pace     = paceLabels[p.paceStatus] || paceLabels.on;
+      const metaPct  = p.metaMonth > 0 ? Math.round((p.revenue / p.metaMonth) * 100) : 0;
+      const metaDone = metaPct >= 100;
+      const barColor = metaDone ? '#10b981' : phase.color;
 
       html += `
       <div onclick="TB.selectUser(${p.id})"
         style="display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:16px;border:1.5px solid ${isSel ? phase.color : 'var(--line)'};margin-bottom:8px;cursor:pointer;background:${isSel ? phase.bg : '#fafafa'};transition:all .15s;">
 
-        <!-- posição + avatar -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
           <div style="width:22px;height:22px;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;">${i+1}</div>
           <div style="width:34px;height:34px;border-radius:50%;background:${phase.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">${p.initials}</div>
         </div>
 
-        <!-- info principal -->
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
             <span style="font-weight:800;font-size:13px;color:#111;">${p.name}</span>
-            <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.06);color:#555;">${senLabel}</span>
-            <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:${pace.color}18;color:${pace.color};">${pace.icon} ${pace.text}</span>
+            <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:${pace.color}18;color:${pace.color};">${pace.icon} ${pace.text}</span>
           </div>
 
-          <!-- Linha: casa · deals · dia -->
           <div style="font-size:10px;color:#888;margin-bottom:6px;">
-            Casa ${p.sq} · ${p.dealsWon} deals · Dia ${p.elapsed} de ${p.lastDay}
+            Casa ${p.sq} · ${p.dealsWon} deal${p.dealsWon !== 1 ? 's' : ''} · Dia ${p.elapsed} de ${p.lastDay}
           </div>
 
-          <!-- Barra de meta mensal -->
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-            <div style="flex:1;height:5px;background:#e8e8e8;border-radius:3px;overflow:hidden;">
-              <div style="height:100%;width:${metaPct}%;background:${metaPct>=100?'#FFD700':phase.color};border-radius:3px;transition:width .4s;"></div>
+          <!-- Barra de meta -->
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+            <div style="flex:1;height:6px;background:#e8e8e8;border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:${Math.min(100,metaPct)}%;background:${barColor};border-radius:3px;transition:width .4s;"></div>
             </div>
-            <span style="font-size:9px;font-weight:700;color:#999;white-space:nowrap;">${metaPct}% da meta</span>
+            ${metaDone
+              ? `<span style="font-size:9px;font-weight:800;color:#10b981;white-space:nowrap;">${metaPct}% ✅</span>`
+              : `<span style="font-size:9px;font-weight:700;color:#999;white-space:nowrap;">${metaPct}%</span>`
+            }
           </div>
-
-          <!-- Ritmo: atual vs necessário -->
-          <div style="display:flex;gap:12px;font-size:10px;color:#888;">
-            <span>Ritmo atual: <strong style="color:#111;">R$ ${fmtK(p.dailyRevPace)}/dia</strong></span>
-            ${p.paceStatus !== 'done' ? `<span>Precisa: <strong style="color:${pace.color};">R$ ${fmtK(p.neededPerDay)}/dia</strong></span>` : `<span style="color:#FFD700;font-weight:700;">🏆 Meta de R$ ${fmtK(p.metaMonth)} batida!</span>`}
-          </div>
+          ${metaDone
+            ? `<div style="font-size:10px;font-weight:700;color:#10b981;">🏆 Meta atingida · +R$ ${fmtK(p.revenue - p.metaMonth)} acima</div>`
+            : `<div style="font-size:10px;color:#888;">Falta <strong style="color:#111;">R$ ${fmtK(p.needToday)}</strong> · <strong style="color:#555;">${p.bizLeft} dia${p.bizLeft!==1?'s':''} útil${p.bizLeft!==1?'eis':''}</strong> · R$ ${fmtK(p.neededPerBizDay)}/dia útil</div>`
+          }
         </div>
 
-        <!-- receita total -->
         <div style="text-align:right;flex-shrink:0;">
           <div style="font-weight:800;font-size:14px;color:#111;">R$ ${fmtK(p.revenue)}</div>
           <div style="font-size:9px;color:#aaa;margin-top:1px;">meta R$ ${fmtK(p.metaMonth)}</div>
-          <div style="font-size:9px;color:#bbb;margin-top:1px;">${p.daysLeft}d restantes</div>
         </div>
       </div>`;
     });
-    el.innerHTML = html || '<div style="color:#aaa;font-size:13px;text-align:center;padding:20px;">Nenhum dado encontrado</div>';
+    el.innerHTML = html || '<div style="color:#aaa;font-size:13px;text-align:center;padding:20px;">Nenhum vendedor selecionado</div>';
   }
 
   // ─── Motor de Resultado ───
   function renderMotor(el) {
     if (!el) return;
-    const p = state.playerData.find(x => x.id === state.selectedUser) || state.playerData[0];
+    const visible = getVisiblePlayers();
+    const p = visible.find(x => x.id === state.selectedUser) || visible[0];
     if (!p) { el.innerHTML = '<div style="color:#aaa;font-size:13px;">Sem dados</div>'; return; }
 
-    const phase = getPhase(p.sq);
-    const totalDays = p.lastDay;
-    const elapsed   = p.elapsed || 1;
-    const daysLeft  = p.daysLeft;
-
-    // Pace atual
-    const dailyRev    = p.dailyRevPace;
-    const projBase    = dailyRev * totalDays;
-
-    // Cenário 1: reuniões +50%
-    const meetBoost   = p.meetings > 0 ? 0.5 : 0;  // 50% mais reuniões
-    const convRate    = p.meetings > 0 ? p.dealsWon / p.meetings : 0.15;
-    const extraDeals  = Math.round(p.meetings * meetBoost * convRate);
-    const projMeet    = projBase + extraDeals * (p.ticket || 5000);
-
-    // Cenário 2: calls +30%
-    const callBoost   = p.calls > 0 ? 0.3 : 0;
-    const callConv    = p.calls > 0 ? p.meetings / Math.max(p.calls, 1) : 0.1;
-    const extraMeetCall = Math.round(p.calls * callBoost * callConv);
-    const projCalls   = projBase + extraMeetCall * (p.ticket || 5000) * convRate;
-
-    const sqBase  = revenueToSquare(projBase);
-    const sqMeet  = revenueToSquare(projMeet);
-    const sqCalls = revenueToSquare(projCalls);
+    const phase     = getPhase(p.sq);
+    const metaDone  = p.revenue >= p.metaMonth;
+    const faltaMeta = Math.max(0, p.metaMonth - p.revenue);
+    const bizLeft   = p.bizLeft || 0;
+    const faltaPorDia = bizLeft > 0 ? Math.ceil(faltaMeta / bizLeft) : 0;
 
     el.innerHTML = `
-    <!-- Vendedor selecionado -->
     <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:${phase.bg};border-radius:14px;border:1px solid ${phase.color}33;margin-bottom:16px;">
       <div style="width:38px;height:38px;border-radius:50%;background:${phase.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;">${p.initials}</div>
       <div>
         <div style="font-weight:700;font-size:14px;color:#111;">${p.name}</div>
-        <div style="font-size:11px;color:#777;">Casa ${p.sq} · ${elapsed} dias corridos · ${daysLeft}d restantes</div>
+        <div style="font-size:11px;color:#777;">Casa ${p.sq} · Dia ${p.elapsed} de ${p.lastDay} · ${bizLeft} dia${bizLeft!==1?'s':''} útil${bizLeft!==1?'eis':''} restante${bizLeft!==1?'s':''}</div>
       </div>
     </div>
 
-    <!-- Atividades -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      ${actCard('📞', 'Chamadas', p.calls)}
-      ${actCard('🤝', 'Reuniões', p.meetings)}
-      ${actCard('📄', 'Propostas', p.proposals)}
       ${actCard('✅', 'Deals ganhos', p.dealsWon)}
-    </div>
-    <div style="font-size:10px;color:#bbb;margin:-8px 0 14px;text-align:right;">
-      Total de atividades no mês: <strong style="color:#999;">${p.totalActs}</strong>
-      · WhatsApp: <strong style="color:#999;">${p.wpp || 0}</strong>
+      ${actCard('💰', 'Ticket médio', p.dealsWon > 0 ? 'R$ ' + fmtK(p.ticket) : '—')}
     </div>
 
-    <!-- Projeções -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:8px;">Projeção de receita</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:10px;">Projeção de fechamento</div>
 
-    ${projCard('Se continuar nesse ritmo', projBase, sqBase, '#6f6f78', '#f0f0f3')}
-    ${projCard('Se aumentar reuniões (+50%)', projMeet, sqMeet, '#059669', 'rgba(5,150,105,.07)')}
-    ${projCard('Se aumentar chamadas (+30%)', projCalls, sqCalls, '#E8620A', 'rgba(232,98,10,.07)')}
+    ${metaDone ? `
+    <div style="background:rgba(16,185,129,.07);border:1.5px solid rgba(16,185,129,.3);border-radius:14px;padding:20px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🏆</div>
+      <div style="font-weight:800;font-size:17px;color:#10b981;margin-bottom:4px;">Meta atingida!</div>
+      <div style="font-size:13px;color:#555;">R$ ${fmt(p.revenue)} de R$ ${fmt(p.metaMonth)}</div>
+      <div style="font-size:12px;font-weight:700;color:#10b981;margin-top:6px;">+R$ ${fmtK(p.revenue - p.metaMonth)} acima da meta</div>
+    </div>
+    ` : `
+    <div style="background:#f8f8f8;border:1px solid #e8e8e8;border-radius:14px;padding:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:10px;color:#888;margin-bottom:3px;">Falta para a meta</div>
+          <div style="font-size:20px;font-weight:800;color:#ef4444;">R$ ${fmt(faltaMeta)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:#888;margin-bottom:3px;">Dias úteis restantes</div>
+          <div style="font-size:20px;font-weight:800;color:#555;">${bizLeft}</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid #e8e8e8;padding-top:14px;">
+        <div style="font-size:10px;color:#888;margin-bottom:4px;">Precisa fechar por dia útil</div>
+        <div style="font-size:26px;font-weight:900;color:#E8620A;">${bizLeft > 0 ? 'R$ ' + fmt(faltaPorDia) : '—'}</div>
+        ${bizLeft === 0 ? '<div style="font-size:10px;color:#ef4444;margin-top:4px;">Mês encerrado</div>' : ''}
+      </div>
+    </div>
+    `}
 
-    <div style="margin-top:14px;font-size:11px;color:#aaa;line-height:1.6;">
-      Ticket médio atual: <strong style="color:#555;">R$ ${fmt(p.ticket)}</strong> ·
+    <div style="margin-top:12px;font-size:11px;color:#aaa;line-height:1.7;">
       Pipeline ponderado: <strong style="color:#555;">R$ ${fmtK(p.openPipeline)}</strong>
-    </div>
-    `;
+    </div>`;
   }
 
   function actCard(icon, label, val) {
@@ -24494,19 +24550,6 @@ const TB = (() => {
       <div style="font-size:18px;margin-bottom:4px;">${icon}</div>
       <div style="font-size:20px;font-weight:800;color:#111;">${val}</div>
       <div style="font-size:10px;color:#888;margin-top:2px;">${label}</div>
-    </div>`;
-  }
-
-  function projCard(label, rev, sq, color, bg) {
-    return `<div style="display:flex;justify-content:space-between;align-items:center;background:${bg};border:1px solid ${color}22;border-radius:12px;padding:10px 14px;margin-bottom:8px;">
-      <div>
-        <div style="font-size:11px;font-weight:600;color:#555;">${label}</div>
-        <div style="font-size:17px;font-weight:800;color:${color};margin-top:2px;">R$ ${fmt(Math.round(rev))}</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;color:#aaa;">chega na</div>
-        <div style="font-size:22px;font-weight:900;color:${color};">casa ${sq}</div>
-      </div>
     </div>`;
   }
 
@@ -24573,7 +24616,7 @@ const TB = (() => {
     localStorage.setItem('captei_tb_config', JSON.stringify({token:state.token, month:state.month, year:state.year}));
   }
 
-  return { init, load, saveConfig, selectUser, renderBoard, _setToken };
+  return { init, load, saveConfig, selectUser, renderBoard, toggleSeller, renderSellerFilter, _setToken };
 })();
 window.TB = TB;
 
@@ -24871,6 +24914,12 @@ const RH = (() => {
       </button>
       <span id="tb-status" style="font-size:13px;font-weight:600;padding:8px 14px;border-radius:8px;display:inline-block;min-width:200px;"></span>
     </div>
+
+    <!-- Filtro de vendedores (aparece após carregar) -->
+    <div id="tb-seller-filter-wrap" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Vendedores no board</div>
+      <div id="tb-seller-filter" style="display:flex;flex-wrap:wrap;"></div>
+    </div>
   </div>
 
   <!-- BOARD SHELL (dark) -->
@@ -24898,14 +24947,14 @@ const RH = (() => {
         <!-- Ranking -->
         <div style="background:rgba(255,255,255,.97);border-radius:24px;padding:22px;border:1px solid rgba(255,255,255,.1);">
           <div style="font-size:18px;font-weight:800;color:#111113;margin-bottom:4px;">Classificação em tempo real</div>
-          <div style="font-size:12px;color:#777;margin-bottom:16px;">Todos os vendedores — casa, receita e ritmo</div>
+          <div style="font-size:12px;color:#777;margin-bottom:16px;">% da meta · falta por dia útil</div>
           <div id="tb-rank-list"></div>
         </div>
 
         <!-- Motor de Resultado -->
         <div style="background:rgba(255,255,255,.97);border-radius:24px;padding:22px;border:1px solid rgba(255,255,255,.1);">
           <div style="font-size:18px;font-weight:800;color:#111113;margin-bottom:4px;">⚡ Motor de Resultado</div>
-          <div style="font-size:12px;color:#777;margin-bottom:16px;">Atividade → receita. Selecione um vendedor para ver a projeção.</div>
+          <div style="font-size:12px;color:#777;margin-bottom:16px;">Deals ganhos · falta por dia útil para bater a meta</div>
           <div id="tb-motor"></div>
         </div>
 
