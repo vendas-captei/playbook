@@ -1952,13 +1952,13 @@ body::before {
    ═══════════════════════════════════════════════════════════ */
 #logout-btn {
   display: none; position: fixed; top: 14px; right: 14px; z-index: 1000;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.6); border-radius: 10px; padding: 8px 14px;
+  background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.65); border-radius: 10px; padding: 8px 14px;
   font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   align-items: center; gap: 6px;
   transition: all 0.2s; backdrop-filter: blur(10px);
 }
-#logout-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+#logout-btn:hover { background: rgba(0,0,0,0.10); color: rgba(0,0,0,0.85); }
 #admin-users-btn {
   display: none; position: fixed; top: 14px; right: 130px; z-index: 1000;
   background: rgba(232,98,10,0.12); border: 1px solid rgba(232,98,10,0.25);
@@ -25033,7 +25033,7 @@ const RH = (() => {
       <div style="font-size:12px;font-weight:600;color:#E8620A;margin-bottom:2px;" id="cm-collab-label"></div>
       <div style="font-size:22px;font-weight:900;color:#111;">💰 Minha Comissão</div>
     </div>
-    <button onclick="COMISSAO.reload()" style="font-size:12px;font-weight:700;color:#666;background:#f5f5f7;border:1px solid #e0e0e0;border-radius:10px;padding:7px 16px;cursor:pointer;font-family:inherit;">↻ Atualizar</button>
+    <div style="width:130px;"></div>
   </div>
 
   <!-- Body -->
@@ -25184,14 +25184,20 @@ const COMISSAO = (() => {
 
       const session = getSession();
       const sName   = (session.name||'').toLowerCase();
-      const sFirst  = sName.split(' ')[0];
       const allUsers = await pd('users?limit=200');
-      const myPd = allUsers.find(u => {
-        const n = (u.name||'').toLowerCase();
-        return n===sName || n.startsWith(sFirst) || sName.startsWith(n.split(' ')[0]);
-      });
-      state.myUserId   = myPd?myPd.id:null;
-      state.myUserName = myPd?myPd.name:(session.name||'Você');
+
+      // 1. Tenta por email (AUTH → Pipedrive) — mais confiável
+      let myPd = null;
+      if (typeof AUTH !== 'undefined') {
+        const authUser = AUTH.getAllUsers().find(a => (a.name||'').toLowerCase() === sName);
+        const authEmail = authUser ? (authUser.user||authUser.email||'').toLowerCase() : '';
+        if (authEmail) myPd = allUsers.find(u => pdEmail(u) === authEmail);
+      }
+      // 2. Fallback: nome completo exato
+      if (!myPd) myPd = allUsers.find(u => (u.name||'').toLowerCase() === sName);
+
+      state.myUserId   = myPd ? myPd.id : null;
+      state.myUserName = myPd ? myPd.name : (session.name||'Você');
 
       const {meta,senKey} = resolveUserMeta(myPd||{});
       state.meta   = meta;
