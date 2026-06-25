@@ -25122,14 +25122,24 @@ const COMISSAO = (() => {
     return String(v);
   }
 
-  function detectPlan(val) {
-    if (!val) return 'anual';
-    const v = val.toLowerCase();
-    if (v.includes('anual')||v.includes('annual')) return 'anual';
-    if (v.includes('semest')) return 'semestral';
-    if (v.includes('trimes')) return 'trimestral';
-    if (v.includes('mensal')||v.includes('monthly')) return 'mensal';
-    if (v.includes('copiloto')||v.includes('cop')) return 'copiloto';
+  function detectPlan(fidelVal, dealValue, mrr) {
+    // 1. Tenta pelo campo de texto (fidelidade/plano)
+    if (fidelVal) {
+      const v = fidelVal.toLowerCase();
+      if (v.includes('anual')||v.includes('annual')) return 'anual';
+      if (v.includes('semest')) return 'semestral';
+      if (v.includes('trimes')) return 'trimestral';
+      if (v.includes('mensal')||v.includes('monthly')) return 'mensal';
+      if (v.includes('copiloto')||v.includes('cop')) return 'copiloto';
+    }
+    // 2. Infere pela razão deal.value / MRR
+    if (mrr > 0 && dealValue > 0) {
+      const months = Math.round(dealValue / mrr);
+      if (months <= 1)  return 'mensal';
+      if (months <= 4)  return 'trimestral';
+      if (months <= 8)  return 'semestral';
+      if (months <= 13) return 'anual';
+    }
     return 'anual';
   }
 
@@ -25177,10 +25187,13 @@ const COMISSAO = (() => {
     try {
       const rawFields = await pd('dealFields?limit=200');
       state.dealFields = Array.isArray(rawFields)?rawFields:[];
-      state.fidelidadeKey = findKey(state.dealFields,'fidelidade','periodicidade','plano','plan','duração');
-      state.produtoKey    = findKey(state.dealFields,'produto','product','tipo de');
-      state.mrrKey        = findKey(state.dealFields,'mrr','mensalidade','monthly');
-      state.idCapteiKey   = findKey(state.dealFields,'captei','id captei','id_captei','contrato');
+      // Keys conhecidos da Captei (fallback hardcoded caso findKey não encontre)
+      const MRR_KEY_CAPTEI  = 'ac90208e8bba90f5646de20bd9e3c63346521b3a';
+      const ID_CAPTEI_KEY   = 'fe13789afb59223307327f7807cfb6127a315e2c';
+      state.fidelidadeKey = findKey(state.dealFields,'fidelidade','periodicidade','duração');
+      state.produtoKey    = findKey(state.dealFields,'produto','product','plano vigente','qual o produto');
+      state.mrrKey        = findKey(state.dealFields,'mrr','mensalidade','monthly') || MRR_KEY_CAPTEI;
+      state.idCapteiKey   = findKey(state.dealFields,'captei','id no sistema','id captei','id_captei') || ID_CAPTEI_KEY;
 
       const session = getSession();
       const sName   = (session.name||'').toLowerCase();
@@ -25254,8 +25267,8 @@ const COMISSAO = (() => {
 
     const rows = state.deals.map(d => {
       const fidelVal = fieldVal(d,state.fidelidadeKey);
-      const plan     = detectPlan(fidelVal);
       const mrrRaw   = state.mrrKey?parseFloat(d[state.mrrKey]||0):0;
+      const plan     = detectPlan(fidelVal, d.value||0, mrrRaw);
       const mrr      = mrrRaw>0?mrrRaw:(d.value||0)/(PLAN_MONTHS[plan]||12);
       return {
         d, date:(d.won_time||'').slice(0,10),
