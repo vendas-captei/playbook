@@ -25076,12 +25076,10 @@ const RH = (() => {
 <div class="section" id="sec-comissao" style="min-height:100vh;background:#f5f5f7;padding:0;margin-left:var(--sidebar-w);flex-direction:column;align-items:stretch;">
 
   <!-- Header -->
-  <div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;">
-    <div>
-      <div style="font-size:12px;font-weight:600;color:#E8620A;margin-bottom:2px;" id="cm-collab-label"></div>
-      <div style="font-size:22px;font-weight:900;color:#111;">💰 Minha Comissão</div>
-    </div>
-    <div id="cm-seller-select" style="display:none;"></div>
+  <div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:20px 28px;box-sizing:border-box;">
+    <div style="font-size:12px;font-weight:600;color:#E8620A;margin-bottom:2px;" id="cm-collab-label"></div>
+    <div style="font-size:22px;font-weight:900;color:#111;">💰 Minha Comissão</div>
+    <div id="cm-seller-select" style="display:none;margin-top:10px;"></div>
   </div>
 
   <!-- Body -->
@@ -25097,7 +25095,7 @@ const COMISSAO = (() => {
   const PLAN_LABEL  = { mensal:'Mensal', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual', copiloto:'Copiloto' };
   const PLAN_COLOR  = { mensal:'#D97706', trimestral:'#059669', semestral:'#7C3AED', anual:'#2563EB', copiloto:'#E8620A' };
 
-  // Accelerator table: tier × time-at-company × level (from Cargos & Comissões)
+  // CAP accelerator table: tier × time-at-company (from Cargos & Comissões)
   // Acel I = 110–119% of meta; Acel II = 120%+
   const ACEL_TABLE = {
     rampagem: { lt6:{I:0,II:0},         m6_18:{I:0,II:0},         ge18:{I:0,II:0}         },
@@ -25130,6 +25128,7 @@ const COMISSAO = (() => {
     return pct >= 1.20 ? tbl.II : tbl.I;
   }
 
+  // CAP gatilhos
   function gatilho(pct) {
     if (pct < 0.70) return 0;
     if (pct < 0.85) return 0.60;
@@ -25145,13 +25144,34 @@ const COMISSAO = (() => {
     return '100% + Acelerador II (120%+)';
   }
 
+  // COP IS gatilhos e aceleradores (Cargos & Comissões — Card 04)
+  function copGatilho(pct) {
+    if (pct < 0.60) return 0;
+    if (pct < 0.80) return 0.50;
+    if (pct < 1.00) return 0.70;
+    return 1.00;
+  }
+  function copGatilhoLabel(pct) {
+    if (pct < 0.60) return '0% — abaixo de 60% da meta';
+    if (pct < 0.80) return '50% da base (60–79%)';
+    if (pct < 1.00) return '70% da base (80–99%)';
+    if (pct < 1.10) return '100% da base';
+    if (pct < 1.20) return '100% + Acelerador I (+4%)';
+    return '100% + Acelerador II (+7,5%)';
+  }
+  function copAcelRate(pct) {
+    if (pct >= 1.20) return 0.075;
+    if (pct >= 1.10) return 0.04;
+    return 0;
+  }
+
   let state = {
     token:null, month:new Date().getMonth()+1, year:new Date().getFullYear(),
     deals:[], dealProducts:{},
     myUserId:null, myUserName:'', dealFields:[],
     viewUserId:null, viewUserName:'',
     fidelidadeKey:null, mrrKey:null, idCapteiKey:null,
-    meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas',
+    meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas', team:'CAP',
     allPdUsers:[], loaded:false,
   };
 
@@ -25225,7 +25245,7 @@ const COMISSAO = (() => {
   }
 
   function resolveUserMeta(pdUser, overrideName) {
-    if (typeof AUTH==='undefined') return {meta:45000,senKey:'pleno1',dataInicio:'',tipoVendas:'vendas'};
+    if (typeof AUTH==='undefined') return {meta:45000,senKey:'pleno1',dataInicio:'',tipoVendas:'vendas',team:'CAP'};
     const email = pdEmail(pdUser);
     const session = getSession();
     const lookupName = overrideName || (session.name||'').toLowerCase();
@@ -25234,13 +25254,14 @@ const COMISSAO = (() => {
       if (email && ae===email) return true;
       return (a.name||'').toLowerCase()===lookupName;
     });
-    if (!au) return {meta:45000,senKey:'pleno1',dataInicio:'',tipoVendas:'vendas'};
+    if (!au) return {meta:45000,senKey:'pleno1',dataInicio:'',tipoVendas:'vendas',team:'CAP'};
     const metaNum = au.meta?(parseInt(String(au.meta).replace(/[^0-9]/g,''))||0):0;
     return {
       meta:       metaNum||45000,
       senKey:     au.seniority||'pleno1',
       dataInicio: au.dataInicio||'',
       tipoVendas: au.tipoVendas||'vendas',
+      team:       au.team||'CAP',
     };
   }
 
@@ -25316,6 +25337,7 @@ const COMISSAO = (() => {
       state.senKey     = meta.senKey;
       state.dataInicio = meta.dataInicio;
       state.tipoVendas = meta.tipoVendas;
+      state.team       = meta.team || session.team || 'CAP';
 
       buildSellerDropdown(session, state.allPdUsers);
 
@@ -25332,7 +25354,6 @@ const COMISSAO = (() => {
 
   async function selectSeller(val) {
     if (!val) {
-      // reset to own user
       state.viewUserId   = state.myUserId;
       state.viewUserName = state.myUserName;
       const meta = resolveUserMeta({});
@@ -25340,6 +25361,7 @@ const COMISSAO = (() => {
       state.senKey     = meta.senKey;
       state.dataInicio = meta.dataInicio;
       state.tipoVendas = meta.tipoVendas;
+      state.team       = meta.team || getSession().team || 'CAP';
     } else {
       const parts = val.split('|');
       const selEmail = parts[0]||'';
@@ -25353,6 +25375,7 @@ const COMISSAO = (() => {
       state.senKey     = meta.senKey;
       state.dataInicio = meta.dataInicio;
       state.tipoVendas = meta.tipoVendas;
+      state.team       = meta.team || 'CAP';
     }
     const lbl = document.getElementById('cm-collab-label');
     if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.viewUserName}`;
@@ -25412,34 +25435,49 @@ const COMISSAO = (() => {
     const body = document.getElementById('cm-body');
     if (!body) return;
 
+    const isCOP = state.team === 'COP';
+
     const rows = state.deals.map(d => {
       const fidelVal = fieldVal(d,state.fidelidadeKey);
       const mrrRaw   = state.mrrKey?parseFloat(d[state.mrrKey]||0):0;
       const plan     = detectPlan(fidelVal, d.value||0, mrrRaw);
       const mrr      = mrrRaw>0?mrrRaw:(d.value||0)/(PLAN_MONTHS[plan]||12);
+      const commBase = isCOP ? mrr*0.70 : mrr*(PLAN_RATES[plan]||0.80);
       return {
         d, date:(d.won_time||'').slice(0,10),
         client: d.title||(d.org_id&&d.org_id.name)||'—',
-        idCaptei: state.idCapteiKey?(fieldVal(d,state.idCapteiKey)||d.id):d.id,
+        idCaptei: state.idCapteiKey?(fieldVal(d,state.idCapteiKey)||'—'):'—',
         valor:d.value||0,
         produto: state.dealProducts[d.id] || '—',
-        fidelVal:fidelVal||'Anual', plan, mrr,
-        commBase: mrr*(PLAN_RATES[plan]||0.80),
+        fidelVal:fidelVal||'Anual', plan, mrr, commBase,
       };
     });
 
     const totalRevenue = rows.reduce((s,r)=>s+r.valor,0);
     const pct          = state.meta>0?totalRevenue/state.meta:0;
-    const gtlho        = gatilho(pct);
     const metaColor    = pct>=1.20?'#7C3AED':pct>=1.00?'#059669':pct>=0.70?'#D97706':'#DC2626';
-    const byPlan = {};
+
+    // Cálculo CAP
+    const capGtlho   = gatilho(pct);
+    const byPlan     = {};
     rows.forEach(r=>{if(!byPlan[r.plan])byPlan[r.plan]=0;byPlan[r.plan]+=r.commBase;});
-    const bonBase    = Object.values(byPlan).reduce((s,v)=>s+v,0)*gtlho;
+    const capBonBase = Object.values(byPlan).reduce((s,v)=>s+v,0)*capGtlho;
     const tier       = getTier(state.senKey);
     const timeBkt    = getTimeBracket(state.dataInicio);
-    const acelRate   = getAcelRate(pct, tier, timeBkt);
-    const bonTotal   = bonBase*(1+acelRate);
-    const tierRates  = (ACEL_TABLE[tier]||{})[timeBkt] || {I:0,II:0};
+    const tierRates  = (ACEL_TABLE[tier]||{})[timeBkt]||{I:0,II:0};
+    const capAcel    = getAcelRate(pct, tier, timeBkt);
+    const capBonTotal= capBonBase*(1+capAcel);
+
+    // Cálculo COP IS
+    const copGtlho   = copGatilho(pct);
+    const totalCommBase = rows.reduce((s,r)=>s+r.commBase,0);
+    const copBonBase = totalCommBase*copGtlho;
+    const copAcel    = copAcelRate(pct);
+    const copBonTotal= copBonBase*(1+copAcel);
+
+    const bonBase  = isCOP ? copBonBase  : capBonBase;
+    const bonTotal = isCOP ? copBonTotal : capBonTotal;
+    const glbl     = isCOP ? copGatilhoLabel(pct) : gatilhoLabel(pct);
 
     let html = monthTabs();
     html += `<div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;">`;
@@ -25473,7 +25511,7 @@ const COMISSAO = (() => {
           <td style="padding:9px 12px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#555;font-weight:600;">${r.idCaptei}</td>
           <td style="padding:9px 12px;text-align:right;font-weight:600;color:#111;">${fmtR(r.valor)}</td>
           <td style="padding:9px 12px;text-align:center;color:#666;font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.produto}">${r.produto}</td>
-          <td style="padding:9px 12px;text-align:center;"><span style="background:${pc}18;color:${pc};font-weight:700;font-size:11px;padding:3px 9px;border-radius:10px;">${PLAN_LABEL[r.plan]}</span></td>
+          <td style="padding:9px 12px;text-align:center;"><span style="background:${pc}18;color:${pc};font-weight:700;font-size:11px;padding:3px 9px;border-radius:10px;">${PLAN_LABEL[r.plan]||r.plan}</span></td>
           <td style="padding:9px 12px;text-align:right;color:#555;">${fmtR(r.mrr)}</td>
           <td style="padding:9px 12px;text-align:right;font-weight:700;color:#059669;">${fmtR(r.commBase)}</td>
         </tr>`;
@@ -25493,7 +25531,7 @@ const COMISSAO = (() => {
     /* ── Painel direito ── */
     html += `<div style="display:flex;flex-direction:column;gap:16px;">`;
 
-    /* Resultado */
+    /* Resultado — igual para CAP e COP */
     html += `<div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;padding:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div style="font-size:13px;font-weight:800;color:#111;">Resultado ${MES3[state.month]}/${String(state.year).slice(2)}</div>
@@ -25511,7 +25549,7 @@ const COMISSAO = (() => {
         <div style="background:${metaColor}14;border-radius:12px;padding:14px;grid-column:1/3;">
           <div style="font-size:10px;font-weight:700;color:${metaColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">% da meta</div>
           <div style="font-size:28px;font-weight:900;color:${metaColor};line-height:1;">${(pct*100).toFixed(1)}%</div>
-          <div style="font-size:11px;color:${metaColor};opacity:.8;margin-top:4px;">${gatilhoLabel(pct)}</div>
+          <div style="font-size:11px;color:${metaColor};opacity:.8;margin-top:4px;">${glbl}</div>
           <div style="margin-top:10px;height:6px;background:${metaColor}25;border-radius:4px;overflow:hidden;">
             <div style="height:100%;width:${Math.min(100,pct*100).toFixed(1)}%;background:${metaColor};border-radius:4px;"></div>
           </div>
@@ -25519,57 +25557,95 @@ const COMISSAO = (() => {
       </div>
     </div>`;
 
-    /* Base de cálculo */
-    html += `<div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;padding:20px;">
-      <div style="font-size:13px;font-weight:800;color:#111;margin-bottom:14px;">Base de Cálculo</div>`;
-    [['mensal','Mensal','30%'],['trimestral','Trimestral','45%'],['semestral','Semestral','60%'],['anual','Anual','80%'],['copiloto','Copiloto','40%']].forEach(([k,lbl,rate])=>{
-      const v=(byPlan[k]||0)*gtlho;
+    if (isCOP) {
+      /* ── Painel COP IS ── */
+      html += `<div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;padding:20px;">
+        <div style="font-size:13px;font-weight:800;color:#111;margin-bottom:6px;">Comissão COP IS</div>
+        <div style="font-size:11px;color:#aaa;margin-bottom:14px;">MRR × 70% × gatilho × (1 + acelerador)</div>`;
       html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f5f7;font-size:12px;">
-        <div style="color:#555;">${lbl} <span style="color:#bbb;font-size:11px;">${rate}</span></div>
-        <div style="font-weight:700;color:${v>0?'#059669':'#ccc'};">${fmtR(v)}</div></div>`;
-    });
-    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e8e8e8;margin-top:4px;font-size:12px;">
-      <div style="font-weight:700;color:#555;">Bonificação s/ resultado</div>
-      <div style="font-weight:800;color:#111;">${fmtR(bonBase)}</div></div>`;
-
-    /* Acelerador baseado em tier × tempo de casa */
-    const tierLbl = TIER_LABEL[tier]||tier;
-    const timeLbl = TIME_LABEL[timeBkt]||timeBkt;
-    const acel1Val = pct>=1.10?bonBase*tierRates.I:0;
-    const acel2Val = pct>=1.20?bonBase*tierRates.II:0;
-    html+=`<div style="margin-top:12px;margin-bottom:8px;">
-      <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Acelerador (a partir de 110%)</div>
-      <div style="background:#f5f5f7;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:11px;">
-        <span style="font-weight:700;color:#555;">${tierLbl}</span>
-        <span style="color:#bbb;margin:0 6px;">·</span>
-        <span style="color:#777;">${timeLbl}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.10&&pct<1.20?'background:#fef9c3;border:1px solid #fde68a;':''}">
+        <div style="color:#555;">Base (70% do MRR)</div>
+        <div style="font-weight:700;color:${totalCommBase>0?'#059669':'#ccc'};">${fmtR(totalCommBase)}</div></div>`;
+      const copGtlhoPct = copGtlho>0?(copGtlho*100).toFixed(0)+'%':'0%';
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f5f7;font-size:12px;">
+        <div style="color:#555;">Gatilho <span style="color:#bbb;font-size:11px;">${copGtlhoPct}</span></div>
+        <div style="font-weight:700;color:${copBonBase>0?'#059669':'#ccc'};">${fmtR(copBonBase)}</div></div>`;
+      html+=`<div style="margin-top:12px;margin-bottom:8px;font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;">Aceleradores</div>`;
+      const cop1Val = pct>=1.10?copBonBase*0.04:0;
+      const cop2Val = pct>=1.20?copBonBase*0.075:0;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.10&&pct<1.20?'background:#fef9c3;border:1px solid #fde68a;':''}">
         <div style="color:${pct>=1.10&&pct<1.20?'#92400e':'#aaa'};font-weight:${pct>=1.10&&pct<1.20?700:400};">
           Acel I <span style="font-size:10px;color:#bbb;">(110–119%)</span>
           ${pct>=1.10&&pct<1.20?' <span style="font-size:10px;background:#D97706;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">ativo</span>':''}
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
-          <span style="color:#bbb;font-size:11px;">${(tierRates.I*100).toFixed(0)}%</span>
-          <span style="font-weight:700;color:${acel1Val>0?'#D97706':'#ccc'};min-width:72px;text-align:right;">${fmtR(acel1Val)}</span>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.20?'background:#f0fdf4;border:1px solid #bbf7d0;':''}">
+          <span style="color:#bbb;font-size:11px;">+4%</span>
+          <span style="font-weight:700;color:${cop1Val>0?'#D97706':'#ccc'};min-width:72px;text-align:right;">${fmtR(cop1Val)}</span>
+        </div></div>`;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.20?'background:#f0fdf4;border:1px solid #bbf7d0;':''}">
         <div style="color:${pct>=1.20?'#059669':'#aaa'};font-weight:${pct>=1.20?700:400};">
           Acel II <span style="font-size:10px;color:#bbb;">(120%+)</span>
           ${pct>=1.20?' <span style="font-size:10px;background:#059669;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">ativo</span>':''}
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
-          <span style="color:#bbb;font-size:11px;">${(tierRates.II*100).toFixed(0)}%</span>
-          <span style="font-weight:700;color:${acel2Val>0?'#7C3AED':'#ccc'};min-width:72px;text-align:right;">${fmtR(acel2Val)}</span>
-        </div>
-      </div>
-    </div>`;
+          <span style="color:#bbb;font-size:11px;">+7,5%</span>
+          <span style="font-weight:700;color:${cop2Val>0?'#7C3AED':'#ccc'};min-width:72px;text-align:right;">${fmtR(cop2Val)}</span>
+        </div></div>`;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid #e8e8e8;margin-top:8px;">
+        <div style="font-weight:800;color:#111;font-size:13px;">Bonificação total</div>
+        <div style="font-weight:900;font-size:20px;color:#E8620A;">${fmtR(copBonTotal)}</div>
+      </div></div>`;
 
-    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid #e8e8e8;margin-top:4px;">
-      <div style="font-weight:800;color:#111;font-size:13px;">Bonificação total</div>
-      <div style="font-weight:900;font-size:20px;color:#E8620A;">${fmtR(bonTotal)}</div>
-    </div></div>`;
+    } else {
+      /* ── Painel CAP ── */
+      html += `<div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;padding:20px;">
+        <div style="font-size:13px;font-weight:800;color:#111;margin-bottom:14px;">Base de Cálculo</div>`;
+      [['mensal','Mensal','30%'],['trimestral','Trimestral','45%'],['semestral','Semestral','60%'],['anual','Anual','80%']].forEach(([k,lbl,rate])=>{
+        const v=(byPlan[k]||0)*capGtlho;
+        html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f5f7;font-size:12px;">
+          <div style="color:#555;">${lbl} <span style="color:#bbb;font-size:11px;">${rate}</span></div>
+          <div style="font-weight:700;color:${v>0?'#059669':'#ccc'};">${fmtR(v)}</div></div>`;
+      });
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e8e8e8;margin-top:4px;font-size:12px;">
+        <div style="font-weight:700;color:#555;">Bonificação s/ resultado</div>
+        <div style="font-weight:800;color:#111;">${fmtR(capBonBase)}</div></div>`;
+
+      const tierLbl = TIER_LABEL[tier]||tier;
+      const timeLbl = TIME_LABEL[timeBkt]||timeBkt;
+      const acel1Val = pct>=1.10?capBonBase*tierRates.I:0;
+      const acel2Val = pct>=1.20?capBonBase*tierRates.II:0;
+      html+=`<div style="margin-top:12px;margin-bottom:8px;">
+        <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Acelerador (a partir de 110%)</div>
+        <div style="background:#f5f5f7;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:11px;">
+          <span style="font-weight:700;color:#555;">${tierLbl}</span>
+          <span style="color:#bbb;margin:0 6px;">·</span>
+          <span style="color:#777;">${timeLbl}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.10&&pct<1.20?'background:#fef9c3;border:1px solid #fde68a;':''}">
+          <div style="color:${pct>=1.10&&pct<1.20?'#92400e':'#aaa'};font-weight:${pct>=1.10&&pct<1.20?700:400};">
+            Acel I <span style="font-size:10px;color:#bbb;">(110–119%)</span>
+            ${pct>=1.10&&pct<1.20?' <span style="font-size:10px;background:#D97706;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">ativo</span>':''}
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="color:#bbb;font-size:11px;">${(tierRates.I*100).toFixed(0)}%</span>
+            <span style="font-weight:700;color:${acel1Val>0?'#D97706':'#ccc'};min-width:72px;text-align:right;">${fmtR(acel1Val)}</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.20?'background:#f0fdf4;border:1px solid #bbf7d0;':''}">
+          <div style="color:${pct>=1.20?'#059669':'#aaa'};font-weight:${pct>=1.20?700:400};">
+            Acel II <span style="font-size:10px;color:#bbb;">(120%+)</span>
+            ${pct>=1.20?' <span style="font-size:10px;background:#059669;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">ativo</span>':''}
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="color:#bbb;font-size:11px;">${(tierRates.II*100).toFixed(0)}%</span>
+            <span style="font-weight:700;color:${acel2Val>0?'#7C3AED':'#ccc'};min-width:72px;text-align:right;">${fmtR(acel2Val)}</span>
+          </div>
+        </div>
+      </div>`;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid #e8e8e8;margin-top:4px;">
+        <div style="font-weight:800;color:#111;font-size:13px;">Bonificação total</div>
+        <div style="font-weight:900;font-size:20px;color:#E8620A;">${fmtR(capBonTotal)}</div>
+      </div></div>`;
+    }
 
     html += `</div></div>`;
     body.innerHTML = html;
