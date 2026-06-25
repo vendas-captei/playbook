@@ -2467,6 +2467,40 @@ function clearSettingsModal() {
           </div>
         </div>
         <div class="um-row" style="margin-bottom:14px;">
+          <div>
+            <label class="um-label">Senioridade</label>
+            <select class="um-input" id="um-seniority" style="cursor:pointer;">
+              <option value="rampagem">🐣 Rampagem</option>
+              <option value="junior1">🌱 Júnior I</option>
+              <option value="junior2">🌱 Júnior II</option>
+              <option value="junior3">🌱 Júnior III</option>
+              <option value="pleno1" selected>🌿 Pleno I</option>
+              <option value="pleno2">🌿 Pleno II</option>
+              <option value="pleno3">🌿 Pleno III</option>
+              <option value="senior1">🌳 Sênior I</option>
+              <option value="senior2">🌳 Sênior II</option>
+              <option value="senior3">🌳 Sênior III</option>
+            </select>
+          </div>
+          <div>
+            <label class="um-label">Data de início na empresa</label>
+            <input class="um-input" id="um-data-inicio" type="date" />
+          </div>
+        </div>
+        <div class="um-row" style="margin-bottom:14px;align-items:flex-end;gap:16px;">
+          <div style="display:flex;align-items:center;gap:8px;padding-bottom:8px;">
+            <input type="checkbox" id="um-has-comissao" style="width:15px;height:15px;cursor:pointer;accent-color:#E8620A;" onchange="document.getElementById('um-tipo-wrap').style.display=this.checked?'block':'none'" />
+            <label for="um-has-comissao" class="um-label" style="margin-bottom:0;cursor:pointer;">Tem comissão?</label>
+          </div>
+          <div id="um-tipo-wrap" style="display:none;">
+            <label class="um-label">Tipo de venda</label>
+            <select class="um-input" id="um-tipo-vendas" style="cursor:pointer;">
+              <option value="vendas">💼 Vendas (IS)</option>
+              <option value="prevendas">📞 Pré-Vendas (SDR)</option>
+            </select>
+          </div>
+        </div>
+        <div class="um-row" style="margin-bottom:14px;">
           <div style="flex:1;">
             <label class="um-label">Meta mensal</label>
             <input class="um-input" id="um-meta" type="text" placeholder="Ex: R$ 50.000" />
@@ -22724,6 +22758,16 @@ const USERMGMT = (() => {
     });
     const teamEl = document.getElementById('um-team');
     if (teamEl) teamEl.value = 'CAP';
+    const senEl = document.getElementById('um-seniority');
+    if (senEl) senEl.value = 'pleno1';
+    const diEl = document.getElementById('um-data-inicio');
+    if (diEl) diEl.value = '';
+    const hcEl = document.getElementById('um-has-comissao');
+    if (hcEl) hcEl.checked = false;
+    const tipoWrap = document.getElementById('um-tipo-wrap');
+    if (tipoWrap) tipoWrap.style.display = 'none';
+    const tipoEl = document.getElementById('um-tipo-vendas');
+    if (tipoEl) tipoEl.value = 'vendas';
     setMsg('error', '');
     setMsg('success', '');
   }
@@ -22898,11 +22942,15 @@ const USERMGMT = (() => {
   }
 
   function addUser() {
-    const name  = (document.getElementById('um-name').value || '').trim();
-    const email = (document.getElementById('um-email').value || '').trim().toLowerCase();
-    const pass  = (document.getElementById('um-pass').value || '').trim();
-    const team  = (document.getElementById('um-team')?.value) || 'CAP';
-    const meta  = (document.getElementById('um-meta').value || '').trim();
+    const name       = (document.getElementById('um-name').value || '').trim();
+    const email      = (document.getElementById('um-email').value || '').trim().toLowerCase();
+    const pass       = (document.getElementById('um-pass').value || '').trim();
+    const team       = (document.getElementById('um-team')?.value) || 'CAP';
+    const meta       = (document.getElementById('um-meta').value || '').trim();
+    const seniority  = (document.getElementById('um-seniority')?.value) || 'pleno1';
+    const dataInicio = (document.getElementById('um-data-inicio')?.value || '').trim();
+    const hasComissao= document.getElementById('um-has-comissao')?.checked || false;
+    const tipoVendas = hasComissao ? ((document.getElementById('um-tipo-vendas')?.value) || 'vendas') : null;
 
     setMsg('error', '');
     setMsg('success', '');
@@ -22918,7 +22966,7 @@ const USERMGMT = (() => {
     }
 
     const extra = AUTH.loadExtra();
-    extra.push({ user: email, pass, name, team, meta });
+    extra.push({ user: email, pass, name, team, meta, seniority, dataInicio, hasComissao, tipoVendas });
     AUTH.saveExtra(extra);
 
     clearForm();
@@ -25033,7 +25081,7 @@ const RH = (() => {
       <div style="font-size:12px;font-weight:600;color:#E8620A;margin-bottom:2px;" id="cm-collab-label"></div>
       <div style="font-size:22px;font-weight:900;color:#111;">💰 Minha Comissão</div>
     </div>
-    <div style="width:130px;"></div>
+    <div id="cm-seller-select" style="display:none;"></div>
   </div>
 
   <!-- Body -->
@@ -25049,16 +25097,38 @@ const COMISSAO = (() => {
   const PLAN_LABEL  = { mensal:'Mensal', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual', copiloto:'Copiloto' };
   const PLAN_COLOR  = { mensal:'#D97706', trimestral:'#059669', semestral:'#7C3AED', anual:'#2563EB', copiloto:'#E8620A' };
 
-  const ACEL = {
-    rampagem:0, junior1:0.05, junior2:0.075, junior3:0.10,
-    pleno1:0.125, pleno2:0.15, pleno3:0.175,
-    senior1:0.20, senior2:0.225, senior3:0.25
+  // Accelerator table: tier × time-at-company × level (from Cargos & Comissões)
+  // Acel I = 110–119% of meta; Acel II = 120%+
+  const ACEL_TABLE = {
+    rampagem: { lt6:{I:0,II:0},         m6_18:{I:0,II:0},         ge18:{I:0,II:0}         },
+    junior:   { lt6:{I:0.05,II:0.12},   m6_18:{I:0.08,II:0.15},   ge18:{I:0.10,II:0.17}   },
+    pleno:    { lt6:{I:0.10,II:0.17},   m6_18:{I:0.13,II:0.20},   ge18:{I:0.15,II:0.22}   },
+    senior:   { lt6:{I:0.15,II:0.22},   m6_18:{I:0.20,II:0.27},   ge18:{I:0.25,II:0.32}   },
   };
-  const ACEL_LABEL = {
-    rampagem:'Rampagem', junior1:'Júnior I', junior2:'Júnior II', junior3:'Júnior III',
-    pleno1:'Pleno I', pleno2:'Pleno II', pleno3:'Pleno III',
-    senior1:'Sênior I', senior2:'Sênior II', senior3:'Sênior III'
-  };
+  const TIER_LABEL = { rampagem:'Rampagem', junior:'Júnior', pleno:'Pleno', senior:'Sênior' };
+  const TIME_LABEL = { lt6:'< 6 meses', m6_18:'6–18 meses', ge18:'18+ meses' };
+
+  function getTier(senKey) {
+    if (!senKey||senKey==='rampagem') return 'rampagem';
+    if (senKey.startsWith('junior')) return 'junior';
+    if (senKey.startsWith('pleno'))  return 'pleno';
+    if (senKey.startsWith('senior')) return 'senior';
+    return 'rampagem';
+  }
+  function getTimeBracket(dataInicio) {
+    if (!dataInicio) return 'ge18';
+    const start = new Date(dataInicio);
+    const now = new Date();
+    const months = (now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth());
+    if (months < 6)  return 'lt6';
+    if (months < 18) return 'm6_18';
+    return 'ge18';
+  }
+  function getAcelRate(pct, tier, timeBracket) {
+    if (pct < 1.10) return 0;
+    const tbl = (ACEL_TABLE[tier]||{})[timeBracket] || {I:0,II:0};
+    return pct >= 1.20 ? tbl.II : tbl.I;
+  }
 
   function gatilho(pct) {
     if (pct < 0.70) return 0;
@@ -25071,15 +25141,18 @@ const COMISSAO = (() => {
     if (pct < 0.85) return '60% da base (70–84%)';
     if (pct < 1.00) return '80% da base (85–99%)';
     if (pct < 1.10) return '100% da base';
-    if (pct < 1.20) return '100% + Acelerador I';
+    if (pct < 1.20) return '100% + Acelerador I (110–119%)';
     return '100% + Acelerador II (120%+)';
   }
 
   let state = {
     token:null, month:new Date().getMonth()+1, year:new Date().getFullYear(),
-    deals:[], myUserId:null, myUserName:'', dealFields:[],
-    fidelidadeKey:null, produtoKey:null, mrrKey:null, idCapteiKey:null,
-    meta:45000, senKey:'pleno1', loaded:false,
+    deals:[], dealProducts:{},
+    myUserId:null, myUserName:'', dealFields:[],
+    viewUserId:null, viewUserName:'',
+    fidelidadeKey:null, mrrKey:null, idCapteiKey:null,
+    meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas',
+    allPdUsers:[], loaded:false,
   };
 
   const fmtR = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -25123,7 +25196,6 @@ const COMISSAO = (() => {
   }
 
   function detectPlan(fidelVal, dealValue, mrr) {
-    // 1. Tenta pelo campo de texto (fidelidade/plano)
     if (fidelVal) {
       const v = fidelVal.toLowerCase();
       if (v.includes('anual')||v.includes('annual')) return 'anual';
@@ -25132,7 +25204,6 @@ const COMISSAO = (() => {
       if (v.includes('mensal')||v.includes('monthly')) return 'mensal';
       if (v.includes('copiloto')||v.includes('cop')) return 'copiloto';
     }
-    // 2. Infere pela razão deal.value / MRR
     if (mrr > 0 && dealValue > 0) {
       const months = Math.round(dealValue / mrr);
       if (months <= 1)  return 'mensal';
@@ -25148,23 +25219,29 @@ const COMISSAO = (() => {
     if (typeof u.email==='string') return u.email.toLowerCase();
     if (Array.isArray(u.email)) {
       const p = u.email.find(e=>e.primary);
-      return ((p?.value)||u.email[0]?.value||'').toLowerCase();
+      return ((p&&p.value)||u.email[0]&&u.email[0].value||'').toLowerCase();
     }
     return '';
   }
 
-  function resolveUserMeta(pdUser) {
-    if (typeof AUTH==='undefined') return {meta:45000,senKey:'pleno1'};
+  function resolveUserMeta(pdUser, overrideName) {
+    if (typeof AUTH==='undefined') return {meta:45000,senKey:'pleno1',dataInicio:'',tipoVendas:'vendas'};
     const email = pdEmail(pdUser);
     const session = getSession();
+    const lookupName = overrideName || (session.name||'').toLowerCase();
     const au = AUTH.getAllUsers().find(a => {
       const ae = (a.user||a.email||'').toLowerCase();
       if (email && ae===email) return true;
-      return (a.name||'').toLowerCase()===(session.name||'').toLowerCase();
+      return (a.name||'').toLowerCase()===lookupName;
     });
-    if (!au) return {meta:45000,senKey:'pleno1'};
+    if (!au) return {meta:45000,senKey:'pleno1',dataInicio:'',tipoVendas:'vendas'};
     const metaNum = au.meta?(parseInt(String(au.meta).replace(/[^0-9]/g,''))||0):0;
-    return {meta:metaNum||45000, senKey:au.seniority||'pleno1'};
+    return {
+      meta:       metaNum||45000,
+      senKey:     au.seniority||'pleno1',
+      dataInicio: au.dataInicio||'',
+      tipoVendas: au.tipoVendas||'vendas',
+    };
   }
 
   function monthTabs() {
@@ -25174,6 +25251,29 @@ const COMISSAO = (() => {
       h += `<button onclick="COMISSAO.setMonth(${m})" style="padding:6px 15px;border-radius:20px;border:1.5px solid ${a?'#E8620A':'#e0e0e0'};background:${a?'#E8620A':'#fff'};color:${a?'#fff':'#555'};font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">${MES3[m]}/${String(state.year).slice(2)}</button>`;
     }
     return h + `</div>`;
+  }
+
+  function buildSellerDropdown(session, allPdUsers) {
+    if (typeof AUTH==='undefined') return;
+    const isAdminGestao = session.isAdmin || session.team==='Gestão';
+    const selDiv = document.getElementById('cm-seller-select');
+    if (!selDiv) return;
+    if (!isAdminGestao) { selDiv.style.display='none'; return; }
+
+    const comUsers = AUTH.getAllUsers().filter(u => u.hasComissao || u.meta);
+    const pdEmailMap = {};
+    allPdUsers.forEach(u => { pdEmailMap[pdEmail(u)] = u.id; });
+
+    let opts = `<option value="">— Minha comissão —</option>`;
+    comUsers.forEach(u => {
+      const uEmail = (u.user||u.email||'').toLowerCase();
+      const pdId = pdEmailMap[uEmail] || '';
+      const uName = u.name||uEmail;
+      opts += `<option value="${uEmail}|${pdId}|${encodeURIComponent(uName)}">${uName}</option>`;
+    });
+    selDiv.style.display = 'block';
+    selDiv.innerHTML = `<label style="font-size:11px;font-weight:700;color:#aaa;display:block;margin-bottom:4px;">Ver comissão de</label>
+      <select id="cm-seller-sel" style="padding:7px 12px;border-radius:10px;border:1.5px solid #e0e0e0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:#fff;" onchange="COMISSAO.selectSeller(this.value)">${opts}</select>`;
   }
 
   async function init() {
@@ -25187,37 +25287,40 @@ const COMISSAO = (() => {
     try {
       const rawFields = await pd('dealFields?limit=200');
       state.dealFields = Array.isArray(rawFields)?rawFields:[];
-      // Keys conhecidos da Captei (fallback hardcoded caso findKey não encontre)
-      const MRR_KEY_CAPTEI  = 'ac90208e8bba90f5646de20bd9e3c63346521b3a';
-      const ID_CAPTEI_KEY   = 'fe13789afb59223307327f7807cfb6127a315e2c';
+      const MRR_KEY_CAPTEI = 'ac90208e8bba90f5646de20bd9e3c63346521b3a';
+      const ID_CAPTEI_KEY  = 'fe13789afb59223307327f7807cfb6127a315e2c';
       state.fidelidadeKey = findKey(state.dealFields,'fidelidade','periodicidade','duração');
-      state.produtoKey    = findKey(state.dealFields,'produto','product','plano vigente','qual o produto');
       state.mrrKey        = findKey(state.dealFields,'mrr','mensalidade','monthly') || MRR_KEY_CAPTEI;
       state.idCapteiKey   = findKey(state.dealFields,'captei','id no sistema','id captei','id_captei') || ID_CAPTEI_KEY;
 
       const session = getSession();
       const sName   = (session.name||'').toLowerCase();
       const allUsers = await pd('users?limit=200');
+      state.allPdUsers = Array.isArray(allUsers)?allUsers:[];
 
-      // 1. Tenta por email (AUTH → Pipedrive) — mais confiável
       let myPd = null;
       if (typeof AUTH !== 'undefined') {
         const authUser = AUTH.getAllUsers().find(a => (a.name||'').toLowerCase() === sName);
         const authEmail = authUser ? (authUser.user||authUser.email||'').toLowerCase() : '';
-        if (authEmail) myPd = allUsers.find(u => pdEmail(u) === authEmail);
+        if (authEmail) myPd = state.allPdUsers.find(u => pdEmail(u) === authEmail);
       }
-      // 2. Fallback: nome completo exato
-      if (!myPd) myPd = allUsers.find(u => (u.name||'').toLowerCase() === sName);
+      if (!myPd) myPd = state.allPdUsers.find(u => (u.name||'').toLowerCase() === sName);
 
       state.myUserId   = myPd ? myPd.id : null;
       state.myUserName = myPd ? myPd.name : (session.name||'Você');
+      state.viewUserId   = state.myUserId;
+      state.viewUserName = state.myUserName;
 
-      const {meta,senKey} = resolveUserMeta(myPd||{});
-      state.meta   = meta;
-      state.senKey = senKey;
+      const meta = resolveUserMeta(myPd||{});
+      state.meta       = meta.meta;
+      state.senKey     = meta.senKey;
+      state.dataInicio = meta.dataInicio;
+      state.tipoVendas = meta.tipoVendas;
+
+      buildSellerDropdown(session, state.allPdUsers);
 
       const lbl = document.getElementById('cm-collab-label');
-      if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.myUserName}`;
+      if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.viewUserName}`;
 
       state.loaded = true;
       await loadMonth();
@@ -25227,12 +25330,41 @@ const COMISSAO = (() => {
     }
   }
 
+  async function selectSeller(val) {
+    if (!val) {
+      // reset to own user
+      state.viewUserId   = state.myUserId;
+      state.viewUserName = state.myUserName;
+      const meta = resolveUserMeta({});
+      state.meta       = meta.meta;
+      state.senKey     = meta.senKey;
+      state.dataInicio = meta.dataInicio;
+      state.tipoVendas = meta.tipoVendas;
+    } else {
+      const parts = val.split('|');
+      const selEmail = parts[0]||'';
+      const selPdId  = parseInt(parts[1])||null;
+      const selName  = decodeURIComponent(parts[2]||'');
+      state.viewUserId   = selPdId;
+      state.viewUserName = selName;
+      const selPdUser = state.allPdUsers.find(u => pdEmail(u)===selEmail) || {};
+      const meta = resolveUserMeta(selPdUser, selName.toLowerCase());
+      state.meta       = meta.meta;
+      state.senKey     = meta.senKey;
+      state.dataInicio = meta.dataInicio;
+      state.tipoVendas = meta.tipoVendas;
+    }
+    const lbl = document.getElementById('cm-collab-label');
+    if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.viewUserName}`;
+    await loadMonth();
+  }
+
   async function loadMonth() {
     if (!state.loaded) { await init(); return; }
     const body = document.getElementById('cm-body');
     if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:50px;color:#aaa;">⏳ Buscando deals de ${MES[state.month]}...</div>`;
     const lbl = document.getElementById('cm-collab-label');
-    if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.myUserName}`;
+    if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.viewUserName}`;
 
     const m = String(state.month).padStart(2,'0'), y = state.year;
     const lastDay = new Date(y,state.month,0).getDate();
@@ -25247,13 +25379,28 @@ const COMISSAO = (() => {
           const wt=(d.won_time||'').slice(0,10);
           if (wt>end) continue;
           if (wt<start){stop=true;break;}
-          if (!state.myUserId){deals.push(d);continue;}
-          const uid=typeof d.user_id==='object'?d.user_id?.id:d.user_id;
-          if (uid===state.myUserId) deals.push(d);
+          if (!state.viewUserId){deals.push(d);continue;}
+          const uid=typeof d.user_id==='object'?d.user_id&&d.user_id.id:d.user_id;
+          if (uid===state.viewUserId) deals.push(d);
         }
         if (stop||chunk.length<100) break;
       }
       state.deals = deals;
+
+      // Fetch connected product for each deal in parallel
+      state.dealProducts = {};
+      if (deals.length > 0) {
+        const prodResults = await Promise.all(deals.map(d =>
+          pd(`deals/${d.id}/products`).then(prods => {
+            const arr = Array.isArray(prods)?prods:[];
+            if (!arr.length) return {id:d.id, name:'—'};
+            const p = arr[0];
+            return {id:d.id, name: p.name || (p.product_id&&(p.product_id.name||String(p.product_id))) || '—'};
+          }).catch(()=>({id:d.id, name:'—'}))
+        ));
+        prodResults.forEach(r => { state.dealProducts[r.id] = r.name; });
+      }
+
       render();
     } catch(e) {
       if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:60px;color:#DC2626;">❌ ${e.message}</div>`;
@@ -25272,9 +25419,10 @@ const COMISSAO = (() => {
       const mrr      = mrrRaw>0?mrrRaw:(d.value||0)/(PLAN_MONTHS[plan]||12);
       return {
         d, date:(d.won_time||'').slice(0,10),
-        client: d.title||(d.org_id?.name)||'—',
+        client: d.title||(d.org_id&&d.org_id.name)||'—',
         idCaptei: state.idCapteiKey?(fieldVal(d,state.idCapteiKey)||d.id):d.id,
-        valor:d.value||0, produto:fieldVal(d,state.produtoKey)||'—',
+        valor:d.value||0,
+        produto: state.dealProducts[d.id] || '—',
         fidelVal:fidelVal||'Anual', plan, mrr,
         commBase: mrr*(PLAN_RATES[plan]||0.80),
       };
@@ -25286,9 +25434,12 @@ const COMISSAO = (() => {
     const metaColor    = pct>=1.20?'#7C3AED':pct>=1.00?'#059669':pct>=0.70?'#D97706':'#DC2626';
     const byPlan = {};
     rows.forEach(r=>{if(!byPlan[r.plan])byPlan[r.plan]=0;byPlan[r.plan]+=r.commBase;});
-    const bonBase  = Object.values(byPlan).reduce((s,v)=>s+v,0)*gtlho;
-    const acelRate = pct>=1.20?(ACEL[state.senKey]||0):0;
-    const bonTotal = bonBase*(1+acelRate);
+    const bonBase    = Object.values(byPlan).reduce((s,v)=>s+v,0)*gtlho;
+    const tier       = getTier(state.senKey);
+    const timeBkt    = getTimeBracket(state.dataInicio);
+    const acelRate   = getAcelRate(pct, tier, timeBkt);
+    const bonTotal   = bonBase*(1+acelRate);
+    const tierRates  = (ACEL_TABLE[tier]||{})[timeBkt] || {I:0,II:0};
 
     let html = monthTabs();
     html += `<div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;">`;
@@ -25306,7 +25457,7 @@ const COMISSAO = (() => {
         <thead><tr style="background:#f8f8f9;">
           <th style="padding:10px 12px;text-align:left;font-weight:700;color:#666;white-space:nowrap;border-bottom:1px solid #f0f0f0;">Data</th>
           <th style="padding:10px 12px;text-align:left;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Cliente</th>
-          <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">ID</th>
+          <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">ID Captei</th>
           <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Contrato</th>
           <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Produto</th>
           <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Plano</th>
@@ -25319,9 +25470,9 @@ const COMISSAO = (() => {
         html += `<tr style="border-top:1px solid #f5f5f7;${i%2===1?'background:#fafafa':''}">
           <td style="padding:9px 12px;color:#999;white-space:nowrap;">${dt}</td>
           <td style="padding:9px 12px;font-weight:600;color:#111;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.client}">${r.client}</td>
-          <td style="padding:9px 12px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#aaa;">${r.idCaptei}</td>
+          <td style="padding:9px 12px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#555;font-weight:600;">${r.idCaptei}</td>
           <td style="padding:9px 12px;text-align:right;font-weight:600;color:#111;">${fmtR(r.valor)}</td>
-          <td style="padding:9px 12px;text-align:center;color:#666;font-size:11px;">${r.produto}</td>
+          <td style="padding:9px 12px;text-align:center;color:#666;font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.produto}">${r.produto}</td>
           <td style="padding:9px 12px;text-align:center;"><span style="background:${pc}18;color:${pc};font-weight:700;font-size:11px;padding:3px 9px;border-radius:10px;">${PLAN_LABEL[r.plan]}</span></td>
           <td style="padding:9px 12px;text-align:right;color:#555;">${fmtR(r.mrr)}</td>
           <td style="padding:9px 12px;text-align:right;font-weight:700;color:#059669;">${fmtR(r.commBase)}</td>
@@ -25381,20 +25532,41 @@ const COMISSAO = (() => {
       <div style="font-weight:700;color:#555;">Bonificação s/ resultado</div>
       <div style="font-weight:800;color:#111;">${fmtR(bonBase)}</div></div>`;
 
-    html+=`<div style="margin-top:12px;margin-bottom:8px;font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;">Aceleradores (a partir de 120%)</div>`;
-    Object.entries(ACEL).forEach(([k,rate])=>{
-      const isMe=k===state.senKey;
-      const val=pct>=1.20?bonBase*rate:0;
-      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:2px;${isMe?'background:#f0fdf4;border:1px solid #bbf7d0;':''}">
-        <div style="color:${isMe?'#059669':'#aaa'};font-weight:${isMe?700:400};">
-          ${ACEL_LABEL[k]}${isMe?' <span style="font-size:10px;font-weight:600;background:#059669;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">você</span>':''}
+    /* Acelerador baseado em tier × tempo de casa */
+    const tierLbl = TIER_LABEL[tier]||tier;
+    const timeLbl = TIME_LABEL[timeBkt]||timeBkt;
+    const acel1Val = pct>=1.10?bonBase*tierRates.I:0;
+    const acel2Val = pct>=1.20?bonBase*tierRates.II:0;
+    html+=`<div style="margin-top:12px;margin-bottom:8px;">
+      <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Acelerador (a partir de 110%)</div>
+      <div style="background:#f5f5f7;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:11px;">
+        <span style="font-weight:700;color:#555;">${tierLbl}</span>
+        <span style="color:#bbb;margin:0 6px;">·</span>
+        <span style="color:#777;">${timeLbl}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.10&&pct<1.20?'background:#fef9c3;border:1px solid #fde68a;':''}">
+        <div style="color:${pct>=1.10&&pct<1.20?'#92400e':'#aaa'};font-weight:${pct>=1.10&&pct<1.20?700:400};">
+          Acel I <span style="font-size:10px;color:#bbb;">(110–119%)</span>
+          ${pct>=1.10&&pct<1.20?' <span style="font-size:10px;background:#D97706;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">ativo</span>':''}
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
-          <span style="color:#bbb;font-size:11px;">${(rate*100).toFixed(1).replace('.',',')}%</span>
-          <span style="font-weight:700;color:${val>0?'#7C3AED':'#ccc'};min-width:72px;text-align:right;">${fmtR(val)}</span>
-        </div></div>`;
-    });
-    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid #e8e8e8;margin-top:8px;">
+          <span style="color:#bbb;font-size:11px;">${(tierRates.I*100).toFixed(0)}%</span>
+          <span style="font-weight:700;color:${acel1Val>0?'#D97706':'#ccc'};min-width:72px;text-align:right;">${fmtR(acel1Val)}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:4px;${pct>=1.20?'background:#f0fdf4;border:1px solid #bbf7d0;':''}">
+        <div style="color:${pct>=1.20?'#059669':'#aaa'};font-weight:${pct>=1.20?700:400};">
+          Acel II <span style="font-size:10px;color:#bbb;">(120%+)</span>
+          ${pct>=1.20?' <span style="font-size:10px;background:#059669;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">ativo</span>':''}
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span style="color:#bbb;font-size:11px;">${(tierRates.II*100).toFixed(0)}%</span>
+          <span style="font-weight:700;color:${acel2Val>0?'#7C3AED':'#ccc'};min-width:72px;text-align:right;">${fmtR(acel2Val)}</span>
+        </div>
+      </div>
+    </div>`;
+
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid #e8e8e8;margin-top:4px;">
       <div style="font-weight:800;color:#111;font-size:13px;">Bonificação total</div>
       <div style="font-weight:900;font-size:20px;color:#E8620A;">${fmtR(bonTotal)}</div>
     </div></div>`;
@@ -25412,7 +25584,7 @@ const COMISSAO = (() => {
 
   function reload() { state.loaded=false; init(); }
 
-  return { init, setMonth, reload };
+  return { init, setMonth, reload, selectSeller };
 })();
 window.COMISSAO = COMISSAO;
 </script>
