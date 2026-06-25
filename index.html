@@ -2784,6 +2784,7 @@ function clearSettingsModal() {
         </div>
         <div class="s-group-body">
           <div class="s-sub" onclick="showSection('tabuleiro-comercial', this)">🏆 Tabuleiro Comercial</div>
+          <div class="s-sub" onclick="showSection('comissao', this)">💰 Minha Comissão</div>
 
         </div>
       </div>
@@ -19140,7 +19141,7 @@ function showSection(id, el) {
   const ov = document.getElementById('overlay');
   if (ov) ov.classList.remove('show');
   // Esconde main quando seções externas (PDI/Tabuleiro) estão ativas — evita blank space
-  const externalSections = ['pdi-board', 'pdi-checkin', 'pdi-timeline', 'tabuleiro-comercial', 'ranking-home'];
+  const externalSections = ['pdi-board', 'pdi-checkin', 'pdi-timeline', 'tabuleiro-comercial', 'ranking-home', 'comissao'];
   const mainEl = document.querySelector('main.main');
   const layoutEl = document.querySelector('.layout');
   if (externalSections.includes(id)) {
@@ -19156,6 +19157,7 @@ function showSection(id, el) {
   if (id === 'pdi-checkin')  { try { PDI.renderCheckin(); } catch(e){} }
   if (id === 'pdi-timeline') { try { PDI.renderTimeline(); } catch(e){} }
   if (id === 'tabuleiro-comercial') { try { TB.init(); } catch(e){ console.error('TB',e); } }
+  if (id === 'comissao') { try { COMISSAO.init(); } catch(e){ console.error('COMISSAO',e); } }
 }
 
 function toggleCard(header) { header.closest('.card').classList.toggle('open'); }
@@ -25019,6 +25021,382 @@ const RH = (() => {
 
 </div>
 
+
+<!-- ═══════════════════════════════════════════
+     MINHA COMISSÃO
+     ═══════════════════════════════════════════ -->
+<div class="section" id="sec-comissao" style="min-height:100vh;background:#f5f5f7;padding:0;margin-left:var(--sidebar-w);flex-direction:column;align-items:stretch;">
+
+  <!-- Header -->
+  <div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:#E8620A;margin-bottom:2px;" id="cm-collab-label"></div>
+      <div style="font-size:22px;font-weight:900;color:#111;">💰 Minha Comissão</div>
+    </div>
+    <button onclick="COMISSAO.reload()" style="font-size:12px;font-weight:700;color:#666;background:#f5f5f7;border:1px solid #e0e0e0;border-radius:10px;padding:7px 16px;cursor:pointer;font-family:inherit;">↻ Atualizar</button>
+  </div>
+
+  <!-- Body -->
+  <div id="cm-body" style="padding:24px 28px;box-sizing:border-box;max-width:1400px;width:100%;"></div>
+</div>
+
+<script>
+/* === COMISSAO — Minha Comissão === */
+const COMISSAO = (() => {
+
+  const PLAN_RATES  = { mensal:0.30, trimestral:0.45, semestral:0.60, anual:0.80, copiloto:0.40 };
+  const PLAN_MONTHS = { mensal:1, trimestral:3, semestral:6, anual:12, copiloto:1 };
+  const PLAN_LABEL  = { mensal:'Mensal', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual', copiloto:'Copiloto' };
+  const PLAN_COLOR  = { mensal:'#D97706', trimestral:'#059669', semestral:'#7C3AED', anual:'#2563EB', copiloto:'#E8620A' };
+
+  const ACEL = {
+    rampagem:0, junior1:0.05, junior2:0.075, junior3:0.10,
+    pleno1:0.125, pleno2:0.15, pleno3:0.175,
+    senior1:0.20, senior2:0.225, senior3:0.25
+  };
+  const ACEL_LABEL = {
+    rampagem:'Rampagem', junior1:'Júnior I', junior2:'Júnior II', junior3:'Júnior III',
+    pleno1:'Pleno I', pleno2:'Pleno II', pleno3:'Pleno III',
+    senior1:'Sênior I', senior2:'Sênior II', senior3:'Sênior III'
+  };
+
+  function gatilho(pct) {
+    if (pct < 0.70) return 0;
+    if (pct < 0.85) return 0.60;
+    if (pct < 1.00) return 0.80;
+    return 1.00;
+  }
+  function gatilhoLabel(pct) {
+    if (pct < 0.70) return '0% — abaixo de 70% da meta';
+    if (pct < 0.85) return '60% da base (70–84%)';
+    if (pct < 1.00) return '80% da base (85–99%)';
+    if (pct < 1.10) return '100% da base';
+    if (pct < 1.20) return '100% + Acelerador I';
+    return '100% + Acelerador II (120%+)';
+  }
+
+  let state = {
+    token:null, month:new Date().getMonth()+1, year:new Date().getFullYear(),
+    deals:[], myUserId:null, myUserName:'', dealFields:[],
+    fidelidadeKey:null, produtoKey:null, mrrKey:null, idCapteiKey:null,
+    meta:45000, senKey:'pleno1', loaded:false,
+  };
+
+  const fmtR = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const MES  = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const MES3 = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  function getToken() {
+    try { return JSON.parse(localStorage.getItem('captei_tb_config')||'{}').token||''; } catch(e){ return ''; }
+  }
+  function getSession() {
+    try { return JSON.parse(sessionStorage.getItem('captei_pb_session')||'{}'); } catch(e){ return {}; }
+  }
+
+  async function pd(path) {
+    const sep = path.includes('?')?'&':'?';
+    const r = await fetch(`https://api.pipedrive.com/v1/${path}${sep}api_token=${state.token}`);
+    if (r.status===401) throw new Error('Token inválido (401)');
+    if (!r.ok) throw new Error(`API ${r.status}: ${path.split('?')[0]}`);
+    return (await r.json()).data || [];
+  }
+
+  function findKey(fields, ...kws) {
+    const f = fields.find(f => kws.some(k => f.name.toLowerCase().includes(k.toLowerCase())));
+    return f ? f.key : null;
+  }
+
+  function fieldVal(deal, key) {
+    if (!key) return null;
+    const v = deal[key];
+    if (v==null||v==='') return null;
+    const field = state.dealFields.find(f => f.key===key);
+    if (field && (field.field_type==='enum'||field.field_type==='set') && field.options) {
+      const labels = String(v).split(',').map(id => {
+        const o = field.options.find(o => String(o.id)===id.trim());
+        return o ? o.label : id;
+      });
+      return labels.join(', ');
+    }
+    if (typeof v==='object' && v!==null) return v.name||v.label||v.value||String(v);
+    return String(v);
+  }
+
+  function detectPlan(val) {
+    if (!val) return 'anual';
+    const v = val.toLowerCase();
+    if (v.includes('anual')||v.includes('annual')) return 'anual';
+    if (v.includes('semest')) return 'semestral';
+    if (v.includes('trimes')) return 'trimestral';
+    if (v.includes('mensal')||v.includes('monthly')) return 'mensal';
+    if (v.includes('copiloto')||v.includes('cop')) return 'copiloto';
+    return 'anual';
+  }
+
+  function pdEmail(u) {
+    if (!u||!u.email) return '';
+    if (typeof u.email==='string') return u.email.toLowerCase();
+    if (Array.isArray(u.email)) {
+      const p = u.email.find(e=>e.primary);
+      return ((p?.value)||u.email[0]?.value||'').toLowerCase();
+    }
+    return '';
+  }
+
+  function resolveUserMeta(pdUser) {
+    if (typeof AUTH==='undefined') return {meta:45000,senKey:'pleno1'};
+    const email = pdEmail(pdUser);
+    const session = getSession();
+    const au = AUTH.getAllUsers().find(a => {
+      const ae = (a.user||a.email||'').toLowerCase();
+      if (email && ae===email) return true;
+      return (a.name||'').toLowerCase()===(session.name||'').toLowerCase();
+    });
+    if (!au) return {meta:45000,senKey:'pleno1'};
+    const metaNum = au.meta?(parseInt(String(au.meta).replace(/[^0-9]/g,''))||0):0;
+    return {meta:metaNum||45000, senKey:au.seniority||'pleno1'};
+  }
+
+  function monthTabs() {
+    let h = `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;">`;
+    for (let m=1;m<=12;m++) {
+      const a = m===state.month;
+      h += `<button onclick="COMISSAO.setMonth(${m})" style="padding:6px 15px;border-radius:20px;border:1.5px solid ${a?'#E8620A':'#e0e0e0'};background:${a?'#E8620A':'#fff'};color:${a?'#fff':'#555'};font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">${MES3[m]}/${String(state.year).slice(2)}</button>`;
+    }
+    return h + `</div>`;
+  }
+
+  async function init() {
+    state.token = getToken();
+    const body = document.getElementById('cm-body');
+    if (!state.token) {
+      if (body) body.innerHTML = `<div style="text-align:center;padding:80px 20px;color:#aaa;"><div style="font-size:40px;margin-bottom:12px;">🔑</div><div style="font-size:15px;font-weight:700;color:#555;">Token Pipedrive não configurado</div><div style="font-size:13px;margin-top:6px;">Configure em <b>Integrações</b> para ver suas comissões.</div></div>`;
+      return;
+    }
+    if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:60px;color:#aaa;"><div style="font-size:28px;margin-bottom:10px;">⏳</div>Carregando dados do Pipedrive...</div>`;
+    try {
+      const rawFields = await pd('dealFields?limit=200');
+      state.dealFields = Array.isArray(rawFields)?rawFields:[];
+      state.fidelidadeKey = findKey(state.dealFields,'fidelidade','periodicidade','plano','plan','duração');
+      state.produtoKey    = findKey(state.dealFields,'produto','product','tipo de');
+      state.mrrKey        = findKey(state.dealFields,'mrr','mensalidade','monthly');
+      state.idCapteiKey   = findKey(state.dealFields,'captei','id captei','id_captei','contrato');
+
+      const session = getSession();
+      const sName   = (session.name||'').toLowerCase();
+      const sFirst  = sName.split(' ')[0];
+      const allUsers = await pd('users?limit=200');
+      const myPd = allUsers.find(u => {
+        const n = (u.name||'').toLowerCase();
+        return n===sName || n.startsWith(sFirst) || sName.startsWith(n.split(' ')[0]);
+      });
+      state.myUserId   = myPd?myPd.id:null;
+      state.myUserName = myPd?myPd.name:(session.name||'Você');
+
+      const {meta,senKey} = resolveUserMeta(myPd||{});
+      state.meta   = meta;
+      state.senKey = senKey;
+
+      const lbl = document.getElementById('cm-collab-label');
+      if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.myUserName}`;
+
+      state.loaded = true;
+      await loadMonth();
+    } catch(e) {
+      if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:60px;color:#DC2626;"><div style="font-size:24px;margin-bottom:8px;">❌</div>${e.message}</div>`;
+      console.error('COMISSAO.init:',e);
+    }
+  }
+
+  async function loadMonth() {
+    if (!state.loaded) { await init(); return; }
+    const body = document.getElementById('cm-body');
+    if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:50px;color:#aaa;">⏳ Buscando deals de ${MES[state.month]}...</div>`;
+    const lbl = document.getElementById('cm-collab-label');
+    if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.myUserName}`;
+
+    const m = String(state.month).padStart(2,'0'), y = state.year;
+    const lastDay = new Date(y,state.month,0).getDate();
+    const start = `${y}-${m}-01`, end = `${y}-${m}-${lastDay}`;
+    let deals = [];
+    try {
+      for (let s=0;s<3000;s+=100) {
+        const chunk = await pd(`deals?status=won&sort=won_time+DESC&start=${s}&limit=100`);
+        if (!Array.isArray(chunk)||chunk.length===0) break;
+        let stop=false;
+        for (const d of chunk) {
+          const wt=(d.won_time||'').slice(0,10);
+          if (wt>end) continue;
+          if (wt<start){stop=true;break;}
+          if (!state.myUserId){deals.push(d);continue;}
+          const uid=typeof d.user_id==='object'?d.user_id?.id:d.user_id;
+          if (uid===state.myUserId) deals.push(d);
+        }
+        if (stop||chunk.length<100) break;
+      }
+      state.deals = deals;
+      render();
+    } catch(e) {
+      if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:60px;color:#DC2626;">❌ ${e.message}</div>`;
+      console.error('COMISSAO.loadMonth:',e);
+    }
+  }
+
+  function render() {
+    const body = document.getElementById('cm-body');
+    if (!body) return;
+
+    const rows = state.deals.map(d => {
+      const fidelVal = fieldVal(d,state.fidelidadeKey);
+      const plan     = detectPlan(fidelVal);
+      const mrrRaw   = state.mrrKey?parseFloat(d[state.mrrKey]||0):0;
+      const mrr      = mrrRaw>0?mrrRaw:(d.value||0)/(PLAN_MONTHS[plan]||12);
+      return {
+        d, date:(d.won_time||'').slice(0,10),
+        client: d.title||(d.org_id?.name)||'—',
+        idCaptei: state.idCapteiKey?(fieldVal(d,state.idCapteiKey)||d.id):d.id,
+        valor:d.value||0, produto:fieldVal(d,state.produtoKey)||'—',
+        fidelVal:fidelVal||'Anual', plan, mrr,
+        commBase: mrr*(PLAN_RATES[plan]||0.80),
+      };
+    });
+
+    const totalRevenue = rows.reduce((s,r)=>s+r.valor,0);
+    const pct          = state.meta>0?totalRevenue/state.meta:0;
+    const gtlho        = gatilho(pct);
+    const metaColor    = pct>=1.20?'#7C3AED':pct>=1.00?'#059669':pct>=0.70?'#D97706':'#DC2626';
+    const byPlan = {};
+    rows.forEach(r=>{if(!byPlan[r.plan])byPlan[r.plan]=0;byPlan[r.plan]+=r.commBase;});
+    const bonBase  = Object.values(byPlan).reduce((s,v)=>s+v,0)*gtlho;
+    const acelRate = pct>=1.20?(ACEL[state.senKey]||0):0;
+    const bonTotal = bonBase*(1+acelRate);
+
+    let html = monthTabs();
+    html += `<div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;">`;
+
+    /* ── Tabela ── */
+    html += `<div><div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;overflow:hidden;">`;
+    html += `<div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:14px;font-weight:800;color:#111;">Vendas — ${MES[state.month]}/${state.year}</div>
+      <div style="font-size:11px;font-weight:600;color:#10b981;">✅ ${rows.length} deals</div></div>`;
+
+    if (rows.length===0) {
+      html += `<div style="padding:48px;text-align:center;color:#aaa;font-size:13px;">Nenhuma venda encontrada neste mês.</div>`;
+    } else {
+      html += `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#f8f8f9;">
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#666;white-space:nowrap;border-bottom:1px solid #f0f0f0;">Data</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Cliente</th>
+          <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">ID</th>
+          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Contrato</th>
+          <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Produto</th>
+          <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Plano</th>
+          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">MRR</th>
+          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Comissão base</th>
+        </tr></thead><tbody>`;
+      rows.forEach((r,i)=>{
+        const dt = r.date?new Date(r.date+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+        const pc = PLAN_COLOR[r.plan]||'#555';
+        html += `<tr style="border-top:1px solid #f5f5f7;${i%2===1?'background:#fafafa':''}">
+          <td style="padding:9px 12px;color:#999;white-space:nowrap;">${dt}</td>
+          <td style="padding:9px 12px;font-weight:600;color:#111;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.client}">${r.client}</td>
+          <td style="padding:9px 12px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#aaa;">${r.idCaptei}</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:600;color:#111;">${fmtR(r.valor)}</td>
+          <td style="padding:9px 12px;text-align:center;color:#666;font-size:11px;">${r.produto}</td>
+          <td style="padding:9px 12px;text-align:center;"><span style="background:${pc}18;color:${pc};font-weight:700;font-size:11px;padding:3px 9px;border-radius:10px;">${PLAN_LABEL[r.plan]}</span></td>
+          <td style="padding:9px 12px;text-align:right;color:#555;">${fmtR(r.mrr)}</td>
+          <td style="padding:9px 12px;text-align:right;font-weight:700;color:#059669;">${fmtR(r.commBase)}</td>
+        </tr>`;
+      });
+      const totalMrr=rows.reduce((s,r)=>s+r.mrr,0);
+      const totalComm=rows.reduce((s,r)=>s+r.commBase,0);
+      html += `<tr style="border-top:2px solid #e8e8e8;background:#f8f8f9;">
+        <td colspan="3" style="padding:10px 12px;font-weight:800;color:#111;font-size:12px;">Total</td>
+        <td style="padding:10px 12px;text-align:right;font-weight:800;color:#111;">${fmtR(totalRevenue)}</td>
+        <td colspan="2"></td>
+        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#555;">${fmtR(totalMrr)}</td>
+        <td style="padding:10px 12px;text-align:right;font-weight:800;color:#059669;">${fmtR(totalComm)}</td>
+      </tr></tbody></table></div>`;
+    }
+    html += `</div></div>`;
+
+    /* ── Painel direito ── */
+    html += `<div style="display:flex;flex-direction:column;gap:16px;">`;
+
+    /* Resultado */
+    html += `<div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:800;color:#111;">Resultado ${MES3[state.month]}/${String(state.year).slice(2)}</div>
+        ${pct>=1.00?'<div style="background:#d1fae5;color:#059669;font-size:11px;font-weight:700;padding:3px 12px;border-radius:10px;">✅ Meta atingida!</div>':''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:#f5f5f7;border-radius:12px;padding:14px;">
+          <div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Total fechado</div>
+          <div style="font-size:17px;font-weight:900;color:#111;">${fmtR(totalRevenue)}</div>
+        </div>
+        <div style="background:#f5f5f7;border-radius:12px;padding:14px;">
+          <div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Meta</div>
+          <div style="font-size:17px;font-weight:900;color:#111;">${fmtR(state.meta)}</div>
+        </div>
+        <div style="background:${metaColor}14;border-radius:12px;padding:14px;grid-column:1/3;">
+          <div style="font-size:10px;font-weight:700;color:${metaColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">% da meta</div>
+          <div style="font-size:28px;font-weight:900;color:${metaColor};line-height:1;">${(pct*100).toFixed(1)}%</div>
+          <div style="font-size:11px;color:${metaColor};opacity:.8;margin-top:4px;">${gatilhoLabel(pct)}</div>
+          <div style="margin-top:10px;height:6px;background:${metaColor}25;border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${Math.min(100,pct*100).toFixed(1)}%;background:${metaColor};border-radius:4px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    /* Base de cálculo */
+    html += `<div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;padding:20px;">
+      <div style="font-size:13px;font-weight:800;color:#111;margin-bottom:14px;">Base de Cálculo</div>`;
+    [['mensal','Mensal','30%'],['trimestral','Trimestral','45%'],['semestral','Semestral','60%'],['anual','Anual','80%'],['copiloto','Copiloto','40%']].forEach(([k,lbl,rate])=>{
+      const v=(byPlan[k]||0)*gtlho;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f5f7;font-size:12px;">
+        <div style="color:#555;">${lbl} <span style="color:#bbb;font-size:11px;">${rate}</span></div>
+        <div style="font-weight:700;color:${v>0?'#059669':'#ccc'};">${fmtR(v)}</div></div>`;
+    });
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e8e8e8;margin-top:4px;font-size:12px;">
+      <div style="font-weight:700;color:#555;">Bonificação s/ resultado</div>
+      <div style="font-weight:800;color:#111;">${fmtR(bonBase)}</div></div>`;
+
+    html+=`<div style="margin-top:12px;margin-bottom:8px;font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.5px;">Aceleradores (a partir de 120%)</div>`;
+    Object.entries(ACEL).forEach(([k,rate])=>{
+      const isMe=k===state.senKey;
+      const val=pct>=1.20?bonBase*rate:0;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;font-size:12px;margin-bottom:2px;${isMe?'background:#f0fdf4;border:1px solid #bbf7d0;':''}">
+        <div style="color:${isMe?'#059669':'#aaa'};font-weight:${isMe?700:400};">
+          ${ACEL_LABEL[k]}${isMe?' <span style="font-size:10px;font-weight:600;background:#059669;color:#fff;padding:1px 6px;border-radius:6px;margin-left:4px;">você</span>':''}
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span style="color:#bbb;font-size:11px;">${(rate*100).toFixed(1).replace('.',',')}%</span>
+          <span style="font-weight:700;color:${val>0?'#7C3AED':'#ccc'};min-width:72px;text-align:right;">${fmtR(val)}</span>
+        </div></div>`;
+    });
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid #e8e8e8;margin-top:8px;">
+      <div style="font-weight:800;color:#111;font-size:13px;">Bonificação total</div>
+      <div style="font-weight:900;font-size:20px;color:#E8620A;">${fmtR(bonTotal)}</div>
+    </div></div>`;
+
+    html += `</div></div>`;
+    body.innerHTML = html;
+  }
+
+  function setMonth(m) {
+    state.month = m;
+    const body = document.getElementById('cm-body');
+    if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:50px;color:#aaa;">⏳ Carregando ${MES[m]}...</div>`;
+    loadMonth();
+  }
+
+  function reload() { state.loaded=false; init(); }
+
+  return { init, setMonth, reload };
+})();
+window.COMISSAO = COMISSAO;
+</script>
 
 </body>
 </html>
