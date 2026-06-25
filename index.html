@@ -25171,7 +25171,7 @@ const COMISSAO = (() => {
     myUserId:null, myUserName:'', dealFields:[],
     viewUserId:null, viewUserName:'',
     fidelidadeKey:null, mrrKey:null, idCapteiKey:null,
-    meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas', team:'CAP',
+    meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas', team:'CAP', calcPlan:'anual',
     allPdUsers:[], loaded:false,
   };
 
@@ -25431,6 +25431,158 @@ const COMISSAO = (() => {
     }
   }
 
+  /* ── Calculadora helpers ── */
+  function calcCurrentCommBase() {
+    const isCOP = state.team === 'COP';
+    return state.deals.reduce((s, d) => {
+      const fv   = fieldVal(d, state.fidelidadeKey);
+      const mrrR = state.mrrKey ? parseFloat(d[state.mrrKey]||0) : 0;
+      const p    = detectPlan(fv, d.value||0, mrrR);
+      const mrr  = mrrR > 0 ? mrrR : (d.value||0)/(PLAN_MONTHS[p]||12);
+      return s + (isCOP ? mrr*0.70 : mrr*(PLAN_RATES[p]||0.80));
+    }, 0);
+  }
+
+  function calcBonFromPct(extraCB, projPct) {
+    const isCOP   = state.team === 'COP';
+    const totalCB = calcCurrentCommBase() + extraCB;
+    const gtlho   = isCOP ? copGatilho(projPct) : gatilho(projPct);
+    const tier    = getTier(state.senKey);
+    const timeBkt = getTimeBracket(state.dataInicio);
+    const acel    = isCOP ? copAcelRate(projPct) : getAcelRate(projPct, tier, timeBkt);
+    return totalCB * gtlho * (1 + acel);
+  }
+
+  function renderCalc() {
+    const isCOP  = state.team === 'COP';
+    const curRev = state.deals.reduce((s,d)=>s+(d.value||0), 0);
+    const curPct = state.meta > 0 ? curRev / state.meta : 0;
+    const curBon = calcBonFromPct(0, curPct);
+    const sp     = state.calcPlan || 'anual';
+
+    const thresholds = isCOP
+      ? [{p:0.60,l:'60%',c:'#DC2626',n:'gatilho'},{p:0.80,l:'80%',c:'#D97706',n:'gatilho 70%'},{p:1.00,l:'100%',c:'#059669',n:'meta'},{p:1.10,l:'110%',c:'#7C3AED',n:'Acel I'},{p:1.20,l:'120%',c:'#5B21B6',n:'Acel II'}]
+      : [{p:0.70,l:'70%',c:'#DC2626',n:'gatilho'},{p:0.85,l:'85%',c:'#D97706',n:'gatilho 80%'},{p:1.00,l:'100%',c:'#059669',n:'meta'},{p:1.10,l:'110%',c:'#7C3AED',n:'Acel I'},{p:1.20,l:'120%',c:'#5B21B6',n:'Acel II'}];
+
+    const avgMrrRatio = isCOP
+      ? (state.deals.length > 0
+          ? state.deals.reduce((s,d)=>s+(state.mrrKey?parseFloat(d[state.mrrKey]||0):(d.value||0)/12), 0)
+            / Math.max(1, curRev)
+          : 1/12)
+      : 1/(PLAN_MONTHS[sp]||12);
+
+    let scenRows = '';
+    thresholds.forEach((t, i) => {
+      const addR  = Math.max(0, state.meta*t.p - curRev);
+      const addCB = isCOP ? addR*avgMrrRatio*0.70 : addR*avgMrrRatio*(PLAN_RATES[sp]||0.80);
+      const bon   = calcBonFromPct(addCB, t.p);
+      const diff  = bon - curBon;
+      const done  = curPct >= t.p + 0.001;
+      const curr  = !done && (i===0 || curPct >= thresholds[i-1].p);
+      const bg    = done?'#f0fdf4':curr?t.c+'18':'#fff';
+      const col   = done?'#059669':curr?t.c:'#ccc';
+      const wgt   = (done||curr)?700:400;
+      const icon  = done?'✅':curr?'👉':'·';
+      const brd   = i<thresholds.length-1?'border-bottom:1px solid #f0f0f0;':'';
+      scenRows += `<div style="display:grid;grid-template-columns:22px 1fr auto;align-items:center;padding:8px 10px;background:${bg};${brd}gap:4px;">
+        <span style="font-size:12px;text-align:center;">${icon}</span>
+        <div>
+          <span style="font-size:12px;font-weight:${wgt};color:${col};">${t.l}</span>
+          <span style="font-size:10px;color:#ddd;margin-left:3px;">${t.n}</span>
+          ${addR>0&&!done?`<div style="font-size:10px;color:#bbb;">+${fmtR(addR)}</div>`:''}
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:${wgt};color:${col};">${fmtR(bon)}</div>
+          ${diff>0&&!done?`<div style="font-size:10px;color:#7C3AED;font-weight:600;">+${fmtR(diff)}</div>`:''}
+        </div>
+      </div>`;
+    });
+
+    const planBtns = isCOP ? '' :
+      `<div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">${
+        ['mensal','trimestral','semestral','anual'].map(p => {
+          const a = sp===p;
+          return `<button onclick="COMISSAO.calcSetPlan('${p}')" id="cm-calc-plan-${p}" style="padding:3px 9px;border-radius:6px;border:1.5px solid ${a?'#E8620A':'#e0e0e0'};background:${a?'#E8620A':'#fff'};color:${a?'#fff':'#888'};font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">${PLAN_LABEL[p]}</button>`;
+        }).join('')
+      }</div>`;
+
+    return `<div id="cm-calc-wrapper" style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;overflow:hidden;">
+      <div style="padding:14px 20px;background:linear-gradient(135deg,#E8620A,#f59e0b);">
+        <div style="font-size:14px;font-weight:800;color:#fff;">🧮 Calculadora</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:1px;">Simule quanto você pode ganhar</div>
+      </div>
+      <div style="padding:14px 20px;border-bottom:1px solid #f0f0f0;">
+        <div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Simular novo fechamento</div>
+        <input id="cm-calc-val" type="number" min="0" step="1000" placeholder="Valor do contrato (R$)"
+          oninput="COMISSAO.calcUpdate()"
+          style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;box-sizing:border-box;outline:none;"
+          onfocus="this.style.borderColor='#E8620A'" onblur="this.style.borderColor='#e0e0e0'" />
+        ${planBtns}
+      </div>
+      <div id="cm-calc-result" style="display:none;padding:14px 20px;border-bottom:1px solid #f0f0f0;"></div>
+      <div style="padding:14px 20px;">
+        <div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Cenários do mês</div>
+        <div style="border-radius:12px;overflow:hidden;border:1px solid #e8e8e8;">${scenRows}</div>
+      </div>
+    </div>`;
+  }
+
+  function calcSetPlan(p) {
+    state.calcPlan = p;
+    const savedVal = document.getElementById('cm-calc-val')?.value || '';
+    render();
+    const ni = document.getElementById('cm-calc-val');
+    if (ni) ni.value = savedVal;
+    calcUpdate();
+  }
+
+  function calcUpdate() {
+    const isCOP   = state.team === 'COP';
+    const addVal  = parseFloat(document.getElementById('cm-calc-val')?.value || '') || 0;
+    const plan    = isCOP ? 'mensal' : (state.calcPlan||'anual');
+    const curRev  = state.deals.reduce((s,d)=>s+(d.value||0), 0);
+    const curPct  = state.meta > 0 ? curRev / state.meta : 0;
+    const curBon  = calcBonFromPct(0, curPct);
+    const addMrr  = addVal > 0 ? addVal/(PLAN_MONTHS[plan]||12) : 0;
+    const addCB   = isCOP ? addMrr*0.70 : addMrr*(PLAN_RATES[plan]||0.80);
+    const projRev = curRev + addVal;
+    const projPct = state.meta > 0 ? projRev/state.meta : 0;
+    const projBon = calcBonFromPct(addCB, projPct);
+    const diff    = projBon - curBon;
+    const resDiv  = document.getElementById('cm-calc-result');
+    if (!resDiv) return;
+    if (addVal <= 0) { resDiv.style.display='none'; return; }
+
+    const col = projPct>=1.20?'#7C3AED':projPct>=1.00?'#059669':projPct>=0.70?'#D97706':'#DC2626';
+    const em  = projPct>=1.20?'💰':projPct>=1.10?'🚀':projPct>=1.00?'🎯':projPct>=0.85?'🔥':projPct>=0.70?'📈':'💪';
+    const thr = isCOP?[0.60,0.80,1.00,1.10,1.20]:[0.70,0.85,1.00,1.10,1.20];
+    const tlb = isCOP
+      ?['ativar o gatilho','gatilho 70%','bater a meta!','Acelerador I','Acelerador II']
+      :['ativar o gatilho','gatilho 80%','bater a meta!','Acelerador I','Acelerador II'];
+    let next = '🏆 Acelerador II ativo!';
+    for (let i=0;i<thr.length;i++) {
+      if (projPct < thr[i]) { next=`Mais ${fmtR(state.meta*thr[i]-projRev)} para ${tlb[i]}`; break; }
+    }
+
+    resDiv.style.display = 'block';
+    resDiv.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="font-size:30px;line-height:1;">${em}</div>
+        <div>
+          <div style="font-size:19px;font-weight:900;color:${col};line-height:1.1;">${(projPct*100).toFixed(1)}% da meta</div>
+          <div style="font-size:10px;color:#aaa;margin-top:2px;">${next}</div>
+        </div>
+      </div>
+      <div style="height:7px;background:#f0f0f0;border-radius:5px;overflow:hidden;margin-bottom:12px;">
+        <div style="height:100%;width:${Math.min(100,(projPct*100)).toFixed(1)}%;background:linear-gradient(90deg,${col}99,${col});border-radius:5px;"></div>
+      </div>
+      <div style="background:${col}12;border:1.5px solid ${col}30;border-radius:12px;padding:12px 16px;text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Comissão projetada</div>
+        <div style="font-size:24px;font-weight:900;color:${col};">${fmtR(projBon)}</div>
+        ${diff>0?`<div style="font-size:11px;color:#059669;font-weight:700;margin-top:3px;">+${fmtR(diff)} a mais que agora 🎉</div>`:''}
+      </div>`;
+  }
+
   function render() {
     const body = document.getElementById('cm-body');
     if (!body) return;
@@ -25647,6 +25799,7 @@ const COMISSAO = (() => {
       </div></div>`;
     }
 
+    html += renderCalc();
     html += `</div></div>`;
     body.innerHTML = html;
   }
@@ -25660,7 +25813,7 @@ const COMISSAO = (() => {
 
   function reload() { state.loaded=false; init(); }
 
-  return { init, setMonth, reload, selectSeller };
+  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan };
 })();
 window.COMISSAO = COMISSAO;
 </script>
