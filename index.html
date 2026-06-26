@@ -2151,6 +2151,9 @@ body::before {
 </head>
 <body>
 <script>
+// Token padrão da Captei — usado como fallback quando o usuário não configurou o próprio
+const DEFAULT_PD_TOKEN = 'fa35e13f4fc5cbbacb557a9b4b0fd6b5129fc688';
+
 function openSettingsModal() {
   var KEY = 'captei_integrations_v1';
   var el = document.getElementById('settings-overlay');
@@ -23642,14 +23645,12 @@ const PDI = (() => {
     const stEl = document.getElementById('pdi-sync-status');
     const setSync = (msg) => { if (stEl) stEl.textContent = msg; };
 
-    // Pega token de qualquer fonte disponível
+    // Pega token de qualquer fonte disponível, com fallback para token padrão
     const token = (() => {
       try { return JSON.parse(localStorage.getItem('captei_integrations_v1')||'{}').pd_token || ''; } catch(e){ return ''; }
     })() || (() => {
       try { return JSON.parse(localStorage.getItem('at_config')||'{}').token || ''; } catch(e){ return ''; }
-    })();
-
-    if (!token) { setSync('⚠️ Configure o token do Pipedrive em Integrações'); return; }
+    })() || DEFAULT_PD_TOKEN;
 
     if (btn) btn.textContent = '⏳ Sincronizando...';
     setSync('Buscando dados do Pipedrive...');
@@ -24064,7 +24065,7 @@ const TB = (() => {
   function loadConfig() {
     try {
       const cfg = JSON.parse(localStorage.getItem('captei_tb_config')||'{}');
-      if (cfg.token) state.token = cfg.token;
+      state.token = cfg.token || DEFAULT_PD_TOKEN;
       if (cfg.month) state.month = cfg.month;
       if (cfg.year)  state.year  = cfg.year;
       if (Array.isArray(cfg.selectedSellers)) state.selectedSellers = new Set(cfg.selectedSellers);
@@ -24155,11 +24156,7 @@ const TB = (() => {
     if (!state.year  || isNaN(state.year))  state.year  = now.getFullYear();
     localStorage.setItem('captei_tb_config', JSON.stringify({token:state.token, month:state.month, year:state.year}));
 
-    if (!state.token) {
-      setStatus('❌ Token obrigatório. Configure em Integrações.', '#ef4444');
-      if (btn) { btn.disabled = false; btn.innerHTML = '🚀 Carregar Tabuleiro'; }
-      return;
-    }
+    if (!state.token) state.token = DEFAULT_PD_TOKEN;
 
     setStatus('⏳ Carregando usuários...', '#888');
     try {
@@ -24748,7 +24745,7 @@ const RH = (() => {
   };
 
   function getToken() {
-    try { return JSON.parse(localStorage.getItem('captei_tb_config')||'{}').token || ''; } catch(e){ return ''; }
+    try { return JSON.parse(localStorage.getItem('captei_tb_config')||'{}').token || DEFAULT_PD_TOKEN; } catch(e){ return DEFAULT_PD_TOKEN; }
   }
   function getMonthYear() {
     try {
@@ -24771,11 +24768,6 @@ const RH = (() => {
     const list   = document.getElementById('rh-list');
     const period = document.getElementById('rh-period');
     const upd    = document.getElementById('rh-updated');
-
-    if (!token) {
-      if (podium) podium.innerHTML = '<div style="text-align:center;color:#aaa;font-size:13px;padding:40px;">Configure o token do Pipedrive em Integrações para ver o ranking.</div>';
-      return;
-    }
 
     const { m, y } = getMonthYear();
     const lastDay = new Date(y, m, 0).getDate();
@@ -25180,7 +25172,7 @@ const COMISSAO = (() => {
   const MES3 = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
   function getToken() {
-    try { return JSON.parse(localStorage.getItem('captei_tb_config')||'{}').token||''; } catch(e){ return ''; }
+    try { return JSON.parse(localStorage.getItem('captei_tb_config')||'{}').token || DEFAULT_PD_TOKEN; } catch(e){ return DEFAULT_PD_TOKEN; }
   }
   function getSession() {
     try { return JSON.parse(sessionStorage.getItem('captei_pb_session')||'{}'); } catch(e){ return {}; }
@@ -25300,10 +25292,6 @@ const COMISSAO = (() => {
   async function init() {
     state.token = getToken();
     const body = document.getElementById('cm-body');
-    if (!state.token) {
-      if (body) body.innerHTML = `<div style="text-align:center;padding:80px 20px;color:#aaa;"><div style="font-size:40px;margin-bottom:12px;">🔑</div><div style="font-size:15px;font-weight:700;color:#555;">Token Pipedrive não configurado</div><div style="font-size:13px;margin-top:6px;">Configure em <b>Integrações</b> para ver suas comissões.</div></div>`;
-      return;
-    }
     if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:60px;color:#aaa;"><div style="font-size:28px;margin-bottom:10px;">⏳</div>Carregando dados do Pipedrive...</div>`;
     try {
       const rawFields = await pd('dealFields?limit=200');
