@@ -24958,14 +24958,7 @@ const RH = (() => {
 
   <!-- CONFIG CARD -->
   <div style="background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);">
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:16px;">
-      <div>
-        <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">API Token Pipedrive</label>
-        <input type="password" id="tb-token" placeholder="Cole seu token aqui..."
-          style="width:100%;padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:13px;font-family:inherit;box-sizing:border-box;background:#fff;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#E8620A'" onblur="this.style.borderColor='var(--line)'" oninput="TB.saveConfig()">
-        <div style="font-size:10px;color:#aaa;margin-top:4px;">Configurações → Dados pessoais → API → Token pessoal</div>
-      </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
       <div>
         <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Mês</label>
         <select id="tb-month" style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;outline:none;" onchange="TB.saveConfig()">
