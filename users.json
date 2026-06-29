@@ -42,5 +42,16 @@
     "dataInicio": "2024-01-29",
     "hasComissao": false,
     "tipoVendas": null
+  },
+  {
+    "user": "eduardo.sousa@captei.com.br",
+    "pass": "123456",
+    "name": "Eduardo Sousa",
+    "team": "CAP",
+    "meta": "58000",
+    "seniority": "senior2",
+    "dataInicio": "2025-10-01",
+    "hasComissao": true,
+    "tipoVendas": "vendas"
   }
 ]
