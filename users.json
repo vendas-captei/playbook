@@ -53,5 +53,16 @@
     "dataInicio": "2025-10-01",
     "hasComissao": true,
     "tipoVendas": "vendas"
+  },
+  {
+    "user": "natan.luz@captei.com.br",
+    "pass": "123456",
+    "name": "Natan da Luz",
+    "team": "Gestão",
+    "meta": "",
+    "seniority": "pleno1",
+    "dataInicio": "",
+    "hasComissao": false,
+    "tipoVendas": null
   }
 ]
