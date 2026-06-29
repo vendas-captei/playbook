@@ -31,5 +31,16 @@
     "dataInicio": "2025-10-01",
     "hasComissao": true,
     "tipoVendas": "vendas"
+  },
+  {
+    "user": "elaine.ribeiro@captei.com.br",
+    "pass": "123456",
+    "name": "Elaine de Paula",
+    "team": "CAP",
+    "meta": "60000",
+    "seniority": "pleno3",
+    "dataInicio": "2024-01-29",
+    "hasComissao": false,
+    "tipoVendas": null
   }
 ]
