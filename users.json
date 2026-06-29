@@ -9,5 +9,16 @@
     "dataInicio": "",
     "hasComissao": false,
     "tipoVendas": null
+  },
+  {
+    "user": "tamara.sousa@captei.com.br",
+    "pass": "123456",
+    "name": "Tamara Sousa",
+    "team": "COP",
+    "meta": "18000",
+    "seniority": "senior1",
+    "dataInicio": "2026-05-11",
+    "hasComissao": true,
+    "tipoVendas": "vendas"
   }
 ]
