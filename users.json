@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "user": "paulo.lourenco@captei.com.br",
+    "pass": "123456",
+    "name": "Paulo Lourenco",
+    "team": "Gestão",
+    "meta": "",
+    "seniority": "pleno1",
+    "dataInicio": "",
+    "hasComissao": false,
+    "tipoVendas": null
+  }
+]
