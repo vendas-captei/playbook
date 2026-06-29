@@ -22562,14 +22562,43 @@ const AUTH = (() => {
     { user: 'admin', pass: 'admin123', name: 'Admin', admin: true },
   ];
 
-  // Usuários adicionados pelo painel (persistem em localStorage)
+  // Usuários adicionados pelo painel (persistem em localStorage + sincronizam com servidor)
   const EXTRA_KEY = 'captei_pb_users';
-  const SEN_KEY   = 'captei_pb_seniority'; // overrides de senioridade (para BASE_USERS também)
+  const SEN_KEY   = 'captei_pb_seniority';
+  const SHA_KEY   = 'captei_pb_users_sha';
+  let _serverSha  = null;
+
   function loadExtra() {
     try { return JSON.parse(localStorage.getItem(EXTRA_KEY) || '[]'); } catch(e) { return []; }
   }
   function saveExtra(arr) {
     localStorage.setItem(EXTRA_KEY, JSON.stringify(arr));
+    // Sincroniza com servidor de forma assíncrona
+    const sha = _serverSha || localStorage.getItem(SHA_KEY);
+    fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ users: arr, sha }),
+    }).then(async r => {
+      if (r.ok) {
+        const d = await r.json();
+        _serverSha = d.sha;
+        localStorage.setItem(SHA_KEY, d.sha);
+      }
+    }).catch(() => {});
+  }
+  async function syncFromServer() {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+      const r = await fetch('/api/users', { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) return;
+      const { users, sha } = await r.json();
+      _serverSha = sha;
+      localStorage.setItem(SHA_KEY, sha);
+      localStorage.setItem(EXTRA_KEY, JSON.stringify(users));
+    } catch(e) { /* offline ou timeout: usa dados locais */ }
   }
   function loadSenOverrides() {
     try { return JSON.parse(localStorage.getItem(SEN_KEY) || '{}'); } catch(e) { return {}; }
@@ -22715,28 +22744,30 @@ const AUTH = (() => {
   }
 
   /* ── Init ───────────────────────────────────────────── */
-  function init() {
+  async function init() {
     // Enter no campo de senha submete
     const passEl = document.getElementById('login-pass');
     const userEl = document.getElementById('login-user');
     if (passEl) passEl.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
     if (userEl) userEl.addEventListener('keydown', e => { if (e.key === 'Enter') { passEl && passEl.focus(); } });
 
-    // Checar sessão já existente
+    // Checar sessão já existente (antes do sync para não bloquear re-entradas)
     const session = checkSession();
     if (session) {
       grantAccess(session.name, session.isAdmin, session.team);
+      syncFromServer(); // sync em background sem bloquear
     } else {
       // Playbook invisível até login
       document.body.style.overflow = 'hidden';
-      // Focar no campo usuário
+      // Sincroniza usuários do servidor antes de liberar o login
+      await syncFromServer();
       setTimeout(() => { const u = document.getElementById('login-user'); if(u) u.focus(); }, 100);
     }
   }
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { submit, toggleEye, logout, grantAccess, loadExtra, saveExtra, getAllUsers, BASE_USERS, saveSenOverride, loadSenOverrides };
+  return { submit, toggleEye, logout, grantAccess, loadExtra, saveExtra, getAllUsers, BASE_USERS, saveSenOverride, loadSenOverrides, syncFromServer };
 })();
 
 /* ════════════════════════════════════════════════════════
