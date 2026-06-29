@@ -22684,7 +22684,7 @@ const AUTH = (() => {
   }
 
   /* ── Submit login ───────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const userEl = document.getElementById('login-user');
     const passEl = document.getElementById('login-pass');
     const errEl  = document.getElementById('login-error');
@@ -22703,30 +22703,36 @@ const AUTH = (() => {
     btn.disabled = true;
     btn.textContent = 'Verificando...';
 
-    setTimeout(() => {
-      const found = USERS.find(u => u.user === user && u.pass === pass);
-      if (found) {
-        errEl.classList.remove('show');
-        grantAccess(found.name, found.admin, found.team);
-      } else {
-        errMsg.textContent = 'Usuário ou senha incorretos. Tente novamente.';
-        errEl.classList.add('show');
-        passEl.value = '';
-        passEl.focus();
-        // Tremer o form
-        const card = document.querySelector('.lp-right');
-        if (card) {
-          card.style.animation = 'none';
-          card.style.transform = 'translateX(-8px)';
-          setTimeout(() => { card.style.transform = 'translateX(8px)'; }, 80);
-          setTimeout(() => { card.style.transform = 'translateX(-4px)'; }, 160);
-          setTimeout(() => { card.style.transform = 'translateX(4px)'; }, 240);
-          setTimeout(() => { card.style.transform = 'translateX(0)'; }, 320);
-        }
+    // Tenta localmente primeiro
+    let found = getAllUsers().find(u => u.user === user && u.pass === pass);
+
+    // Não encontrou localmente — sincroniza com servidor e tenta de novo
+    if (!found) {
+      btn.textContent = 'Sincronizando...';
+      await syncFromServer();
+      found = getAllUsers().find(u => u.user === user && u.pass === pass);
+    }
+
+    if (found) {
+      errEl.classList.remove('show');
+      grantAccess(found.name, found.admin, found.team);
+    } else {
+      errMsg.textContent = 'Usuário ou senha incorretos. Tente novamente.';
+      errEl.classList.add('show');
+      passEl.value = '';
+      passEl.focus();
+      const card = document.querySelector('.lp-right');
+      if (card) {
+        card.style.animation = 'none';
+        card.style.transform = 'translateX(-8px)';
+        setTimeout(() => { card.style.transform = 'translateX(8px)'; }, 80);
+        setTimeout(() => { card.style.transform = 'translateX(-4px)'; }, 160);
+        setTimeout(() => { card.style.transform = 'translateX(4px)'; }, 240);
+        setTimeout(() => { card.style.transform = 'translateX(0)'; }, 320);
       }
-      btn.disabled = false;
-      btn.textContent = 'Entrar no Playbook →';
-    }, 400);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Entrar no Playbook →';
   }
 
   /* ── Toggle eye ─────────────────────────────────────── */
