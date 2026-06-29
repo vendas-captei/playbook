@@ -64,5 +64,16 @@
     "dataInicio": "",
     "hasComissao": false,
     "tipoVendas": null
+  },
+  {
+    "user": "eloise.miranda@captei.com.br",
+    "pass": "123456",
+    "name": "Eloise Miranda",
+    "team": "COP",
+    "meta": "",
+    "seniority": "senior1",
+    "dataInicio": "2026-03-01",
+    "hasComissao": true,
+    "tipoVendas": "prevendas"
   }
 ]
