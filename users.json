@@ -20,5 +20,16 @@
     "dataInicio": "2026-05-11",
     "hasComissao": true,
     "tipoVendas": "vendas"
+  },
+  {
+    "user": "ana.goncalves@captei.com.br",
+    "pass": "123456",
+    "name": "Ana Luiza",
+    "team": "CAP",
+    "meta": "52000",
+    "seniority": "junior2",
+    "dataInicio": "2025-10-01",
+    "hasComissao": true,
+    "tipoVendas": "vendas"
   }
 ]
