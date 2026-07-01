@@ -25112,7 +25112,8 @@ const RH = (() => {
 /* === COMISSAO — Minha Comissão === */
 const COMISSAO = (() => {
 
-  const PLAN_RATES  = { mensal:0.30, trimestral:0.45, semestral:0.60, anual:0.80, copiloto:0.40 };
+  const PLAN_RATES    = { mensal:0.30, trimestral:0.45, semestral:0.60, anual:0.80, copiloto:0.40 };
+  const CAP_ARR_RATES = { mensal:0, trimestral:0.02, semestral:0.03, anual:0.04 }; // % sobre ARR total
   const PLAN_MONTHS = { mensal:1, trimestral:3, semestral:6, anual:12, copiloto:1 };
   const PLAN_LABEL  = { mensal:'Mensal', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual', copiloto:'Copiloto' };
   const PLAN_COLOR  = { mensal:'#D97706', trimestral:'#059669', semestral:'#7C3AED', anual:'#2563EB', copiloto:'#E8620A' };
@@ -25194,6 +25195,7 @@ const COMISSAO = (() => {
     viewUserId:null, viewUserName:'',
     fidelidadeKey:null, mrrKey:null, idCapteiKey:null,
     meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas', team:'CAP', calcPlan:'anual',
+    pipelineId:null,
     allPdUsers:[], loaded:false,
   };
 
@@ -25363,6 +25365,10 @@ const COMISSAO = (() => {
       if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.viewUserName}`;
 
       state.loaded = true;
+      // Admin vê picker de funil antes de carregar
+      if (session.isAdmin && state.pipelineId === null) {
+        showFunnelPicker(); return;
+      }
       await loadMonth();
     } catch(e) {
       if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:60px;color:#DC2626;"><div style="font-size:24px;margin-bottom:8px;">❌</div>${e.message}</div>`;
@@ -25370,8 +25376,59 @@ const COMISSAO = (() => {
     }
   }
 
+  function showFunnelPicker() {
+    const body = document.getElementById('cm-body');
+    if (!body) return;
+    body.innerHTML = monthTabs() + `
+      <div style="padding:48px 20px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:#111;margin-bottom:6px;">Qual funil deseja analisar?</div>
+        <div style="font-size:13px;color:#aaa;margin-bottom:36px;">Selecione o funil para ver sua comissão do mês</div>
+        <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+          <div onclick="COMISSAO.selectFunnel(7)"
+            style="cursor:pointer;background:#fff;border:2.5px solid #e8e8e8;border-radius:22px;padding:32px 40px;min-width:190px;transition:all .18s;box-shadow:0 2px 16px rgba(0,0,0,.05);"
+            onmouseover="this.style.borderColor='#E8620A';this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(232,98,10,.18)'"
+            onmouseout="this.style.borderColor='#e8e8e8';this.style.transform='translateY(0)';this.style.boxShadow='0 2px 16px rgba(0,0,0,.05)'">
+            <div style="font-size:44px;margin-bottom:14px;">🏠</div>
+            <div style="font-size:17px;font-weight:900;color:#111;margin-bottom:6px;">Captação Ativa</div>
+            <div style="font-size:11px;color:#aaa;margin-bottom:4px;">Funil ID 7</div>
+            <div style="font-size:11px;font-weight:700;color:#E8620A;">Meta R$ 160.000</div>
+          </div>
+          <div onclick="COMISSAO.selectFunnel(2)"
+            style="cursor:pointer;background:#fff;border:2.5px solid #e8e8e8;border-radius:22px;padding:32px 40px;min-width:190px;transition:all .18s;box-shadow:0 2px 16px rgba(0,0,0,.05);"
+            onmouseover="this.style.borderColor='#E8620A';this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(232,98,10,.18)'"
+            onmouseout="this.style.borderColor='#e8e8e8';this.style.transform='translateY(0)';this.style.boxShadow='0 2px 16px rgba(0,0,0,.05)'">
+            <div style="font-size:44px;margin-bottom:14px;">🤝</div>
+            <div style="font-size:17px;font-weight:900;color:#111;margin-bottom:6px;">Copiloto</div>
+            <div style="font-size:11px;color:#aaa;">Funil ID 2</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  async function selectFunnel(pipelineId) {
+    state.pipelineId = pipelineId;
+    if (pipelineId === 7) {
+      state.team   = 'CAP';
+      state.meta   = 160000;
+      state.senKey = 'senior1';
+      // 7 meses atrás → bracket m6_18
+      const d = new Date(); d.setMonth(d.getMonth() - 7);
+      state.dataInicio = d.toISOString().slice(0,10);
+    } else {
+      state.team = 'COP';
+    }
+    await loadMonth();
+  }
+
+  function resetFunnel() {
+    state.pipelineId = null;
+    showFunnelPicker();
+  }
+
   async function selectSeller(val) {
     if (!val) {
+      // Voltou para própria comissão — re-abre picker para admin
+      if (getSession().isAdmin) { resetFunnel(); return; }
       state.viewUserId   = state.myUserId;
       state.viewUserName = state.myUserName;
       const meta = resolveUserMeta({});
@@ -25394,6 +25451,7 @@ const COMISSAO = (() => {
       state.dataInicio = meta.dataInicio;
       state.tipoVendas = meta.tipoVendas;
       state.team       = meta.team || 'CAP';
+      state.pipelineId = null; // sem filtro de funil ao ver outro vendedor
     }
     const lbl = document.getElementById('cm-collab-label');
     if (lbl) lbl.textContent = `${MES[state.month]}/${state.year} · ${state.viewUserName}`;
@@ -25426,6 +25484,8 @@ const COMISSAO = (() => {
         }
         if (stop||chunk.length<100) break;
       }
+      // Filtro por funil (quando admin seleciona um funil específico)
+      if (state.pipelineId) deals = deals.filter(d => d.pipeline_id === state.pipelineId);
       state.deals = deals;
 
       // Fetch connected product for each deal in parallel
@@ -25450,15 +25510,19 @@ const COMISSAO = (() => {
   }
 
   /* ── Calculadora helpers ── */
+  function dealCommBase(d, isCOP) {
+    const fv   = fieldVal(d, state.fidelidadeKey);
+    const mrrR = state.mrrKey ? parseFloat(d[state.mrrKey]||0) : 0;
+    const p    = detectPlan(fv, d.value||0, mrrR);
+    if (isCOP) {
+      const mrr = mrrR > 0 ? mrrR : (d.value||0)/(PLAN_MONTHS[p]||12);
+      return mrr * 0.70;
+    }
+    return (d.value||0) * (CAP_ARR_RATES[p]||0);
+  }
   function calcCurrentCommBase() {
     const isCOP = state.team === 'COP';
-    return state.deals.reduce((s, d) => {
-      const fv   = fieldVal(d, state.fidelidadeKey);
-      const mrrR = state.mrrKey ? parseFloat(d[state.mrrKey]||0) : 0;
-      const p    = detectPlan(fv, d.value||0, mrrR);
-      const mrr  = mrrR > 0 ? mrrR : (d.value||0)/(PLAN_MONTHS[p]||12);
-      return s + (isCOP ? mrr*0.70 : mrr*(PLAN_RATES[p]||0.80));
-    }, 0);
+    return state.deals.reduce((s, d) => s + dealCommBase(d, isCOP), 0);
   }
 
   function calcBonFromPct(extraCB, projPct) {
@@ -25482,17 +25546,18 @@ const COMISSAO = (() => {
       ? [{p:0.60,l:'60%',c:'#DC2626',n:'gatilho'},{p:0.80,l:'80%',c:'#D97706',n:'gatilho 70%'},{p:1.00,l:'100%',c:'#059669',n:'meta'},{p:1.10,l:'110%',c:'#7C3AED',n:'Acel I'},{p:1.20,l:'120%',c:'#5B21B6',n:'Acel II'}]
       : [{p:0.70,l:'70%',c:'#DC2626',n:'gatilho'},{p:0.85,l:'85%',c:'#D97706',n:'gatilho 80%'},{p:1.00,l:'100%',c:'#059669',n:'meta'},{p:1.10,l:'110%',c:'#7C3AED',n:'Acel I'},{p:1.20,l:'120%',c:'#5B21B6',n:'Acel II'}];
 
+    // Para CAP: taxa média de comissão sobre ARR atual, ou taxa do plano selecionado
     const avgMrrRatio = isCOP
       ? (state.deals.length > 0
           ? state.deals.reduce((s,d)=>s+(state.mrrKey?parseFloat(d[state.mrrKey]||0):(d.value||0)/12), 0)
             / Math.max(1, curRev)
           : 1/12)
-      : 1/(PLAN_MONTHS[sp]||12);
+      : (CAP_ARR_RATES[sp]||0);
 
     let scenRows = '';
     thresholds.forEach((t, i) => {
       const addR  = Math.max(0, state.meta*t.p - curRev);
-      const addCB = isCOP ? addR*avgMrrRatio*0.70 : addR*avgMrrRatio*(PLAN_RATES[sp]||0.80);
+      const addCB = isCOP ? addR*avgMrrRatio*0.70 : addR*(CAP_ARR_RATES[sp]||0);
       const bon   = calcBonFromPct(addCB, t.p);
       const diff  = bon - curBon;
       const done  = curPct >= t.p + 0.001;
@@ -25562,7 +25627,7 @@ const COMISSAO = (() => {
     const curPct  = state.meta > 0 ? curRev / state.meta : 0;
     const curBon  = calcBonFromPct(0, curPct);
     const addMrr  = addVal > 0 ? addVal/(PLAN_MONTHS[plan]||12) : 0;
-    const addCB   = isCOP ? addMrr*0.70 : addMrr*(PLAN_RATES[plan]||0.80);
+    const addCB   = isCOP ? addMrr*0.70 : addVal*(CAP_ARR_RATES[plan]||0);
     const projRev = curRev + addVal;
     const projPct = state.meta > 0 ? projRev/state.meta : 0;
     const projBon = calcBonFromPct(addCB, projPct);
@@ -25612,7 +25677,7 @@ const COMISSAO = (() => {
       const mrrRaw   = state.mrrKey?parseFloat(d[state.mrrKey]||0):0;
       const plan     = detectPlan(fidelVal, d.value||0, mrrRaw);
       const mrr      = mrrRaw>0?mrrRaw:(d.value||0)/(PLAN_MONTHS[plan]||12);
-      const commBase = isCOP ? mrr*0.70 : mrr*(PLAN_RATES[plan]||0.80);
+      const commBase = dealCommBase(d, isCOP);
       return {
         d, date:(d.won_time||'').slice(0,10),
         client: d.title||(d.org_id&&d.org_id.name)||'—',
@@ -25654,8 +25719,13 @@ const COMISSAO = (() => {
 
     /* ── Tabela ── */
     html += `<div><div style="background:#fff;border-radius:18px;border:1px solid #e8e8e8;overflow:hidden;">`;
+    const isAdminView = getSession().isAdmin;
+    const funnelLabel = state.pipelineId===7?'🏠 Captação Ativa':state.pipelineId===2?'🤝 Copiloto':'';
     html += `<div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:14px;font-weight:800;color:#111;">Vendas — ${MES[state.month]}/${state.year}</div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#111;">Vendas — ${MES[state.month]}/${state.year}</div>
+        ${isAdminView&&funnelLabel?`<div style="font-size:11px;color:#E8620A;font-weight:700;margin-top:2px;">${funnelLabel} · <span style="cursor:pointer;text-decoration:underline;" onclick="COMISSAO.resetFunnel()">← Trocar funil</span></div>`:''}
+      </div>
       <div style="font-size:11px;font-weight:600;color:#10b981;">✅ ${rows.length} deals</div></div>`;
 
     if (rows.length===0) {
@@ -25669,7 +25739,7 @@ const COMISSAO = (() => {
           <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Contrato</th>
           <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Produto</th>
           <th style="padding:10px 12px;text-align:center;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Plano</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">MRR</th>
+          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">${isCOP?'MRR':'ARR'}</th>
           <th style="padding:10px 12px;text-align:right;font-weight:700;color:#666;border-bottom:1px solid #f0f0f0;">Comissão base</th>
         </tr></thead><tbody>`;
       rows.forEach((r,i)=>{
@@ -25682,11 +25752,11 @@ const COMISSAO = (() => {
           <td style="padding:9px 12px;text-align:right;font-weight:600;color:#111;">${fmtR(r.valor)}</td>
           <td style="padding:9px 12px;text-align:center;color:#666;font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.produto}">${r.produto}</td>
           <td style="padding:9px 12px;text-align:center;"><span style="background:${pc}18;color:${pc};font-weight:700;font-size:11px;padding:3px 9px;border-radius:10px;">${PLAN_LABEL[r.plan]||r.plan}</span></td>
-          <td style="padding:9px 12px;text-align:right;color:#555;">${fmtR(r.mrr)}</td>
+          <td style="padding:9px 12px;text-align:right;color:#555;">${fmtR(isCOP?r.mrr:r.valor)}</td>
           <td style="padding:9px 12px;text-align:right;font-weight:700;color:#059669;">${fmtR(r.commBase)}</td>
         </tr>`;
       });
-      const totalMrr=rows.reduce((s,r)=>s+r.mrr,0);
+      const totalMrr=rows.reduce((s,r)=>s+(isCOP?r.mrr:r.valor),0);
       const totalComm=rows.reduce((s,r)=>s+r.commBase,0);
       html += `<tr style="border-top:2px solid #e8e8e8;background:#f8f8f9;">
         <td colspan="3" style="padding:10px 12px;font-weight:800;color:#111;font-size:12px;">Total</td>
@@ -25831,7 +25901,7 @@ const COMISSAO = (() => {
 
   function reload() { state.loaded=false; init(); }
 
-  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan };
+  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan, selectFunnel, resetFunnel };
 })();
 window.COMISSAO = COMISSAO;
 </script>
