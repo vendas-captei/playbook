@@ -25196,6 +25196,7 @@ const COMISSAO = (() => {
     fidelidadeKey:null, mrrKey:null, idCapteiKey:null,
     meta:45000, senKey:'pleno1', dataInicio:'', tipoVendas:'vendas', team:'CAP', calcPlan:'anual',
     pipelineId:null,
+    adjustment: { value: 0, reason: '' },
     allPdUsers:[], loaded:false,
   };
 
@@ -25891,6 +25892,32 @@ const COMISSAO = (() => {
       </div></div>`;
     }
 
+    if (isAdminView) {
+      const adjTotal = bonTotal + state.adjustment.value;
+      const adjColor = state.adjustment.value > 0 ? '#059669' : state.adjustment.value < 0 ? '#DC2626' : '#E8620A';
+      html += `<div style="background:#fff;border:1.5px solid #e8e8e8;border-radius:16px;padding:16px 18px;margin-top:4px;">
+        <div style="font-size:10px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;">Ajuste de Comissão</div>
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:10px;color:#aaa;font-weight:700;margin-bottom:4px;">Valor (+/−)</div>
+            <input id="cm-adj-val" type="number" value="${state.adjustment.value||''}" placeholder="Ex: −500"
+              oninput="COMISSAO.applyAdjustment()"
+              style="width:100%;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;font-weight:700;outline:none;font-family:inherit;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:10px;color:#aaa;font-weight:700;margin-bottom:4px;">Justificativa</div>
+            <input id="cm-adj-reason" type="text" value="${state.adjustment.reason||''}" placeholder="Motivo do ajuste..."
+              oninput="COMISSAO.applyAdjustment()"
+              style="width:100%;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:2px solid #f0f0f0;">
+          <div style="font-size:12px;font-weight:700;color:#555;">Comissão final com ajuste</div>
+          <div id="cm-adj-total" data-base="${bonTotal}" style="font-size:20px;font-weight:900;color:${adjColor};">${fmtR(adjTotal)}</div>
+        </div>
+      </div>`;
+    }
+
     html += `<button onclick="COMISSAO.downloadPDF()" style="width:100%;padding:13px;background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border:none;border-radius:14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.3px;transition:opacity .15s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
       <span style="font-size:16px;">📥</span> Baixar Relatório PDF
     </button>`;
@@ -25943,6 +25970,9 @@ const COMISSAO = (() => {
       acelVal    = ca > 0 ? `+${(ca*100).toFixed(1)}%` : '—';
       acelLbl    = pct>=1.20?'Acel II ativo':pct>=1.10?'Acel I ativo':'Sem acelerador';
     }
+    const adjValue  = state.adjustment.value || 0;
+    const adjReason = state.adjustment.reason || '';
+    const bonFinalAjustado = bonFinal + adjValue;
 
     const fmt = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     const funnelName = state.pipelineId===7?'Captação Ativa':state.pipelineId===2?'Copiloto':'Geral';
@@ -26002,8 +26032,15 @@ const COMISSAO = (() => {
     </style></head><body>
     <div class="header">
       <div>
-        <div class="logo">cap<span>tei</span></div>
-        <div style="font-size:11px;color:#aaa;margin-top:2px;">Relatório de Comissão</div>
+        <svg viewBox="0 0 168 44" xmlns="http://www.w3.org/2000/svg" style="height:38px;display:block;">
+          <text y="38" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="42" fill="#c8c8c8">C</text>
+          <circle cx="29" cy="40" r="5" fill="#39B54A"/>
+          <text x="27" y="38" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="42" fill="#F47920">A</text>
+          <text x="57" y="38" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="42" fill="#c8c8c8">P</text>
+          <circle cx="77" cy="7" r="5" fill="#39B54A"/>
+          <text x="85" y="38" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="42" fill="#c8c8c8">TEI</text>
+        </svg>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">Relatório de Comissão</div>
       </div>
       <div class="header-right">
         <div class="seller-name">${seller}</div>
@@ -26019,7 +26056,7 @@ const COMISSAO = (() => {
       <div class="stat"><div class="stat-label">% da Meta</div><div class="stat-val" style="color:${metaColor}">${(pct*100).toFixed(1)}%</div></div>
       <div class="stat"><div class="stat-label">Base comissão</div><div class="stat-val" style="font-size:12px;">${fmt(totalCB)}</div></div>
       <div class="stat"><div class="stat-label">Acelerador</div><div class="stat-val ${pct>=1.20?'purple':pct>=1.10?'orange':''}">${acelVal}</div></div>
-      <div class="stat" style="background:#E8620A14;border:1.5px solid #E8620A30;"><div class="stat-label" style="color:#E8620A;">Comissão final</div><div class="stat-val brand">${fmt(bonFinal)}</div></div>
+      <div class="stat" style="background:#E8620A14;border:1.5px solid #E8620A30;"><div class="stat-label" style="color:#E8620A;">Comissão final</div><div class="stat-val brand">${fmt(bonFinalAjustado)}</div></div>
     </div>
 
     <div style="margin-bottom:10px;">
@@ -26031,6 +26068,7 @@ const COMISSAO = (() => {
         <div style="text-align:right;">
           <div style="font-size:10px;color:#aaa;margin-bottom:2px;">${acelLbl}</div>
           <div style="font-size:13px;font-weight:800;color:#111;">${fmt(bonBase)} × (1 + ${acelVal === '—' ? '0%' : acelVal}) = <span style="color:#E8620A;">${fmt(bonFinal)}</span></div>
+          ${adjValue !== 0 ? `<div style="font-size:11px;margin-top:6px;color:${adjValue>0?'#059669':'#DC2626'};font-weight:700;">Ajuste: ${adjValue>0?'+':''}${fmt(adjValue)}${adjReason?' · '+adjReason:''}</div><div style="font-size:13px;font-weight:900;margin-top:4px;">Comissão com ajuste: <span style="color:${adjValue>0?'#059669':'#DC2626'};">${fmt(bonFinalAjustado)}</span></div>` : ''}
         </div>
       </div>
     </div>
@@ -26067,8 +26105,22 @@ const COMISSAO = (() => {
     win.document.close();
   }
 
+  function applyAdjustment() {
+    const v = parseFloat(document.getElementById('cm-adj-val')?.value||'') || 0;
+    const r = (document.getElementById('cm-adj-reason')?.value||'').trim();
+    state.adjustment = { value: v, reason: r };
+    const dispEl = document.getElementById('cm-adj-total');
+    if (dispEl) {
+      const base = parseFloat(dispEl.dataset.base||'0');
+      const total = base + v;
+      dispEl.textContent = 'R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      dispEl.style.color = v > 0 ? '#059669' : v < 0 ? '#DC2626' : '#E8620A';
+    }
+  }
+
   function setMonth(m) {
     state.month = m;
+    state.adjustment = { value: 0, reason: '' };
     const body = document.getElementById('cm-body');
     if (body) body.innerHTML = monthTabs()+`<div style="text-align:center;padding:50px;color:#aaa;">⏳ Carregando ${MES[m]}...</div>`;
     loadMonth();
@@ -26076,7 +26128,7 @@ const COMISSAO = (() => {
 
   function reload() { state.loaded=false; init(); }
 
-  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan, selectFunnel, resetFunnel, downloadPDF };
+  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan, selectFunnel, resetFunnel, downloadPDF, applyAdjustment };
 })();
 window.COMISSAO = COMISSAO;
 </script>
