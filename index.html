@@ -25332,7 +25332,7 @@ const COMISSAO = (() => {
       const ID_CAPTEI_KEY  = 'fe13789afb59223307327f7807cfb6127a315e2c';
       state.fidelidadeKey = findKey(state.dealFields,'fidelidade','periodicidade','duração');
       state.mrrKey        = findKey(state.dealFields,'mrr','mensalidade','monthly') || MRR_KEY_CAPTEI;
-      state.idCapteiKey   = findKey(state.dealFields,'captei','id no sistema','id captei','id_captei') || ID_CAPTEI_KEY;
+      state.idCapteiKey   = ID_CAPTEI_KEY; // chave confirmada do campo "ID Captei" no Pipedrive
 
       const session = getSession();
       const sName   = (session.name||'').toLowerCase();
@@ -25887,9 +25887,179 @@ const COMISSAO = (() => {
       </div></div>`;
     }
 
+    html += `<button onclick="COMISSAO.downloadPDF()" style="width:100%;padding:13px;background:linear-gradient(135deg,#1e293b,#334155);color:#fff;border:none;border-radius:14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.3px;transition:opacity .15s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+      <span style="font-size:16px;">📥</span> Baixar Relatório PDF
+    </button>`;
     html += renderCalc();
     html += `</div></div>`;
     body.innerHTML = html;
+  }
+
+  function downloadPDF() {
+    const isCOP = state.team === 'COP';
+    const rows = state.deals.map(d => {
+      const fv   = fieldVal(d, state.fidelidadeKey);
+      const mrrR = state.mrrKey ? parseFloat(d[state.mrrKey]||0) : 0;
+      const plan = detectPlan(fv, d.value||0, mrrR);
+      const mrr  = mrrR>0?mrrR:(d.value||0)/(PLAN_MONTHS[plan]||12);
+      const cb   = dealCommBase(d, isCOP);
+      const rate = isCOP ? '70%' : ((CAP_ARR_RATES[plan]||0)*100).toFixed(0)+'%';
+      return {
+        date:  (d.won_time||'').slice(0,10),
+        client: d.title||(d.org_id&&d.org_id.name)||'—',
+        idCaptei: state.idCapteiKey?(fieldVal(d,state.idCapteiKey)||'—'):'—',
+        valor: d.value||0, produto: state.dealProducts[d.id]||'—',
+        plan, mrr, rate, cb,
+      };
+    });
+
+    const totalRev  = rows.reduce((s,r)=>s+r.valor, 0);
+    const totalCB   = rows.reduce((s,r)=>s+r.cb, 0);
+    const pct       = state.meta>0?totalRev/state.meta:0;
+    const tier      = getTier(state.senKey);
+    const timeBkt   = getTimeBracket(state.dataInicio);
+    const tierRates = (ACEL_TABLE[tier]||{})[timeBkt]||{I:0,II:0};
+
+    let bonFinal, bonBase, gtlhoLbl, acelLbl, acelVal;
+    if (isCOP) {
+      const cg   = copGatilho(pct);
+      const ca   = copAcelRate(pct);
+      bonBase    = totalCB * cg;
+      bonFinal   = bonBase * (1 + ca);
+      gtlhoLbl   = copGatilhoLabel(pct);
+      acelVal    = ca > 0 ? `+${(ca*100).toFixed(1)}%` : '—';
+      acelLbl    = pct>=1.20?'Acel II ativo':pct>=1.10?'Acel I ativo':'Sem acelerador';
+    } else {
+      const cg   = gatilho(pct);
+      const ca   = getAcelRate(pct, tier, timeBkt);
+      bonBase    = totalCB * cg;
+      bonFinal   = bonBase * (1 + ca);
+      gtlhoLbl   = gatilhoLabel(pct);
+      acelVal    = ca > 0 ? `+${(ca*100).toFixed(1)}%` : '—';
+      acelLbl    = pct>=1.20?'Acel II ativo':pct>=1.10?'Acel I ativo':'Sem acelerador';
+    }
+
+    const fmt = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const funnelName = state.pipelineId===7?'Captação Ativa':state.pipelineId===2?'Copiloto':'Geral';
+    const today = new Date().toLocaleDateString('pt-BR');
+    const metaColor = pct>=1.00?'#059669':pct>=0.70?'#D97706':'#DC2626';
+    const seller = state.viewUserName || '—';
+    const mes = MES[state.month]||'';
+
+    const tableRows = rows.map((r,i) => {
+      const dt  = r.date ? new Date(r.date+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+      const planColors = {mensal:'#D97706',trimestral:'#059669',semestral:'#7C3AED',anual:'#2563EB',copiloto:'#E8620A'};
+      const pc  = planColors[r.plan]||'#555';
+      return `<tr style="background:${i%2===0?'#fff':'#f9fafb'};">
+        <td style="padding:7px 10px;color:#666;white-space:nowrap;font-size:11px;">${dt}</td>
+        <td style="padding:7px 10px;font-weight:600;color:#111;font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.client}</td>
+        <td style="padding:7px 10px;text-align:center;font-family:monospace;font-size:10px;color:#555;">${r.idCaptei}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:600;font-size:11px;">${fmt(r.valor)}</td>
+        <td style="padding:7px 10px;text-align:center;font-size:10px;color:#555;white-space:nowrap;">${r.produto}</td>
+        <td style="padding:7px 10px;text-align:center;"><span style="background:${pc}18;color:${pc};font-weight:700;font-size:10px;padding:2px 7px;border-radius:8px;">${PLAN_LABEL[r.plan]||r.plan}</span></td>
+        <td style="padding:7px 10px;text-align:right;font-size:11px;color:#555;">${fmt(isCOP?r.mrr:r.valor)}</td>
+        <td style="padding:7px 10px;text-align:center;font-size:11px;font-weight:700;color:#666;">${r.rate}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:700;color:#059669;font-size:11px;">${fmt(r.cb)}</td>
+      </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+    <title>Comissão ${seller} — ${mes}/${state.year}</title>
+    <style>
+      @page { size: A4 landscape; margin: 16mm 14mm; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; color: #111; background: #fff; }
+      .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2.5px solid #E8620A; }
+      .logo { font-size: 22px; font-weight: 900; color: #E8620A; letter-spacing: -1px; }
+      .logo span { color: #111; }
+      .header-right { text-align: right; }
+      .seller-name { font-size: 18px; font-weight: 900; color: #111; }
+      .sub { font-size: 11px; color: #666; margin-top: 3px; }
+      .summary { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 18px; }
+      .stat { background: #f8f8f9; border-radius: 10px; padding: 10px 12px; text-align: center; }
+      .stat-label { font-size: 9px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+      .stat-val { font-size: 14px; font-weight: 900; color: #111; }
+      .stat-val.green { color: #059669; }
+      .stat-val.orange { color: #D97706; }
+      .stat-val.red { color: #DC2626; }
+      .stat-val.purple { color: #7C3AED; }
+      .stat-val.brand { color: #E8620A; font-size: 18px; }
+      .section-title { font-size: 11px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+      table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      thead tr { background: #1e293b; color: #fff; }
+      thead th { padding: 8px 10px; text-align: left; font-weight: 700; font-size: 10px; letter-spacing: .3px; }
+      thead th.right { text-align: right; }
+      thead th.center { text-align: center; }
+      tbody tr:last-child { border-top: 2px solid #e8e8e8; background: #f0f0f3 !important; font-weight: 800; }
+      .gtlho-box { background: ${metaColor}12; border: 1.5px solid ${metaColor}30; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+      .footer { margin-top: 18px; padding-top: 10px; border-top: 1px solid #e8e8e8; display: flex; justify-content: space-between; font-size: 9px; color: #aaa; }
+      @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    </style></head><body>
+    <div class="header">
+      <div>
+        <div class="logo">cap<span>tei</span></div>
+        <div style="font-size:11px;color:#aaa;margin-top:2px;">Relatório de Comissão</div>
+      </div>
+      <div class="header-right">
+        <div class="seller-name">${seller}</div>
+        <div class="sub">${mes} / ${state.year} &nbsp;·&nbsp; Funil: ${funnelName}</div>
+        <div class="sub">Gerado em ${today}</div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="stat"><div class="stat-label">Vendas</div><div class="stat-val">${rows.length}</div></div>
+      <div class="stat"><div class="stat-label">Total fechado</div><div class="stat-val" style="font-size:12px;">${fmt(totalRev)}</div></div>
+      <div class="stat"><div class="stat-label">Meta</div><div class="stat-val" style="font-size:12px;">${fmt(state.meta)}</div></div>
+      <div class="stat"><div class="stat-label">% da Meta</div><div class="stat-val" style="color:${metaColor}">${(pct*100).toFixed(1)}%</div></div>
+      <div class="stat"><div class="stat-label">Base comissão</div><div class="stat-val" style="font-size:12px;">${fmt(totalCB)}</div></div>
+      <div class="stat"><div class="stat-label">Acelerador</div><div class="stat-val ${pct>=1.20?'purple':pct>=1.10?'orange':''}">${acelVal}</div></div>
+      <div class="stat" style="background:#E8620A14;border:1.5px solid #E8620A30;"><div class="stat-label" style="color:#E8620A;">Comissão final</div><div class="stat-val brand">${fmt(bonFinal)}</div></div>
+    </div>
+
+    <div style="margin-bottom:10px;">
+      <div class="gtlho-box">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:${metaColor};text-transform:uppercase;letter-spacing:.5px;">Gatilho</div>
+          <div style="font-size:13px;font-weight:800;color:#111;margin-top:2px;">${gtlhoLbl}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:#aaa;margin-bottom:2px;">${acelLbl}</div>
+          <div style="font-size:13px;font-weight:800;color:#111;">${fmt(bonBase)} × (1 + ${acelVal === '—' ? '0%' : acelVal}) = <span style="color:#E8620A;">${fmt(bonFinal)}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Detalhamento das vendas — ${mes}/${state.year}</div>
+    <table>
+      <thead><tr>
+        <th>Data</th><th>Cliente</th><th class="center">ID Captei</th>
+        <th class="right">Valor contrato</th><th class="center">Produto</th>
+        <th class="center">Plano</th><th class="right">${isCOP?'MRR':'ARR'}</th>
+        <th class="center">Taxa</th><th class="right">Comissão base</th>
+      </tr></thead>
+      <tbody>
+        ${tableRows}
+        <tr>
+          <td colspan="3" style="padding:8px 10px;">Total</td>
+          <td style="padding:8px 10px;text-align:right;">${fmt(totalRev)}</td>
+          <td colspan="3" style="padding:8px 10px;text-align:right;">${fmt(rows.reduce((s,r)=>s+(isCOP?r.mrr:r.valor),0))}</td>
+          <td></td>
+          <td style="padding:8px 10px;text-align:right;color:#059669;">${fmt(totalCB)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="footer">
+      <div>Captei · Relatório de Comissão · ${seller} · ${mes}/${state.year}</div>
+      <div>Documento gerado automaticamente pelo Playbook Comercial em ${today}</div>
+    </div>
+    <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`;
+
+    const win = window.open('', '_blank', 'width=1200,height=800');
+    if (!win) { alert('Permita pop-ups para baixar o relatório.'); return; }
+    win.document.write(html);
+    win.document.close();
   }
 
   function setMonth(m) {
@@ -25901,7 +26071,7 @@ const COMISSAO = (() => {
 
   function reload() { state.loaded=false; init(); }
 
-  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan, selectFunnel, resetFunnel };
+  return { init, setMonth, reload, selectSeller, calcUpdate, calcSetPlan, selectFunnel, resetFunnel, downloadPDF };
 })();
 window.COMISSAO = COMISSAO;
 </script>
