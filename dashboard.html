@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playbook — CAP Executivo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style> body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; } </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <header class="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">C</span>
+          <h1 class="text-2xl font-bold tracking-tight">Playbook — CAP Executivo</h1>
+        </div>
+        <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · Tracking mensal de vendas</p>
+      </div>
+      <div class="text-left sm:text-right">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
+        <p id="today" class="text-sm font-medium capitalize text-slate-700"></p>
+      </div>
+    </header>
+
+    <!-- Filtros -->
+    <section class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div class="w-full sm:w-64">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Funil</label>
+        <select id="f-funil" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
+      </div>
+      <div class="w-full sm:w-56">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Usuário</label>
+        <select id="f-user" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
+      </div>
+      <div class="w-full sm:w-48">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Mês</label>
+        <select id="f-mes" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
+      </div>
+      <div id="spinner" class="hidden items-center gap-2 pb-2 text-sm text-slate-400 sm:flex">
+        <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600"></span> atualizando…
+      </div>
+    </section>
+
+    <div id="erro" class="mt-6 hidden rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"></div>
+
+    <!-- KPIs -->
+    <section id="kpis" class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"></section>
+
+    <!-- Gráficos -->
+    <section class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-base font-semibold">Funil de Conversão</h2>
+        <p id="funil-sub" class="mt-0.5 text-xs text-slate-500"></p>
+        <div class="mt-4"><canvas id="chart-funil"></canvas></div>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-base font-semibold">Forecast Semanal</h2>
+        <p id="forecast-sub" class="mt-0.5 text-xs text-slate-500"></p>
+        <div class="mt-4"><canvas id="chart-forecast"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Ritmo diário -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Ritmo Diário Necessário</h2>
+        <span id="ritmo-sub" class="text-xs text-slate-500"></span>
+      </div>
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="rounded-lg border border-slate-200 p-4">
+          <p class="text-sm font-medium text-slate-700">Geração de pipeline / dia <span class="text-xs font-normal text-slate-400">(meta de referência)</span></p>
+          <div id="geracao" class="mt-3 grid grid-cols-3 gap-3"></div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <p class="text-sm font-medium text-slate-700">Fechamento / dia necessário</p>
+          <p id="fech-dia" class="mt-3 text-2xl font-bold"></p>
+          <p id="fech-sub" class="mt-2 text-xs text-slate-500"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer id="footer" class="mt-8 border-t border-slate-200 pt-4 text-center text-xs text-slate-400"></footer>
+  </main>
+
+  <script>
+    const brl = (v) => (v||0).toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
+    const num = (v) => (v||0).toLocaleString("pt-BR");
+    let chartFunil, chartForecast;
+
+    document.getElementById("today").textContent = new Date().toLocaleDateString("pt-BR",
+      { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+
+    // Popular meses (últimos 6)
+    (function(){
+      const sel = document.getElementById("f-mes");
+      const hoje = new Date();
+      for (let i=0;i<6;i++){
+        const d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+        const valor = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+        let rot = d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+        rot = rot.charAt(0).toUpperCase()+rot.slice(1);
+        const o = document.createElement("option"); o.value=valor; o.textContent=rot; sel.appendChild(o);
+      }
+    })();
+
+    function kpiCard(titulo, valor, cor, rodape){
+      return `<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-t-4 ${cor}">
+        <p class="text-sm text-slate-500">${titulo}</p>
+        <p class="mt-1 text-2xl font-bold">${valor}</p>
+        <p class="mt-3 text-xs text-slate-500">${rodape}</p></div>`;
+    }
+
+    function render(d){
+      document.getElementById("subtitle").innerHTML =
+        `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`;
+
+      const pctMeta = d.metaMensal ? Math.min(100,(d.faturamentoAtual/d.metaMensal)*100) : 0;
+      const pctRun = d.metaMensal ? Math.round((d.runRate/d.metaMensal)*100) : 0;
+      document.getElementById("kpis").innerHTML =
+        kpiCard("Faturamento Atual", brl(d.faturamentoAtual), "border-blue-500",
+          `${d.negociosGanhos} ganhos · ${pctMeta.toFixed(1)}% da meta`) +
+        kpiCard("Tracking / Run Rate", brl(d.runRate), pctRun>=100?"border-emerald-500":"border-amber-500",
+          `Projeção no ritmo atual (${pctRun}% da meta)`) +
+        kpiCard("Gap para a Meta", brl(d.gapMeta), "border-rose-500",
+          `Meta ${brl(d.metaMensal)} · faltam ${d.diasUteisRestantes} dias úteis`) +
+        kpiCard("Ticket Médio", brl(d.ticketMedio), "border-violet-500",
+          d.negociosGanhos>0 ? `${brl(d.faturamentoAtual)} / ${d.negociosGanhos} ganhos` : "—");
+
+      // Funil
+      const fLabels = d.funil.map(s=>s.etapa), fVals = d.funil.map(s=>s.quantidade);
+      const topo = fVals[0]||1, ganho = d.funil[d.funil.length-1].quantidade;
+      document.getElementById("funil-sub").textContent =
+        `Abertos por etapa · conversão topo→ganho ${((ganho/topo)*100).toFixed(1)}%`;
+      if (chartFunil) chartFunil.destroy();
+      chartFunil = new Chart(document.getElementById("chart-funil"), {
+        type:"bar",
+        data:{ labels:fLabels, datasets:[{ data:fVals, backgroundColor:"#3b82f6", borderRadius:4 }] },
+        options:{ indexAxis:"y", plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}} }
+      });
+
+      // Forecast
+      const total = d.forecastSemanal.reduce((a,p)=>a+p.valor,0);
+      document.getElementById("forecast-sub").textContent =
+        `Previsão em aberto · ${brl(total)} no pipeline`;
+      if (chartForecast) chartForecast.destroy();
+      chartForecast = new Chart(document.getElementById("chart-forecast"), {
+        type:"bar",
+        data:{ labels:d.forecastSemanal.map(p=>p.semana),
+               datasets:[{ data:d.forecastSemanal.map(p=>p.valor), backgroundColor:"#2563eb", borderRadius:4 }] },
+        options:{ plugins:{legend:{display:false},
+                 tooltip:{callbacks:{label:(c)=>brl(c.raw)}}},
+                 scales:{y:{beginAtZero:true, ticks:{callback:(v)=>brl(v)}}} }
+      });
+
+      // Ritmo diário
+      document.getElementById("ritmo-sub").textContent =
+        `${d.diasUteisRestantes} dias úteis restantes de ${d.diasUteisTotais}`;
+      const ger = [["MQLs / dia",16],["SQLs / dia",7],["Reuniões / dia",3]];
+      document.getElementById("geracao").innerHTML = ger.map(([r,v])=>
+        `<div><p class="text-xl font-bold">${num(v)}</p><p class="text-xs text-slate-500">${r}</p></div>`).join("");
+      document.getElementById("fech-dia").textContent = brl(d.fechamentoDiarioNecessario);
+      document.getElementById("fech-sub").textContent =
+        `Para zerar o gap de ${brl(d.gapMeta)} nos ${d.diasUteisRestantes} dias úteis restantes.`;
+
+      document.getElementById("footer").textContent =
+        "Dados ao vivo do Pipedrive · atualizado " +
+        new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    }
+
+    function carregar(){
+      const pid = document.getElementById("f-funil").value;
+      if (!pid) return;
+      const uid = document.getElementById("f-user").value;
+      const mes = document.getElementById("f-mes").value;
+      const erro = document.getElementById("erro");
+      document.getElementById("spinner").classList.remove("hidden");
+      erro.classList.add("hidden");
+      const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
+      if (uid) qs.set("user_id", uid);
+      fetch(`/api/metrics?${qs.toString()}`)
+        .then(r=>r.json())
+        .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
+        .catch(e=>{ erro.textContent = "Erro ao buscar dados do Pipedrive: "+e.message; erro.classList.remove("hidden"); })
+        .finally(()=> document.getElementById("spinner").classList.add("hidden"));
+    }
+
+    // Init: carrega filtros e primeira leitura
+    fetch("/api/filters").then(r=>r.json()).then(d=>{
+      if (d.error) throw new Error(d.error);
+      const selF = document.getElementById("f-funil");
+      (d.funis||[]).forEach(f=>{ const o=document.createElement("option"); o.value=f.id; o.textContent=f.nome; selF.appendChild(o); });
+      if ([...selF.options].some(o=>o.value=="7")) selF.value="7";
+      const selU = document.getElementById("f-user");
+      const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
+      (d.usuarios||[]).forEach(u=>{ const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o); });
+      ["f-funil","f-user","f-mes"].forEach(id=>document.getElementById(id).addEventListener("change", carregar));
+      carregar();
+    }).catch(e=>{
+      const erro=document.getElementById("erro");
+      erro.textContent="Erro ao carregar filtros: "+e.message+" (verifique a env PIPEDRIVE_API_TOKEN na Vercel)";
+      erro.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
