@@ -126,7 +126,11 @@ module.exports = async function handler(req, res) {
       fetchOpenDeals(pipelineId, userId, TK),
     ]);
 
-    const metaMensal = META_POR_FUNIL[pipelineId] || META_PADRAO;
+    const metaParam = u.searchParams.get("meta");
+    const metaMensal =
+      metaParam && !isNaN(Number(metaParam)) && Number(metaParam) > 0
+        ? Number(metaParam)
+        : META_POR_FUNIL[pipelineId] || META_PADRAO;
     const d = deriveMetrics({ ano, mes, diaAtual, faturamentoAtual: won.sum, negociosGanhos: won.count, metaMensal });
 
     const stages = (stagesRaw.data || []).sort((a, b) => a.order_nr - b.order_nr);

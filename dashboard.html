@@ -44,6 +44,20 @@
       </div>
     </section>
 
+    <!-- Meta editável -->
+    <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+      <span class="text-slate-500">Meta mensal do funil:</span>
+      <span id="meta-view" class="font-semibold text-slate-800">—</span>
+      <button id="meta-edit" class="text-blue-600 hover:underline">editar</button>
+      <span id="meta-form" style="display:none;" class="flex-wrap items-center gap-2">
+        <span class="text-slate-400">R$</span>
+        <input id="meta-input" type="number" min="0" step="1000" class="w-36 rounded border border-slate-300 px-2 py-1 focus:border-blue-500 focus:outline-none" />
+        <button id="meta-save" class="rounded bg-blue-600 px-3 py-1 font-medium text-white hover:bg-blue-700">Salvar</button>
+        <button id="meta-cancel" class="text-slate-500 hover:underline">cancelar</button>
+        <span id="meta-status" class="text-xs text-slate-400"></span>
+      </span>
+    </div>
+
     <div id="erro" class="mt-6 hidden rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"></div>
 
     <!-- KPIs -->
@@ -89,6 +103,8 @@
     const brl = (v) => (v||0).toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
     const num = (v) => (v||0).toLocaleString("pt-BR");
     let chartFunil, chartForecast;
+    let metasMap = {};
+    let currentMeta = 0;
 
     document.getElementById("today").textContent = new Date().toLocaleDateString("pt-BR",
       { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
@@ -116,6 +132,9 @@
     function render(d){
       document.getElementById("subtitle").innerHTML =
         `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`;
+
+      currentMeta = d.metaMensal;
+      document.getElementById("meta-view").textContent = brl(d.metaMensal);
 
       const pctMeta = d.metaMensal ? Math.min(100,(d.faturamentoAtual/d.metaMensal)*100) : 0;
       const pctRun = d.metaMensal ? Math.round((d.runRate/d.metaMensal)*100) : 0;
@@ -170,6 +189,29 @@
         new Date(d.atualizadoEm).toLocaleString("pt-BR");
     }
 
+    function abrirMeta(){
+      document.getElementById("meta-input").value = Math.round(currentMeta || 0);
+      document.getElementById("meta-form").style.display = "inline-flex";
+      document.getElementById("meta-edit").style.display = "none";
+    }
+    function fecharMeta(){
+      document.getElementById("meta-form").style.display = "none";
+      document.getElementById("meta-edit").style.display = "inline";
+      document.getElementById("meta-status").textContent = "";
+    }
+    function salvarMeta(){
+      const pid = document.getElementById("f-funil").value;
+      const v = Number(document.getElementById("meta-input").value);
+      const st = document.getElementById("meta-status");
+      if (!(v > 0)) { st.textContent = "valor inválido"; return; }
+      st.textContent = "salvando…";
+      fetch("/api/metas", { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ pipelineId: pid, valor: v }) })
+        .then(r=>r.json())
+        .then(d=>{ if(d.error) throw new Error(d.error); metasMap = d.metas || metasMap; fecharMeta(); carregar(); })
+        .catch(e=>{ st.textContent = "erro: "+e.message; });
+    }
+
     function carregar(){
       const pid = document.getElementById("f-funil").value;
       if (!pid) return;
@@ -180,6 +222,7 @@
       erro.classList.add("hidden");
       const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
       if (uid) qs.set("user_id", uid);
+      if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
       fetch(`/api/metrics?${qs.toString()}`)
         .then(r=>r.json())
         .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
@@ -197,7 +240,10 @@
       const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
       (d.usuarios||[]).forEach(u=>{ const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o); });
       ["f-funil","f-user","f-mes"].forEach(id=>document.getElementById(id).addEventListener("change", carregar));
-      carregar();
+      document.getElementById("meta-edit").addEventListener("click", abrirMeta);
+      document.getElementById("meta-cancel").addEventListener("click", fecharMeta);
+      document.getElementById("meta-save").addEventListener("click", salvarMeta);
+      fetch("/api/metas").then(r=>r.json()).then(m=>{ metasMap = m.metas || {}; }).catch(()=>{}).finally(carregar);
     }).catch(e=>{
       const erro=document.getElementById("erro");
       erro.textContent="Erro ao carregar filtros: "+e.message+" (verifique a env PIPEDRIVE_API_TOKEN na Vercel)";
