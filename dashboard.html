@@ -90,7 +90,7 @@
       </div>
       <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div class="rounded-lg border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-700">Geração de pipeline / dia <span class="text-xs font-normal text-slate-400">(meta de referência)</span></p>
+          <p class="text-sm font-medium text-slate-700">Geração no mês <span class="text-xs font-normal text-slate-400">(Entrada → SQL → Reunião)</span></p>
           <div id="geracao" class="mt-3 grid grid-cols-3 gap-3"></div>
         </div>
         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -219,7 +219,8 @@
       // Ritmo diário
       document.getElementById("ritmo-sub").textContent =
         `${d.diasUteisRestantes} dias úteis restantes de ${d.diasUteisTotais}`;
-      const ger = [["MQLs / dia",16],["SQLs / dia",7],["Reuniões / dia",3]];
+      const g = d.geracao || {mql:0,sql:0,reunioes:0};
+      const ger = [["Entradas (MQL)",g.mql],["SQL",g.sql],["Reuniões",g.reunioes]];
       document.getElementById("geracao").innerHTML = ger.map(([r,v])=>
         `<div><p class="text-xl font-bold">${num(v)}</p><p class="text-xs text-slate-500">${r}</p></div>`).join("");
       document.getElementById("fech-dia").textContent = brl(d.fechamentoDiarioNecessario);
@@ -308,7 +309,9 @@
 
       // Funil (todos veem — gestão à vista)
       const selF = document.getElementById("f-funil");
-      (d.funis||[]).forEach(f=>{ const o=document.createElement("option"); o.value=f.id; o.textContent=f.nome; selF.appendChild(o); });
+      const FUNIS_RADAR = [7, 2]; // só CAP Ativa (7) e Copiloto (2) entram no radar agora
+      (d.funis||[]).filter(f=>FUNIS_RADAR.includes(Number(f.id)))
+        .forEach(f=>{ const o=document.createElement("option"); o.value=f.id; o.textContent=f.nome; selF.appendChild(o); });
       if ([...selF.options].some(o=>o.value=="7")) selF.value="7";
 
       // Recorte por vendedor: admin escolhe; vendedor fica travado no próprio.

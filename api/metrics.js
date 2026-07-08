@@ -49,6 +49,33 @@ async function fetchWonMonth(pipelineId, userId, monthStart, TK) {
   return { count: deals.length, sum };
 }
 
+async function fetchEntrantesMonth(pipelineId, userId, monthStart, TK) {
+  let url = `${V1}/deals/timeline?start_date=${monthStart}&interval=month&amount=1&field_key=add_time&pipeline_id=${pipelineId}`;
+  if (userId) url += `&user_id=${userId}`;
+  const r = await pd(url, TK);
+  return (r.data && r.data[0] && r.data[0].deals) || [];
+}
+
+// Geração do mês: entrantes (Entrada), SQL (alcançou Qualificado, ord>=4) e Reuniões (alcançou Reunião Agendada, ord>=5).
+function computeGeracao(entrantes, stagesRaw) {
+  const stages = stagesRaw.data || [];
+  const orderByStage = new Map(stages.map((s) => [s.id, s.order_nr]));
+  let qualOrder = 4, reuniaoOrder = 5, qualNome = "Qualificado", reuniaoNome = "Reunião Agendada";
+  for (const s of stages) {
+    const n = (s.name || "").toLowerCase();
+    if (/qualif/.test(n)) { qualOrder = s.order_nr; qualNome = s.name; }
+    if (/reuni/.test(n) && /agend/.test(n)) { reuniaoOrder = s.order_nr; reuniaoNome = s.name; }
+  }
+  let mql = entrantes.length, sql = 0, reunioes = 0;
+  for (const d of entrantes) {
+    const won = d.status === "won";
+    const ord = won ? 999 : (orderByStage.get(d.stage_id) || 0);
+    if (ord >= qualOrder) sql++;
+    if (ord >= reuniaoOrder) reunioes++;
+  }
+  return { mql, sql, reunioes, qualNome, reuniaoNome };
+}
+
 async function fetchOpenDeals(pipelineId, userId, TK) {
   const out = [];
   let cursor = null, guard = 0;
@@ -118,13 +145,15 @@ module.exports = async function handler(req, res) {
     const ehMesAtual = ano === now.getFullYear() && mes === now.getMonth();
     const diaAtual = ehMesAtual ? now.getDate() : new Date(ano, mes + 1, 0).getDate();
 
-    const [pipe, user, stagesRaw, won, open] = await Promise.all([
+    const [pipe, user, stagesRaw, won, open, entrantes] = await Promise.all([
       pd(`${V1}/pipelines/${pipelineId}`, TK),
       userId ? pd(`${V1}/users/${userId}`, TK) : Promise.resolve(null),
       pd(`${V1}/stages?pipeline_id=${pipelineId}`, TK),
       fetchWonMonth(pipelineId, userId, monthStart, TK),
       fetchOpenDeals(pipelineId, userId, TK),
+      fetchEntrantesMonth(pipelineId, userId, monthStart, TK),
     ]);
+    const geracao = computeGeracao(entrantes, stagesRaw);
 
     const metaParam = u.searchParams.get("meta");
     const metaMensal =
@@ -150,6 +179,7 @@ module.exports = async function handler(req, res) {
       negociosGanhos: won.count,
       pipelineAbertoTotal,
       funil,
+      geracao,
       forecastSemanal: buildForecast(open),
       ...d,
       atualizadoEm: new Date().toISOString(),
