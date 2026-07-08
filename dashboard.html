@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Playbook — CAP Executivo</title>
+  <title>Playbook — Tracking Comercial</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style> body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; } </style>
@@ -15,9 +15,9 @@
       <div>
         <div class="flex items-center gap-2">
           <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">C</span>
-          <h1 class="text-2xl font-bold tracking-tight">Playbook — CAP Executivo</h1>
+          <h1 class="text-2xl font-bold tracking-tight">Playbook — Tracking Comercial</h1>
         </div>
-        <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · Tracking mensal de vendas</p>
+        <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · Tracking mensal de vendas por funil e vendedor</p>
       </div>
       <div class="text-left sm:text-right">
         <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
@@ -31,9 +31,13 @@
         <label class="mb-1 block text-xs font-medium text-slate-500">Funil</label>
         <select id="f-funil" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
       </div>
-      <div class="w-full sm:w-56">
-        <label class="mb-1 block text-xs font-medium text-slate-500">Usuário</label>
+      <div id="user-filter-wrap" class="w-full sm:w-56">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Vendedor</label>
         <select id="f-user" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
+      </div>
+      <div id="user-fixed" class="hidden w-full sm:w-56">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Vendedor</label>
+        <div id="user-fixed-label" class="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700"></div>
       </div>
       <div class="w-full sm:w-48">
         <label class="mb-1 block text-xs font-medium text-slate-500">Mês</label>
@@ -44,11 +48,12 @@
       </div>
     </section>
 
-    <!-- Meta editável -->
+    <!-- Meta -->
     <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
-      <span class="text-slate-500">Meta mensal do funil:</span>
+      <span id="meta-label" class="text-slate-500">Meta mensal do funil:</span>
       <span id="meta-view" class="font-semibold text-slate-800">—</span>
       <button id="meta-edit" class="text-blue-600 hover:underline">editar</button>
+      <span id="meta-hint" class="hidden text-xs text-slate-400"></span>
       <span id="meta-form" style="display:none;" class="flex-wrap items-center gap-2">
         <span class="text-slate-400">R$</span>
         <input id="meta-input" type="number" min="0" step="1000" class="w-36 rounded border border-slate-300 px-2 py-1 focus:border-blue-500 focus:outline-none" />
@@ -103,8 +108,21 @@
     const brl = (v) => (v||0).toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
     const num = (v) => (v||0).toLocaleString("pt-BR");
     let chartFunil, chartForecast;
-    let metasMap = {};
+    let metasMap = {};          // metas.json: pipelineId -> meta do funil
     let currentMeta = 0;
+
+    // ── Sessão / controle de acesso (espelha o padrão da aba Minha Comissão) ──
+    function getSession(){ try { return JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}"); } catch(e){ return {}; } }
+    const session = getSession();
+    // Sem sessão = acesso direto sem login → manda pro login do playbook.
+    if (!session || !session.name) { location.replace("/"); }
+    const isAdmin = !!(session.isAdmin || session.team === "Gestão");
+
+    let usersByEmail = {};      // email -> { meta, name, team }
+    let metaByPdId   = {};      // pipedrive user id -> meta individual (mensal)
+    let myPdId = null;          // id Pipedrive do usuário logado
+    let myName = session.name || "";
+    let viewIsIndividual = false; // recorte atual é de um vendedor específico?
 
     document.getElementById("today").textContent = new Date().toLocaleDateString("pt-BR",
       { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
@@ -129,12 +147,36 @@
         <p class="mt-3 text-xs text-slate-500">${rodape}</p></div>`;
     }
 
+    // uid atual: admin usa o dropdown; vendedor é fixado no próprio id.
+    function currentUid(){
+      if (isAdmin) return document.getElementById("f-user").value || "";
+      return myPdId != null ? String(myPdId) : "";
+    }
+
+    function renderMetaControls(){
+      const metaEdit  = document.getElementById("meta-edit");
+      const metaLabel = document.getElementById("meta-label");
+      const metaHint  = document.getElementById("meta-hint");
+      if (viewIsIndividual){
+        metaLabel.textContent = "Meta individual (mensal):";
+        metaEdit.style.display = "none";
+        metaHint.classList.remove("hidden");
+        metaHint.textContent = "editar em PDI & Gamificação › Minha Comissão";
+      } else {
+        metaLabel.textContent = "Meta mensal do funil:";
+        metaHint.classList.add("hidden");
+        // Só a Gestão edita a meta do funil.
+        metaEdit.style.display = isAdmin ? "inline" : "none";
+      }
+    }
+
     function render(d){
       document.getElementById("subtitle").innerHTML =
         `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`;
 
       currentMeta = d.metaMensal;
       document.getElementById("meta-view").textContent = brl(d.metaMensal);
+      renderMetaControls();
 
       const pctMeta = d.metaMensal ? Math.min(100,(d.faturamentoAtual/d.metaMensal)*100) : 0;
       const pctRun = d.metaMensal ? Math.round((d.runRate/d.metaMensal)*100) : 0;
@@ -196,7 +238,7 @@
     }
     function fecharMeta(){
       document.getElementById("meta-form").style.display = "none";
-      document.getElementById("meta-edit").style.display = "inline";
+      document.getElementById("meta-edit").style.display = isAdmin ? "inline" : "none";
       document.getElementById("meta-status").textContent = "";
     }
     function salvarMeta(){
@@ -215,14 +257,21 @@
     function carregar(){
       const pid = document.getElementById("f-funil").value;
       if (!pid) return;
-      const uid = document.getElementById("f-user").value;
+      const uid = currentUid();
       const mes = document.getElementById("f-mes").value;
       const erro = document.getElementById("erro");
       document.getElementById("spinner").classList.remove("hidden");
       erro.classList.add("hidden");
+
+      // Recorte individual quando há um vendedor selecionado com meta cadastrada.
+      viewIsIndividual = !!(uid && metaByPdId[uid] != null);
+
       const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
       if (uid) qs.set("user_id", uid);
-      if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
+      // Meta: individual (users.json) tem prioridade; senão a do funil (metas.json).
+      if (viewIsIndividual) qs.set("meta", metaByPdId[uid]);
+      else if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
+
       fetch(`/api/metrics?${qs.toString()}`)
         .then(r=>r.json())
         .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
@@ -230,16 +279,59 @@
         .finally(()=> document.getElementById("spinner").classList.add("hidden"));
     }
 
-    // Init: carrega filtros e primeira leitura
-    fetch("/api/filters").then(r=>r.json()).then(d=>{
+    // Init: carrega usuários (users.json) + filtros (Pipedrive) e faz a junção por e-mail.
+    Promise.all([
+      fetch("/api/users").then(r=>r.json()).catch(()=>({users:[]})),
+      fetch("/api/filters").then(r=>r.json()),
+    ]).then(([ud, d])=>{
       if (d.error) throw new Error(d.error);
+
+      // users.json → mapa por e-mail (meta individual mensal)
+      (ud.users||[]).forEach(u=>{
+        const em = (u.user||u.email||"").toLowerCase();
+        if (!em) return;
+        const metaNum = u.meta ? (parseInt(String(u.meta).replace(/[^0-9]/g,""))||0) : 0;
+        usersByEmail[em] = { meta: metaNum, name: u.name||em, team: u.team||"" };
+      });
+      // e-mail do usuário logado (casa pelo nome da sessão)
+      let myEmail = null;
+      (ud.users||[]).forEach(u=>{
+        if ((u.name||"").toLowerCase() === (myName||"").toLowerCase()) myEmail = (u.user||u.email||"").toLowerCase();
+      });
+
+      // Junção Pipedrive: id -> meta individual; e id do logado
+      (d.usuarios||[]).forEach(u=>{
+        const em = (u.email||"").toLowerCase();
+        if (em && usersByEmail[em] && usersByEmail[em].meta > 0) metaByPdId[u.id] = usersByEmail[em].meta;
+        if (em && myEmail && em === myEmail) myPdId = u.id;
+      });
+
+      // Funil (todos veem — gestão à vista)
       const selF = document.getElementById("f-funil");
       (d.funis||[]).forEach(f=>{ const o=document.createElement("option"); o.value=f.id; o.textContent=f.nome; selF.appendChild(o); });
       if ([...selF.options].some(o=>o.value=="7")) selF.value="7";
-      const selU = document.getElementById("f-user");
-      const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
-      (d.usuarios||[]).forEach(u=>{ const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o); });
-      ["f-funil","f-user","f-mes"].forEach(id=>document.getElementById(id).addEventListener("change", carregar));
+
+      // Recorte por vendedor: admin escolhe; vendedor fica travado no próprio.
+      if (isAdmin){
+        const selU = document.getElementById("f-user");
+        const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
+        (d.usuarios||[]).forEach(u=>{ const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o); });
+        selU.addEventListener("change", carregar);
+      } else {
+        // Esconde o dropdown, mostra rótulo fixo.
+        document.getElementById("user-filter-wrap").classList.add("hidden");
+        const fixed = document.getElementById("user-fixed");
+        fixed.classList.remove("hidden");
+        const lbl = document.getElementById("user-fixed-label");
+        if (myPdId != null){
+          lbl.textContent = (myName.split(" ")[0]) + " (só o seu)";
+        } else {
+          lbl.textContent = "Funil geral";
+          lbl.title = "Sem vínculo com o Pipedrive — exibindo o funil geral";
+        }
+      }
+
+      ["f-funil","f-mes"].forEach(id=>document.getElementById(id).addEventListener("change", carregar));
       document.getElementById("meta-edit").addEventListener("click", abrirMeta);
       document.getElementById("meta-cancel").addEventListener("click", fecharMeta);
       document.getElementById("meta-save").addEventListener("click", salvarMeta);

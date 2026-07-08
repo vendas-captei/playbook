@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
       .map((p) => ({ id: p.id, nome: p.name }));
     const usuarios = (users.data || [])
       .filter((u) => u.active_flag)
-      .map((u) => ({ id: u.id, nome: u.name }))
+      .map((u) => ({ id: u.id, nome: u.name, email: (u.email || "").toLowerCase() }))
       .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
     res.status(200).json({ funis, usuarios });
   } catch (e) {
