@@ -169,6 +169,7 @@ module.exports = async function handler(req, res) {
     funil.push({ etapa: "Ganho (mês)", quantidade: won.count });
 
     const pipelineAbertoTotal = open.reduce((acc, o) => acc + o.value, 0);
+    const abertoCount = open.length; // nº de leads em aberto (p/ teto saudável de 55)
 
     res.status(200).json({
       mesReferencia: nomeMes(ano, mes),
@@ -178,6 +179,7 @@ module.exports = async function handler(req, res) {
       faturamentoAtual: won.sum,
       negociosGanhos: won.count,
       pipelineAbertoTotal,
+      abertoCount,
       funil,
       geracao,
       forecastSemanal: buildForecast(open),

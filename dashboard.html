@@ -19,9 +19,12 @@
         </div>
         <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · Tracking mensal de vendas por funil e vendedor</p>
       </div>
-      <div class="text-left sm:text-right">
-        <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
-        <p id="today" class="text-sm font-medium capitalize text-slate-700"></p>
+      <div class="flex items-center gap-4">
+        <a href="/" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">← Voltar ao Playbook</a>
+        <div class="text-left sm:text-right">
+          <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
+          <p id="today" class="text-sm font-medium capitalize text-slate-700"></p>
+        </div>
       </div>
     </header>
 
@@ -107,6 +110,10 @@
   <script>
     const brl = (v) => (v||0).toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
     const num = (v) => (v||0).toLocaleString("pt-BR");
+    // Gestão à vista: verde no/acima do ritmo, amarelo perto, vermelho abaixo.
+    const tempBorder = (pct) => pct>=100 ? "border-emerald-500" : (pct>=90 ? "border-amber-500" : "border-rose-500");
+    const TETO_ABERTO = 55; // teto saudável de leads em aberto por vendedor (daily 08/07)
+    const META_ENTRADAS_DIA = 10; // novas entradas/dia por vendedor (daily 08/07)
     let chartFunil, chartForecast;
     let metasMap = {};          // metas.json: pipelineId -> meta do funil
     let currentMeta = 0;
@@ -180,15 +187,18 @@
 
       const pctMeta = d.metaMensal ? Math.min(100,(d.faturamentoAtual/d.metaMensal)*100) : 0;
       const pctRun = d.metaMensal ? Math.round((d.runRate/d.metaMensal)*100) : 0;
+      const abertoCor = (d.abertoCount||0) > TETO_ABERTO ? "border-rose-500" : "border-emerald-500";
+      const abertoNota = (d.abertoCount||0) > TETO_ABERTO
+        ? `acima do teto de ${TETO_ABERTO} — segurar entradas`
+        : `de ${TETO_ABERTO} (teto saudável)`;
       document.getElementById("kpis").innerHTML =
+        kpiCard("Gap para a Meta", brl(d.gapMeta), tempBorder(pctRun),
+          `Meta ${brl(d.metaMensal)} · faltam ${d.diasUteisRestantes} dias úteis · ritmo ${pctRun}%`) +
+        kpiCard("Tracking / Run Rate", brl(d.runRate), tempBorder(pctRun),
+          `Projeção no ritmo atual (${pctRun}% da meta)`) +
         kpiCard("Faturamento Atual", brl(d.faturamentoAtual), "border-blue-500",
           `${d.negociosGanhos} ganhos · ${pctMeta.toFixed(1)}% da meta`) +
-        kpiCard("Tracking / Run Rate", brl(d.runRate), pctRun>=100?"border-emerald-500":"border-amber-500",
-          `Projeção no ritmo atual (${pctRun}% da meta)`) +
-        kpiCard("Gap para a Meta", brl(d.gapMeta), "border-rose-500",
-          `Meta ${brl(d.metaMensal)} · faltam ${d.diasUteisRestantes} dias úteis`) +
-        kpiCard("Ticket Médio", brl(d.ticketMedio), "border-violet-500",
-          d.negociosGanhos>0 ? `${brl(d.faturamentoAtual)} / ${d.negociosGanhos} ganhos` : "—");
+        kpiCard("Leads em aberto", num(d.abertoCount), abertoCor, abertoNota);
 
       // Funil
       const fLabels = d.funil.map(s=>s.etapa), fVals = d.funil.map(s=>s.quantidade);
@@ -220,9 +230,21 @@
       document.getElementById("ritmo-sub").textContent =
         `${d.diasUteisRestantes} dias úteis restantes de ${d.diasUteisTotais}`;
       const g = d.geracao || {mql:0,sql:0,reunioes:0};
-      const ger = [["Entradas (MQL)",g.mql],["SQL",g.sql],["Reuniões",g.reunioes]];
-      document.getElementById("geracao").innerHTML = ger.map(([r,v])=>
-        `<div><p class="text-xl font-bold">${num(v)}</p><p class="text-xs text-slate-500">${r}</p></div>`).join("");
+      // Meta de 10 entradas/dia útil por vendedor — só medimos no recorte individual.
+      const espEntradas = viewIsIndividual ? META_ENTRADAS_DIA * d.diasUteisDecorridos : null;
+      const mqlCor = espEntradas!=null
+        ? (g.mql>=espEntradas ? "text-emerald-600" : (g.mql>=espEntradas*0.9 ? "text-amber-600" : "text-rose-600"))
+        : "";
+      const mqlSub = espEntradas!=null
+        ? `esperado ${espEntradas} (${META_ENTRADAS_DIA}/dia útil)`
+        : `meta ${META_ENTRADAS_DIA}/dia útil por vendedor`;
+      const ger = [
+        ["Entradas (MQL)", g.mql, mqlCor, mqlSub],
+        ["SQL", g.sql, "", ""],
+        ["Reuniões", g.reunioes, "", ""],
+      ];
+      document.getElementById("geracao").innerHTML = ger.map(([r,v,cor,sub])=>
+        `<div><p class="text-xl font-bold ${cor}">${num(v)}</p><p class="text-xs text-slate-500">${r}</p>${sub?`<p class="mt-0.5 text-[10px] text-slate-400">${sub}</p>`:""}</div>`).join("");
       document.getElementById("fech-dia").textContent = brl(d.fechamentoDiarioNecessario);
       document.getElementById("fech-sub").textContent =
         `Para zerar o gap de ${brl(d.gapMeta)} nos ${d.diasUteisRestantes} dias úteis restantes.`;
