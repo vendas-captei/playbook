@@ -14,11 +14,25 @@ function pd(url, TK) {
   });
 }
 
+// Feriados nacionais BR (fixos + móveis) — dias úteis = seg-sex que NÃO são feriado.
+// Manter atualizado ano a ano. Fonte: calendário nacional (Lei 14.759/2023 incluiu 20/11).
+const FERIADOS = new Set([
+  // 2025
+  "2025-01-01","2025-03-03","2025-03-04","2025-04-18","2025-04-21","2025-05-01",
+  "2025-06-19","2025-09-07","2025-10-12","2025-11-02","2025-11-15","2025-11-20","2025-12-25",
+  // 2026
+  "2026-01-01","2026-02-16","2026-02-17","2026-04-03","2026-04-21","2026-05-01",
+  "2026-06-04","2026-09-07","2026-10-12","2026-11-02","2026-11-15","2026-11-20","2026-12-25",
+]);
+
 function contarDiasUteis(ano, mes, de, ate) {
   let c = 0;
   for (let d = de; d <= ate; d++) {
     const w = new Date(ano, mes, d).getDay();
-    if (w !== 0 && w !== 6) c++;
+    if (w === 0 || w === 6) continue;
+    const key = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    if (FERIADOS.has(key)) continue;
+    c++;
   }
   return c;
 }
