@@ -20,7 +20,7 @@
         <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · Tracking mensal de vendas por funil e vendedor</p>
       </div>
       <div class="flex items-center gap-4">
-        <a href="/" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">← Voltar ao Playbook</a>
+        <a id="back-playbook" href="/" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">← Voltar ao Playbook</a>
         <div class="text-left sm:text-right">
           <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
           <p id="today" class="text-sm font-medium capitalize text-slate-700"></p>
@@ -121,8 +121,11 @@
     // ── Sessão / controle de acesso (espelha o padrão da aba Minha Comissão) ──
     function getSession(){ try { return JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}"); } catch(e){ return {}; } }
     const session = getSession();
-    // Sem sessão = acesso direto sem login → manda pro login do playbook.
-    if (!session || !session.name) { location.replace("/"); }
+    const framed = window.self !== window.top; // embutido no playbook (iframe) vs aba avulsa
+    // Aba avulsa sem sessão = acesso direto sem login → manda pro login. Embutido: o playbook (pai) já autenticou.
+    if ((!session || !session.name) && !framed) { location.replace("/"); }
+    // Embutido: o menu do playbook já navega; esconde o botão "Voltar" (evitaria aninhar o playbook no iframe).
+    if (framed) { const b = document.getElementById("back-playbook"); if (b) b.style.display = "none"; }
     const isAdmin = !!(session.isAdmin || session.team === "Gestão");
 
     let usersByEmail = {};      // email -> { meta, name, team }

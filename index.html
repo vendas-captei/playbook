@@ -2630,6 +2630,7 @@ function clearSettingsModal() {
       </div>
       <div class="s-sub" onclick="showSection('cargos', this)" style="padding-left:32px;">Cargos & Comissões</div>
       <div class="s-sub" onclick="showSection('metas', this)" style="padding-left:32px;">Metas & Atividades</div>
+      <div class="s-sub" onclick="showSection('tracking', this)" style="padding-left:32px;">📊 Tracking Comercial <span style="display:inline-block;vertical-align:middle;margin-left:4px;background:#dcfce7;color:#15803d;font-size:9px;font-weight:700;letter-spacing:.4px;padding:1px 6px;border-radius:999px;">AO VIVO</span></div>
       <div class="s-sub" onclick="showSection('ferramentas', this)" style="padding-left:32px;">Ferramentas</div>
       <div class="s-sub" onclick="showSection('processos', this)" style="padding-left:32px;">Processos & Rituais</div>
 
@@ -3759,7 +3760,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- Link Dashboard ao vivo -->
- <a href="/dashboard.html" class="card" style="display:block;text-decoration:none;color:inherit;margin-bottom:14px;">
+ <a onclick="showSection('tracking')" class="card" style="display:block;text-decoration:none;color:inherit;margin-bottom:14px;cursor:pointer;">
    <div class="card-header" style="cursor:pointer;">
      <div class="card-header-left">
        <div class="card-icon accent">📊</div>
@@ -19192,7 +19193,7 @@ function showSection(id, el) {
   const ov = document.getElementById('overlay');
   if (ov) ov.classList.remove('show');
   // Esconde main quando seções externas (PDI/Tabuleiro) estão ativas — evita blank space
-  const externalSections = ['pdi-board', 'pdi-checkin', 'pdi-timeline', 'tabuleiro-comercial', 'ranking-home', 'comissao'];
+  const externalSections = ['pdi-board', 'pdi-checkin', 'pdi-timeline', 'tabuleiro-comercial', 'ranking-home', 'comissao', 'tracking'];
   const mainEl = document.querySelector('main.main');
   const layoutEl = document.querySelector('.layout');
   if (externalSections.includes(id)) {
@@ -19203,6 +19204,8 @@ function showSection(id, el) {
     if (layoutEl) { layoutEl.style.minHeight = ''; layoutEl.style.height = ''; layoutEl.style.overflow = ''; }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Tracking Comercial: carrega o iframe só na 1ª abertura (evita chamar Pipedrive à toa)
+  if (id === 'tracking') { const f = document.getElementById('tracking-frame'); if (f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
   // PDI renders
   if (id === 'pdi-board')    { try { PDI.renderBoard(); } catch(e){} }
   if (id === 'pdi-checkin')  { try { PDI.renderCheckin(); } catch(e){} }
@@ -25120,6 +25123,13 @@ const RH = (() => {
 
   <!-- Body -->
   <div id="cm-body" style="padding:24px 28px;box-sizing:border-box;max-width:1400px;width:100%;"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     📊 TRACKING COMERCIAL (dashboard ao vivo embutido via iframe)
+     ═══════════════════════════════════════════ -->
+<div class="section" id="sec-tracking" style="min-height:100vh;background:#f5f5f7;padding:0;margin-left:var(--sidebar-w);flex-direction:column;align-items:stretch;">
+  <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:100vh;border:0;display:block;"></iframe>
 </div>
 
 <script>
