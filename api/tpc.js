@@ -28,6 +28,23 @@ function parseData(s) {
   return isNaN(t) ? null : t;
 }
 
+// Minutos ÚTEIS entre dois instantes (UTC): desconsidera sábado e domingo.
+// Corte do fim de semana em BRT (UTC-3) para bater com o calendário brasileiro.
+const BRT = -3 * 3600000;
+function minutosUteis(iniMs, fimMs) {
+  if (fimMs <= iniMs) return 0;
+  let total = 0, cur = iniMs;
+  while (cur < fimMs) {
+    const dBr = new Date(cur + BRT);
+    const dow = dBr.getUTCDay(); // 0=dom, 6=sáb (em BRT)
+    const proxMeiaNoiteBr = Date.UTC(dBr.getUTCFullYear(), dBr.getUTCMonth(), dBr.getUTCDate() + 1) - BRT;
+    const segFim = Math.min(proxMeiaNoiteBr, fimMs);
+    if (dow !== 0 && dow !== 6) total += segFim - cur;
+    cur = segFim;
+  }
+  return total / 60000;
+}
+
 async function primeiroContatoMin(deal, TK) {
   const addTime = parseData(deal.add_time);
   if (addTime == null) return null;
@@ -38,7 +55,7 @@ async function primeiroContatoMin(deal, TK) {
     .filter((t) => t != null && t >= addTime)
     .sort((a, b) => a - b);
   if (!acts.length) return null;
-  return (acts[0] - addTime) / 60000; // minutos
+  return minutosUteis(addTime, acts[0]); // minutos úteis (sem fins de semana)
 }
 
 async function poolMap(items, fn, size) {
