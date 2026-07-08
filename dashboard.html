@@ -5,8 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Playbook — Tracking Comercial</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style> body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; } </style>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    /* Modo TV / paisagem: esconde controles, alarga e aumenta as fontes p/ exibição em televisor */
+    .tv .hide-tv { display: none !important; }
+    .tv main { max-width: 100% !important; padding: 1.5rem 2.5rem !important; }
+    .tv #kpis .text-2xl { font-size: 2.25rem; }
+    .tv #trilha .text-xl, .tv #tpc .text-xl { font-size: 1.75rem; }
+    .tv h2 { font-size: 1.35rem; }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
   <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -20,7 +27,8 @@
         <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · Tracking mensal de vendas por funil e vendedor</p>
       </div>
       <div class="flex items-center gap-4">
-        <a id="back-playbook" href="/" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">← Voltar ao Playbook</a>
+        <a id="back-playbook" href="/" class="hide-tv inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">← Voltar ao Playbook</a>
+        <button id="tv-toggle" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">📺 Modo TV</button>
         <div class="text-left sm:text-right">
           <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
           <p id="today" class="text-sm font-medium capitalize text-slate-700"></p>
@@ -29,7 +37,7 @@
     </header>
 
     <!-- Filtros -->
-    <section class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+    <section class="hide-tv mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
       <div class="w-full sm:w-64">
         <label class="mb-1 block text-xs font-medium text-slate-500">Funil</label>
         <select id="f-funil" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
@@ -52,7 +60,7 @@
     </section>
 
     <!-- Meta -->
-    <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+    <div class="hide-tv mt-4 flex flex-wrap items-center gap-2 text-sm">
       <span id="meta-label" class="text-slate-500">Meta mensal do funil:</span>
       <span id="meta-view" class="font-semibold text-slate-800">—</span>
       <button id="meta-edit" class="text-blue-600 hover:underline">editar</button>
@@ -71,18 +79,22 @@
     <!-- KPIs -->
     <section id="kpis" class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"></section>
 
-    <!-- Gráficos -->
-    <section class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 class="text-base font-semibold">Funil de Conversão</h2>
-        <p id="funil-sub" class="mt-0.5 text-xs text-slate-500"></p>
-        <div class="mt-4"><canvas id="chart-funil"></canvas></div>
+    <!-- Trilha do Mês -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Trilha do Mês</h2>
+        <span id="trilha-sub" class="text-xs text-slate-500"></span>
       </div>
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 class="text-base font-semibold">Forecast Semanal</h2>
-        <p id="forecast-sub" class="mt-0.5 text-xs text-slate-500"></p>
-        <div class="mt-4"><canvas id="chart-forecast"></canvas></div>
+      <div id="trilha"></div>
+    </section>
+
+    <!-- TPC — Tempo de Primeiro Contato -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">TPC — Tempo de Primeiro Contato</h2>
+        <span id="tpc-sub" class="text-xs text-slate-500">meta 5 min · tempo até o 1º contato real após a entrada no funil</span>
       </div>
+      <div id="tpc" class="mt-4 text-sm text-slate-400">carregando…</div>
     </section>
 
     <!-- Ritmo diário -->
@@ -114,7 +126,6 @@
     const tempBorder = (pct) => pct>=100 ? "border-emerald-500" : (pct>=90 ? "border-amber-500" : "border-rose-500");
     const TETO_ABERTO = 55; // teto saudável de leads em aberto por vendedor (daily 08/07)
     const META_ENTRADAS_DIA = 10; // novas entradas/dia por vendedor (daily 08/07)
-    let chartFunil, chartForecast;
     let metasMap = {};          // metas.json: pipelineId -> meta do funil
     let currentMeta = 0;
 
@@ -136,6 +147,24 @@
 
     document.getElementById("today").textContent = new Date().toLocaleDateString("pt-BR",
       { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+
+    // Modo TV: fullscreen + classe .tv (esconde controles, aumenta fontes p/ televisor)
+    (function(){
+      const btn = document.getElementById("tv-toggle");
+      if (!btn) return;
+      btn.addEventListener("click", ()=>{
+        const on = !document.body.classList.contains("tv");
+        document.body.classList.toggle("tv", on);
+        btn.textContent = on ? "✕ Sair do Modo TV" : "📺 Modo TV";
+        if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+        else if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+      });
+      document.addEventListener("fullscreenchange", ()=>{
+        if (!document.fullscreenElement && document.body.classList.contains("tv")){
+          document.body.classList.remove("tv"); btn.textContent = "📺 Modo TV";
+        }
+      });
+    })();
 
     // Popular meses (últimos 6)
     (function(){
@@ -203,31 +232,7 @@
           `${d.negociosGanhos} ganhos · ${pctMeta.toFixed(1)}% da meta`) +
         kpiCard("Leads em aberto", num(d.abertoCount), abertoCor, abertoNota);
 
-      // Funil
-      const fLabels = d.funil.map(s=>s.etapa), fVals = d.funil.map(s=>s.quantidade);
-      const topo = fVals[0]||1, ganho = d.funil[d.funil.length-1].quantidade;
-      document.getElementById("funil-sub").textContent =
-        `Abertos por etapa · conversão topo→ganho ${((ganho/topo)*100).toFixed(1)}%`;
-      if (chartFunil) chartFunil.destroy();
-      chartFunil = new Chart(document.getElementById("chart-funil"), {
-        type:"bar",
-        data:{ labels:fLabels, datasets:[{ data:fVals, backgroundColor:"#3b82f6", borderRadius:4 }] },
-        options:{ indexAxis:"y", plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}} }
-      });
-
-      // Forecast
-      const total = d.forecastSemanal.reduce((a,p)=>a+p.valor,0);
-      document.getElementById("forecast-sub").textContent =
-        `Previsão em aberto · ${brl(total)} no pipeline`;
-      if (chartForecast) chartForecast.destroy();
-      chartForecast = new Chart(document.getElementById("chart-forecast"), {
-        type:"bar",
-        data:{ labels:d.forecastSemanal.map(p=>p.semana),
-               datasets:[{ data:d.forecastSemanal.map(p=>p.valor), backgroundColor:"#2563eb", borderRadius:4 }] },
-        options:{ plugins:{legend:{display:false},
-                 tooltip:{callbacks:{label:(c)=>brl(c.raw)}}},
-                 scales:{y:{beginAtZero:true, ticks:{callback:(v)=>brl(v)}}} }
-      });
+      renderTrilha(d);
 
       // Ritmo diário
       document.getElementById("ritmo-sub").textContent =
@@ -255,6 +260,98 @@
       document.getElementById("footer").textContent =
         "Dados ao vivo do Pipedrive · atualizado " +
         new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    }
+
+    // ── Trilha do Mês: onde o vendedor DEVERIA estar hoje vs onde está ──
+    // Base diária = meta ÷ dias úteis do mês (já sem fins de semana/feriados, vindo da API).
+    // Amortização: "precisa/dia restante" = gap ÷ dias úteis restantes → cai sozinho ao fechar.
+    function renderTrilha(d){
+      const el = document.getElementById("trilha");
+      const tot  = d.diasUteisTotais || 0;
+      const dec  = d.diasUteisDecorridos || 0;
+      const meta = d.metaMensal || 0;
+      const real = d.faturamentoAtual || 0;
+      const baseDia = tot > 0 ? meta / tot : 0;                 // R$ 7.942/dia no funil 7
+      const espHoje = tot > 0 ? meta * (dec / tot) : 0;         // alvo acumulado até hoje
+      const pct     = espHoje > 0 ? real / espHoje : (real > 0 ? 1 : 0);
+      const cor     = pct >= 1 ? "#10b981" : (pct >= 0.9 ? "#f59e0b" : "#f43f5e");
+      const rotulo  = pct >= 1 ? "no ritmo (ou à frente)" : (pct >= 0.9 ? "levemente atrás" : "atrás da trilha");
+      // Posição na régua (em dias úteis): tempo decorrido vs equivalente do realizado.
+      const posHoje = tot > 0 ? (dec / tot) * 100 : 0;
+      const posReal = tot > 0 ? Math.max(0, Math.min(100, (meta > 0 ? (real / meta) : 0) * 100)) : 0;
+
+      document.getElementById("trilha-sub").textContent =
+        `${tot} dias úteis no mês · hoje é o dia útil ${dec} · base ${brl(baseDia)}/dia útil`;
+
+      const tile = (t, v, sub, style) =>
+        `<div class="rounded-lg border border-slate-200 p-3">
+           <p class="text-xs text-slate-500">${t}</p>
+           <p class="mt-1 text-xl font-bold"${style ? ` style="${style}"` : ""}>${v}</p>
+           ${sub ? `<p class="mt-1 text-[11px] text-slate-400">${sub}</p>` : ""}
+         </div>`;
+
+      el.innerHTML = `
+        <div class="mt-4 flex items-center gap-2 text-sm">
+          <span class="inline-block h-2.5 w-2.5 rounded-full" style="background:${cor}"></span>
+          <span class="font-semibold" style="color:${cor}">${(pct*100).toFixed(0)}% da trilha</span>
+          <span class="text-slate-500">— ${rotulo}</span>
+        </div>
+
+        <!-- Régua de dias úteis: preenchida = tempo decorrido; pino = onde o realizado está -->
+        <div class="relative mt-5 mb-8" style="height:16px;">
+          <div class="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-slate-100"></div>
+          <div class="absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-slate-300" style="width:${posHoje}%"></div>
+          <!-- marcador HOJE / meta de hoje -->
+          <div class="absolute -top-1 flex flex-col items-center" style="left:${posHoje}%;transform:translateX(-50%)">
+            <div style="width:2px;height:26px;background:#0f172a;"></div>
+          </div>
+          <div class="absolute text-[10px] font-semibold text-slate-700" style="left:${posHoje}%;top:20px;transform:translateX(-50%);white-space:nowrap;">meta de hoje</div>
+          <!-- pino VOCÊ ESTÁ AQUI -->
+          <div class="absolute top-1/2" style="left:${posReal}%;transform:translate(-50%,-50%);">
+            <div style="width:18px;height:18px;border-radius:50%;background:${cor};border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);"></div>
+          </div>
+          <div class="absolute text-[10px] font-bold" style="left:${posReal}%;top:-18px;transform:translateX(-50%);white-space:nowrap;color:${cor};">você está aqui</div>
+          <div class="absolute -bottom-5 left-0 text-[10px] text-slate-400">dia útil 1</div>
+          <div class="absolute -bottom-5 right-0 text-[10px] text-slate-400">dia útil ${tot}</div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          ${tile("Esperado até hoje", brl(espHoje), `${dec}/${tot} dias úteis`)}
+          ${tile("Realizado", brl(real), `${(pct*100).toFixed(0)}% do esperado`, `color:${cor}`)}
+          ${tile("Base do funil", brl(baseDia), "por dia útil (meta ÷ dias úteis)")}
+          ${tile("Precisa por dia útil", brl(d.fechamentoDiarioNecessario), `amortiza conforme fecha · ${d.diasUteisRestantes} dias restantes`, "color:#ea580c")}
+        </div>`;
+    }
+
+    // TPC — busca separada (mais lenta), não bloqueia o render principal.
+    function carregarTPC(pid, uid, mes){
+      const el = document.getElementById("tpc");
+      if (!el) return;
+      el.innerHTML = '<span class="text-slate-400">calculando… (pode levar alguns segundos)</span>';
+      const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
+      if (uid) qs.set("user_id", uid);
+      fetch(`/api/tpc?${qs.toString()}`)
+        .then(r=>r.json())
+        .then(t=>{
+          if (t.error) throw new Error(t.error);
+          const med = t.medianaMin;
+          const cor = med <= t.metaMin ? "#10b981" : (med <= 15 ? "#f59e0b" : "#f43f5e");
+          const rot = med <= t.metaMin ? "dentro da meta" : (med <= 15 ? "acima da meta" : "muito acima da meta");
+          const tile = (titulo, valor, sub, style) =>
+            `<div class="rounded-lg border border-slate-200 p-3">
+               <p class="text-xs text-slate-500">${titulo}</p>
+               <p class="mt-1 text-xl font-bold"${style?` style="${style}"`:""}>${valor}</p>
+               ${sub?`<p class="mt-1 text-[11px] text-slate-400">${sub}</p>`:""}
+             </div>`;
+          el.innerHTML = `
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              ${tile("Mediana TPC", med.toLocaleString("pt-BR")+" min", rot, `color:${cor}`)}
+              ${tile("Dentro de 5 min", t.pctDentroMeta+"%", `${t.comContato} deals com contato`)}
+              ${tile("Entradas no mês", num(t.totalEntrantes), t.capAtingido?`amostra de ${t.amostra} (mais recentes)`:"amostra completa")}
+              ${tile("Meta", t.metaMin+" min", "1º contato após a entrada no funil")}
+            </div>`;
+        })
+        .catch(e=>{ el.innerHTML = `<span class="text-rose-600">Erro no TPC: ${e.message}</span>`; });
     }
 
     function abrirMeta(){
@@ -303,6 +400,8 @@
         .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
         .catch(e=>{ erro.textContent = "Erro ao buscar dados do Pipedrive: "+e.message; erro.classList.remove("hidden"); })
         .finally(()=> document.getElementById("spinner").classList.add("hidden"));
+
+      carregarTPC(pid, uid, mes);
     }
 
     // Init: carrega usuários (users.json) + filtros (Pipedrive) e faz a junção por e-mail.
