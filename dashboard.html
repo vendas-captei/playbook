@@ -283,6 +283,15 @@
       document.getElementById("trilha-sub").textContent =
         `${tot} dias úteis no mês · hoje é o dia útil ${dec} · base ${brl(baseDia)}/dia útil`;
 
+      // Termômetro do ritmo: quanto o "precisa/dia" (amortizado) subiu/caiu vs a base do funil.
+      // Subiu (precisa > base) = ficou atrás, ritmo apertou → vermelho. Caiu = adiantou → verde.
+      const precisaDia  = d.fechamentoDiarioNecessario || 0;
+      const deltaRitmo  = Math.round(precisaDia - baseDia);
+      const corDelta    = deltaRitmo > 0 ? "#f43f5e" : (deltaRitmo < 0 ? "#10b981" : "#64748b");
+      const sinalDelta  = deltaRitmo > 0 ? "+" : (deltaRitmo < 0 ? "−" : "");
+      const subDelta    = deltaRitmo > 0 ? "ritmo apertou vs base ⚠️"
+                        : (deltaRitmo < 0 ? "folgou vs base ✓" : "igual à base");
+
       const tile = (t, v, sub, style) =>
         `<div class="rounded-lg border border-slate-200 p-3">
            <p class="text-xs text-slate-500">${t}</p>
@@ -315,11 +324,12 @@
           <div class="absolute -bottom-5 right-0 text-[10px] text-slate-400">dia útil ${tot}</div>
         </div>
 
-        <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           ${tile("Esperado até hoje", brl(espHoje), `${dec}/${tot} dias úteis`)}
           ${tile("Realizado", brl(real), `${(pct*100).toFixed(0)}% do esperado`, `color:${cor}`)}
           ${tile("Base do funil", brl(baseDia), "por dia útil (meta ÷ dias úteis)")}
           ${tile("Precisa por dia útil", brl(d.fechamentoDiarioNecessario), `amortiza conforme fecha · ${d.diasUteisRestantes} dias restantes`, "color:#ea580c")}
+          ${tile("Ritmo vs base", `${sinalDelta}${brl(Math.abs(deltaRitmo))}`, subDelta, `color:${corDelta}`)}
         </div>`;
     }
 
