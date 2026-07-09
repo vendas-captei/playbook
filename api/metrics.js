@@ -6,6 +6,21 @@ const V2 = "https://api.pipedrive.com/api/v2";
 const META_POR_FUNIL = { 7: 160000, 2: 80000 }; // ajuste por funil
 const META_PADRAO = 160000;
 
+// ── Campos custom e opções para a definição de negócio de MQL/SQL/OPP (Captação Ativa, funil 7) ──
+// Verificado via API em 2026-07-09. Ver memória project_pipedrive_estrutura / reference_cidade_lead_e_base.
+const F_PRODUTO = "4a67c7a7684177402784cf8773a45dd8e1670b59"; // set: 6843 CA, 6844 Indica+, 6860 IA, 7173 NI
+const F_CIDADE  = "ad134d73ddf7e8c36e15b4a7c6348cc595170d70"; // enum: 7207 dentro base, 7208 fora base
+const F_CRECI   = "806f3f6384d7d9b503e4e25a9375818d187a18bc"; // enum: 6734 Sim, 6735 Não
+const F_CLIENTE = "75afcc85302974a298be36d95bb743ce7e9b2fc7"; // enum: 7096 Sim, 7097 Não
+const F_IMOB    = "dca89917133f0345cb886860d6343f65d37cd2f4"; // enum: 6786 Imobiliária, 6787 Corretor autônomo
+const PROD_CA = "6843", PROD_INDICA = "6844";
+const APRESENTACOES = ["apresentacao_captei", "apresentacao_indica"]; // activityType key_strings
+
+function setHas(raw, id) {
+  // campo "set" do Pipedrive vem como string "6843" ou "6843,6860"
+  return raw != null && String(raw).split(",").map((s) => s.trim()).includes(id);
+}
+
 function pd(url, TK) {
   const sep = url.includes("?") ? "&" : "?";
   return fetch(`${url}${sep}api_token=${TK}`, { cache: "no-store" }).then((r) => {
@@ -70,7 +85,8 @@ async function fetchEntrantesMonth(pipelineId, userId, monthStart, TK) {
   return (r.data && r.data[0] && r.data[0].deals) || [];
 }
 
-// Geração do mês: entrantes (Entrada), SQL (alcançou Qualificado, ord>=4) e Reuniões (alcançou Reunião Agendada, ord>=5).
+// ── Geração por ETAPA (funis que ainda não têm definição de negócio, ex.: funil 2 por ora) ──
+// entrantes (Entrada), SQL (alcançou Qualificado, ord>=4) e Reuniões (alcançou Reunião Agendada, ord>=5).
 function computeGeracao(entrantes, stagesRaw) {
   const stages = stagesRaw.data || [];
   const orderByStage = new Map(stages.map((s) => [s.id, s.order_nr]));
@@ -87,7 +103,77 @@ function computeGeracao(entrantes, stagesRaw) {
     if (ord >= qualOrder) sql++;
     if (ord >= reuniaoOrder) reunioes++;
   }
-  return { mql, sql, reunioes, qualNome, reuniaoNome };
+  return { modo: "etapa", mql, sql, reunioes, qualNome, reuniaoNome };
+}
+
+// ── Geração por DEFINIÇÃO DE NEGÓCIO — Captação Ativa (funil 7). Definido com Natan 2026-07-09. ──
+// MQL: produto de interesse ∈ {Captação Ativa, Indica+}, criado no mês, EM QUALQUER FUNIL.
+// SQL: MQL E ( [dentro da base + Tem CRECI Sim + não é cliente] OU [fora da base + Imobiliária + não é cliente] ).
+//   "não é cliente" = campo "É cliente Captei?" != Sim (null ou Não passam).
+function computeGeracaoCA(entrantesCrossFunil) {
+  let mql = 0, sql = 0;
+  for (const d of entrantesCrossFunil) {
+    const isCA = setHas(d[F_PRODUTO], PROD_CA) || setHas(d[F_PRODUTO], PROD_INDICA);
+    if (!isCA) continue;
+    mql++;
+    const naoCliente = String(d[F_CLIENTE]) !== "7096";
+    const dentro = String(d[F_CIDADE]) === "7207";
+    const fora   = String(d[F_CIDADE]) === "7208";
+    const temCreci = String(d[F_CRECI]) === "6734";
+    const imob = String(d[F_IMOB]) === "6786";
+    const sqlDentro = dentro && temCreci && naoCliente;
+    const sqlFora   = fora && imob && naoCliente;
+    if (sqlDentro || sqlFora) sql++;
+  }
+  return { modo: "ca", mql, sql };
+}
+
+// Entrantes do mês SEM filtro de funil (cross-funil), com os campos custom p/ MQL/SQL de negócio.
+async function fetchEntrantesCrossFunil(userId, monthStart, TK) {
+  let url = `${V1}/deals/timeline?start_date=${monthStart}&interval=month&amount=1&field_key=add_time`;
+  if (userId) url += `&user_id=${userId}`;
+  const r = await pd(url, TK);
+  return (r.data && r.data[0] && r.data[0].deals) || [];
+}
+
+// deal_ids com atividade de apresentação (Captei/Indica+) no mês — status a fazer OU concluído (não deletadas).
+// user_id=0 => todos os vendedores (v1 /activities sem user_id retorna só o dono do token).
+// O recorte por vendedor é feito depois pelo DONO DO DEAL (não pelo dono da atividade).
+async function fetchDealIdsApresentacao(monthStart, monthEnd, TK) {
+  const ids = new Set();
+  for (const type of APRESENTACOES) {
+    let start = 0, guard = 0;
+    do {
+      const url = `${V1}/activities?type=${type}&user_id=0&start_date=${monthStart}&end_date=${monthEnd}&start=${start}&limit=500`;
+      const r = await pd(url, TK);
+      for (const a of r.data || []) {
+        if (a.deal_id && a.active_flag !== false) ids.add(a.deal_id);
+      }
+      const pg = (r.additional_data && r.additional_data.pagination) || {};
+      start = pg.more_items_in_collection ? pg.next_start : -1;
+    } while (start >= 0 && ++guard < 20);
+  }
+  return ids;
+}
+
+// OPP (funil 7) = deals COM apresentação no mês que pertencem ao funil 7 (e ao vendedor, se filtrado).
+// Resolve o pipeline/dono só dos ~dezenas de deals com apresentação (barato) em vez de varrer o funil inteiro.
+async function computeOppFunil7(pipelineId, userId, monthStart, monthEnd, TK) {
+  const ids = [...(await fetchDealIdsApresentacao(monthStart, monthEnd, TK))];
+  let opp = 0;
+  const CONC = 12;
+  for (let i = 0; i < ids.length; i += CONC) {
+    const chunk = ids.slice(i, i + CONC);
+    const deals = await Promise.all(
+      chunk.map((id) => pd(`${V2}/deals/${id}`, TK).then((r) => r.data || {}).catch(() => ({})))
+    );
+    for (const d of deals) {
+      if (d.pipeline_id !== pipelineId) continue;
+      if (userId && d.owner_id !== userId) continue;
+      opp++;
+    }
+  }
+  return opp;
 }
 
 async function fetchOpenDeals(pipelineId, userId, TK) {
@@ -155,19 +241,34 @@ module.exports = async function handler(req, res) {
       const parts = month.split("-").map(Number);
       ano = parts[0]; mes = parts[1] - 1;
     }
+    const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
     const monthStart = `${ano}-${String(mes + 1).padStart(2, "0")}-01`;
+    const monthEnd = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(ultimoDiaMes).padStart(2, "0")}`;
     const ehMesAtual = ano === now.getFullYear() && mes === now.getMonth();
-    const diaAtual = ehMesAtual ? now.getDate() : new Date(ano, mes + 1, 0).getDate();
+    const diaAtual = ehMesAtual ? now.getDate() : ultimoDiaMes;
 
-    const [pipe, user, stagesRaw, won, open, entrantes] = await Promise.all([
+    const [pipe, user, stagesRaw, won, open] = await Promise.all([
       pd(`${V1}/pipelines/${pipelineId}`, TK),
       userId ? pd(`${V1}/users/${userId}`, TK) : Promise.resolve(null),
       pd(`${V1}/stages?pipeline_id=${pipelineId}`, TK),
       fetchWonMonth(pipelineId, userId, monthStart, TK),
       fetchOpenDeals(pipelineId, userId, TK),
-      fetchEntrantesMonth(pipelineId, userId, monthStart, TK),
     ]);
-    const geracao = computeGeracao(entrantes, stagesRaw);
+
+    // Funil 7 (Captação Ativa) usa definição de NEGÓCIO (MQL/SQL cross-funil, OPP por apresentação, Venda=Ganho).
+    // Demais funis mantêm a definição por ETAPA até terem coordenadas próprias.
+    let geracao;
+    if (pipelineId === 7) {
+      const [entrantesCF, opp] = await Promise.all([
+        fetchEntrantesCrossFunil(userId, monthStart, TK),
+        computeOppFunil7(pipelineId, userId, monthStart, monthEnd, TK),
+      ]);
+      const base = computeGeracaoCA(entrantesCF);
+      geracao = { ...base, opp, venda: won.count };
+    } else {
+      const entrantes = await fetchEntrantesMonth(pipelineId, userId, monthStart, TK);
+      geracao = computeGeracao(entrantes, stagesRaw);
+    }
 
     const metaParam = u.searchParams.get("meta");
     const metaMensal =

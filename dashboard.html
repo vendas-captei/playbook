@@ -105,7 +105,7 @@
       </div>
       <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div class="rounded-lg border border-slate-200 p-4">
-          <p class="text-sm font-medium text-slate-700">Geração no mês <span class="text-xs font-normal text-slate-400">(Entrada → SQL → Reunião)</span></p>
+          <p class="text-sm font-medium text-slate-700">Geração no mês <span id="geracao-fluxo" class="text-xs font-normal text-slate-400">(Entrada → SQL → Reunião)</span></p>
           <div id="geracao" class="mt-3 grid grid-cols-3 gap-3"></div>
         </div>
         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -256,7 +256,7 @@
       // Ritmo diário
       document.getElementById("ritmo-sub").textContent =
         `${d.diasUteisRestantes} dias úteis restantes de ${d.diasUteisTotais}`;
-      const g = d.geracao || {mql:0,sql:0,reunioes:0};
+      const g = d.geracao || {modo:"etapa", mql:0, sql:0, reunioes:0};
       // Meta de 10 entradas/dia útil por vendedor — só medimos no recorte individual.
       const espEntradas = viewIsIndividual ? META_ENTRADAS_DIA * d.diasUteisDecorridos : null;
       const mqlCor = espEntradas!=null
@@ -265,12 +265,25 @@
       const mqlSub = espEntradas!=null
         ? `esperado ${espEntradas} (${META_ENTRADAS_DIA}/dia útil)`
         : `meta ${META_ENTRADAS_DIA}/dia útil por vendedor`;
-      const ger = [
-        ["Entradas (MQL)", g.mql, mqlCor, mqlSub],
-        ["SQL", g.sql, "", ""],
-        ["Reuniões", g.reunioes, "", ""],
-      ];
-      document.getElementById("geracao").innerHTML = ger.map(([r,v,cor,sub])=>
+      // Funil 7 (Captação Ativa) usa definição de negócio: MQL → SQL → OPP → Venda.
+      // Demais funis mantêm Entrada → SQL → Reunião (por etapa).
+      const ger = g.modo === "ca"
+        ? [
+            ["MQL", g.mql, mqlCor, mqlSub],
+            ["SQL", g.sql, "", "cidade base + CRECI · ou fora + imobiliária"],
+            ["OPP", g.opp||0, "", "c/ apresentação Captei/Indica+"],
+            ["Venda", g.venda||0, "", "Ganho no mês"],
+          ]
+        : [
+            ["Entradas (MQL)", g.mql, mqlCor, mqlSub],
+            ["SQL", g.sql, "", ""],
+            ["Reuniões", g.reunioes, "", ""],
+          ];
+      document.getElementById("geracao-fluxo").textContent =
+        g.modo === "ca" ? "(MQL → SQL → OPP → Venda)" : "(Entrada → SQL → Reunião)";
+      const geEl = document.getElementById("geracao");
+      geEl.className = "mt-3 grid gap-3 " + (ger.length===4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3");
+      geEl.innerHTML = ger.map(([r,v,cor,sub])=>
         `<div><p class="text-xl font-bold ${cor}">${num(v)}</p><p class="text-xs text-slate-500">${r}</p>${sub?`<p class="mt-0.5 text-[10px] text-slate-400">${sub}</p>`:""}</div>`).join("");
       document.getElementById("fech-dia").textContent = brl(d.fechamentoDiarioNecessario);
       document.getElementById("fech-sub").textContent =
