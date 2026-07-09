@@ -4508,6 +4508,183 @@ function clearSettingsModal() {
    </div>
  </div>
 
+ <!-- Calculadora de Pacotes -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon accent">🧮</div>
+       <div><div class="card-title">Calculadora de Pacotes</div><div class="card-subtitle">Dimensione o plano ideal e o investimento — Captação Ativa e Copiloto</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+
+     <!-- sub-abas de produto -->
+     <div style="display:inline-flex; gap:4px; background:var(--n-75); padding:5px; border-radius:10px; margin-bottom:22px;">
+       <button id="pc-tab-ca"  onclick="pcShow('ca')"  style="border:none; padding:8px 16px; border-radius:7px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer;">🌱 Captação Ativa</button>
+       <button id="pc-tab-cop" onclick="pcShow('cop')" style="border:none; padding:8px 16px; border-radius:7px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer;">🤖 Copiloto</button>
+     </div>
+
+     <!-- ===== PAINEL CAPTAÇÃO ATIVA ===== -->
+     <div id="pc-panel-ca" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; align-items:start;">
+       <div>
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Periodicidade</label>
+         <select id="pc-ca-period" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px;">
+           <option value="mensal">Mensal</option>
+           <option value="trimestral">Trimestral</option>
+           <option value="semestral">Semestral</option>
+           <option value="anual" selected>Anual (à vista)</option>
+         </select>
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Usuários</label>
+         <input id="pc-ca-users" type="number" min="1" value="1" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Consultas de proprietário / mês</label>
+         <input id="pc-ca-consultas" type="number" min="0" value="80" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Cidades extras (além da inclusa)</label>
+         <input id="pc-ca-cidades" type="number" min="0" value="0" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; box-sizing:border-box;">
+       </div>
+       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:18px 20px; border-left:3px solid var(--accent);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:6px;">Plano recomendado</div>
+         <div id="pc-ca-plan" style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px; color:var(--n-900);">—</div>
+         <div id="pc-ca-who" style="font-size:12.5px; color:var(--n-600); margin-bottom:14px;"></div>
+         <div id="pc-ca-lines" style="display:flex; flex-direction:column; gap:8px; font-size:13px;"></div>
+         <div style="border-top:1px solid var(--n-75); margin-top:14px; padding-top:14px;">
+           <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+             <span id="pc-ca-total-label" style="font-size:13px; font-weight:600; color:var(--n-700);">Total</span>
+             <span id="pc-ca-total" style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:24px; color:var(--accent);">—</span>
+           </div>
+           <div id="pc-ca-note" style="font-size:11px; color:var(--n-600); margin-top:8px; line-height:1.5;"></div>
+         </div>
+       </div>
+     </div>
+
+     <!-- ===== PAINEL COPILOTO ===== -->
+     <div id="pc-panel-cop" style="display:none; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; align-items:start;">
+       <div>
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Números de WhatsApp (agentes)</label>
+         <input id="pc-cop-agents" type="number" min="1" value="1" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Usuários</label>
+         <input id="pc-cop-users" type="number" min="1" value="2" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
+         <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Conversas / mês</label>
+         <input id="pc-cop-convos" type="number" min="0" value="500" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; box-sizing:border-box;">
+       </div>
+       <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:18px 20px; border-left:3px solid var(--purple);">
+         <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:6px;">Plano recomendado</div>
+         <div id="pc-cop-plan" style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px; color:var(--n-900);">—</div>
+         <div id="pc-cop-who" style="font-size:12.5px; color:var(--n-600); margin-bottom:14px;"></div>
+         <div id="pc-cop-lines" style="display:flex; flex-direction:column; gap:8px; font-size:13px;"></div>
+         <div style="border-top:1px solid var(--n-75); margin-top:14px; padding-top:14px;">
+           <div style="display:flex; align-items:flex-end; justify-content:space-between;">
+             <span style="font-size:13px; font-weight:600; color:var(--n-700);">Mensalidade</span>
+             <span id="pc-cop-total" style="font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:24px; color:var(--purple);">—</span>
+           </div>
+           <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
+             <span style="font-size:13px; font-weight:600; color:var(--n-700);">Implantação (única)</span>
+             <span id="pc-cop-implant" style="font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--n-900);">—</span>
+           </div>
+           <div id="pc-cop-note" style="font-size:11px; color:var(--n-600); margin-top:8px; line-height:1.5;"></div>
+         </div>
+       </div>
+     </div>
+
+   </div>
+ </div>
+
+ <script>
+ (function(){
+   // ===== DADOS (fonte: Pipedrive + apresentações). Editável aqui. =====
+   var CA_PLANS = [
+     { key:'Corretor',   users:1,  consultas:80,  who:'Ideal para corretores.',                      price:{ mensal:299,  trimestral:852.15,  semestral:1524.90, anual:2583.36 } },
+     { key:'Light',      users:3,  consultas:200, who:'Ideal para imobiliárias menores.',            price:{ mensal:null, trimestral:1422.15, semestral:2694.60, anual:4191.60 } },
+     { key:'Pro',        users:5,  consultas:300, who:'Ideal para imobiliárias maiores.',            price:{ mensal:null, trimestral:2055.06, semestral:3774.60, anual:5871.60 } },
+     { key:'Enterprise', users:10, consultas:600, who:'Ideal para grande equipe e demanda.',         price:{ mensal:null, trimestral:2643.06, semestral:4854.60, anual:7551.60 } }
+   ];
+   var CA_ADDON = { usuario:39, capcoin:1, cidade:49 };   // usuário = valor fixo (Pipedrive); capcoin/cidade = unitário mensal
+   var CA_MONTHS = { mensal:1, trimestral:3, semestral:6, anual:12 };
+   var CA_PLABEL = { mensal:'/mês', trimestral:'/trimestre', semestral:'/semestre', anual:'/ano' };
+
+   var COP_PLANS = [
+     { key:'Light',      price:1490, agents:1, users:2,  convos:500,  implant:1800, who:'Operações começando a automatizar.' },
+     { key:'Pro',        price:2290, agents:2, users:5,  convos:700,  implant:2700, who:'Operações em crescimento.' },
+     { key:'Business',   price:2990, agents:4, users:10, convos:1000, implant:3600, who:'Operações que não podem perder lead.' },
+     { key:'Enterprise', price:4490, agents:6, users:18, convos:1500, implant:3600, who:'Operações de maior complexidade.' }
+   ];
+   var COP_ADDON = { agent:320, user:89, convo:3 };
+
+   // ===== helpers =====
+   function fmt(n){ return new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n); }
+   function money(n){ return 'R$ ' + fmt(n); }
+   function iint(n){ return new Intl.NumberFormat('pt-BR').format(n); }
+   function gv(id){ var v=parseInt((document.getElementById(id).value||'0'),10); return isNaN(v)||v<0?0:v; }
+   function row(l,v){ return '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;"><span style="color:var(--n-600);">'+l+'</span><span style="white-space:nowrap; font-weight:700; color:var(--n-900);">'+v+'</span></div>'; }
+
+   // ===== Captação Ativa =====
+   function calcCA(){
+     var period=document.getElementById('pc-ca-period').value, months=CA_MONTHS[period];
+     var users=Math.max(1,gv('pc-ca-users')), consultas=gv('pc-ca-consultas'), cidades=gv('pc-ca-cidades');
+     var plan=CA_PLANS.find(function(p){return users<=p.users && consultas<=p.consultas;}) || CA_PLANS[CA_PLANS.length-1];
+     var extraUsers=Math.max(0,users-plan.users), extraCons=Math.max(0,consultas-plan.consultas);
+     var base=plan.price[period];
+     var addUser=extraUsers*CA_ADDON.usuario, addCap=extraCons*CA_ADDON.capcoin*months, addCid=cidades*CA_ADDON.cidade*months;
+     document.getElementById('pc-ca-plan').textContent='Plano '+plan.key;
+     document.getElementById('pc-ca-who').textContent=plan.who;
+     var L=[]; var baseTxt=(base==null)?'<span style="color:var(--accent); font-weight:800;">a validar ⚠️</span>':money(base);
+     L.push(row('Plano '+plan.key+' ('+plan.users+' usuário'+(plan.users>1?'s':'')+' · '+plan.consultas+' consultas/mês)', baseTxt));
+     if(extraUsers>0) L.push(row('+ '+extraUsers+' usuário extra × R$ '+fmt(CA_ADDON.usuario), money(addUser)));
+     if(extraCons>0)  L.push(row('+ '+iint(extraCons)+' capcoins (consultas extras) × R$ '+fmt(CA_ADDON.capcoin)+'/mês', money(addCap)));
+     if(cidades>0)    L.push(row('+ '+cidades+' cidade extra × R$ '+fmt(CA_ADDON.cidade)+'/mês', money(addCid)));
+     document.getElementById('pc-ca-lines').innerHTML=L.join('');
+     document.getElementById('pc-ca-total-label').textContent='Total '+CA_PLABEL[period];
+     if(base==null){
+       document.getElementById('pc-ca-total').innerHTML='<span style="color:var(--accent);">validar</span>';
+       document.getElementById('pc-ca-note').innerHTML='⚠️ Preço <b>mensal</b> de Light/Pro/Enterprise não é confiável no Pipedrive (igual ao trimestral). Use trimestral+ ou valide o cadastro.';
+     } else {
+       var total=base+addUser+addCap+addCid;
+       document.getElementById('pc-ca-total').textContent=money(total);
+       document.getElementById('pc-ca-note').textContent = (period==='anual')
+         ? 'Anual à vista (PIX/boleto) ou 12× sem juros no cartão. Add-ons por unidade.'
+         : 'Add-ons cobrados por unidade, escalados pela periodicidade.';
+     }
+   }
+
+   // ===== Copiloto =====
+   function calcCop(){
+     var agents=Math.max(1,gv('pc-cop-agents')), users=Math.max(1,gv('pc-cop-users')), convos=gv('pc-cop-convos');
+     function cost(p){ var ea=Math.max(0,agents-p.agents),eu=Math.max(0,users-p.users),ec=Math.max(0,convos-p.convos);
+       return { monthly:p.price+ea*COP_ADDON.agent+eu*COP_ADDON.user+ec*COP_ADDON.convo, ea:ea,eu:eu,ec:ec,addons:ea*COP_ADDON.agent+eu*COP_ADDON.user+ec*COP_ADDON.convo }; }
+     var best=null; COP_PLANS.forEach(function(p){ var c=cost(p); if(!best||c.monthly<best.c.monthly) best={p:p,c:c}; });
+     var p=best.p,c=best.c;
+     document.getElementById('pc-cop-plan').textContent='Plano '+p.key;
+     document.getElementById('pc-cop-who').textContent=p.who;
+     var L=[]; L.push(row('Plano '+p.key+' ('+p.agents+' nº · '+p.users+' usuários · '+iint(p.convos)+' conversas/mês)', money(p.price)));
+     if(c.ea>0) L.push(row('+ '+c.ea+' agente extra × R$ '+fmt(COP_ADDON.agent), money(c.ea*COP_ADDON.agent)));
+     if(c.eu>0) L.push(row('+ '+c.eu+' usuário extra × R$ '+fmt(COP_ADDON.user), money(c.eu*COP_ADDON.user)));
+     if(c.ec>0) L.push(row('+ '+iint(c.ec)+' conversas excedentes × R$ '+fmt(COP_ADDON.convo), money(c.ec*COP_ADDON.convo)));
+     document.getElementById('pc-cop-lines').innerHTML=L.join('');
+     document.getElementById('pc-cop-total').textContent=money(c.monthly)+'/mês';
+     document.getElementById('pc-cop-implant').textContent=money(p.implant);
+     document.getElementById('pc-cop-note').textContent = c.addons>0
+       ? 'Adicionais mantêm a operação sem subir de plano. Implantação cobrada uma vez.'
+       : 'Plano completo, sem adicionais. Implantação cobrada uma vez.';
+   }
+
+   // ===== tabs =====
+   var ACT='background:white; color:var(--n-900); box-shadow:0 1px 2px rgba(0,0,0,0.08);';
+   var INA='background:transparent; color:var(--n-600); box-shadow:none;';
+   window.pcShow=function(which){
+     var isCA=(which==='ca');
+     document.getElementById('pc-panel-ca').style.display  = isCA?'grid':'none';
+     document.getElementById('pc-panel-cop').style.display = isCA?'none':'grid';
+     document.getElementById('pc-tab-ca').style.cssText  += ';'+(isCA?ACT:INA);
+     document.getElementById('pc-tab-cop').style.cssText += ';'+(isCA?INA:ACT);
+   };
+
+   function bind(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener('input',fn); }
+   ['pc-ca-period','pc-ca-users','pc-ca-consultas','pc-ca-cidades'].forEach(function(id){bind(id,calcCA);});
+   ['pc-cop-agents','pc-cop-users','pc-cop-convos'].forEach(function(id){bind(id,calcCop);});
+   calcCA(); calcCop(); window.pcShow('ca');
+ })();
+ </script>
+
  </div>
 
  <!-- ============================================================ -->
