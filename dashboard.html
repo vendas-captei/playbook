@@ -141,9 +141,28 @@
 
     let usersByEmail = {};      // email -> { meta, name, team }
     let metaByPdId   = {};      // pipedrive user id -> meta individual (mensal)
+    let pdUsers      = [];      // usuários ativos do Pipedrive (de /api/filters)
     let myPdId = null;          // id Pipedrive do usuário logado
     let myName = session.name || "";
     let viewIsIndividual = false; // recorte atual é de um vendedor específico?
+
+    // Cada vendedor pertence a UM funil/frente (users.json.team): CAP=Captação Ativa(7), COP=Copiloto(2).
+    const FUNIL_TEAM = { 7: "CAP", 2: "COP" };
+    const teamDoPdUser = (u) => { const em=(u.email||"").toLowerCase(); return (usersByEmail[em]&&usersByEmail[em].team)||""; };
+    // Repopula o dropdown de vendedor só com quem é do funil selecionado (preserva a escolha se ainda válida).
+    function popularVendedores(){
+      const selU = document.getElementById("f-user");
+      if (!selU) return;
+      const prev = selU.value;
+      const teamAlvo = FUNIL_TEAM[Number(document.getElementById("f-funil").value)] || null;
+      selU.innerHTML = "";
+      const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
+      (pdUsers||[]).forEach(u=>{
+        if (teamAlvo && teamDoPdUser(u) !== teamAlvo) return; // só vendedores do funil
+        const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o);
+      });
+      selU.value = [...selU.options].some(o=>o.value==prev) ? prev : "";
+    }
 
     document.getElementById("today").textContent = new Date().toLocaleDateString("pt-BR",
       { weekday:"long", day:"2-digit", month:"long", year:"numeric" });
@@ -435,6 +454,7 @@
       });
 
       // Junção Pipedrive: id -> meta individual; e id do logado
+      pdUsers = d.usuarios || [];
       (d.usuarios||[]).forEach(u=>{
         const em = (u.email||"").toLowerCase();
         if (em && usersByEmail[em] && usersByEmail[em].meta > 0) metaByPdId[u.id] = usersByEmail[em].meta;
@@ -450,10 +470,8 @@
 
       // Recorte por vendedor: admin escolhe; vendedor fica travado no próprio.
       if (isAdmin){
-        const selU = document.getElementById("f-user");
-        const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
-        (d.usuarios||[]).forEach(u=>{ const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o); });
-        selU.addEventListener("change", carregar);
+        popularVendedores(); // dropdown já filtrado pelo funil default (7)
+        document.getElementById("f-user").addEventListener("change", carregar);
       } else {
         // Esconde o dropdown, mostra rótulo fixo.
         document.getElementById("user-filter-wrap").classList.add("hidden");
@@ -468,7 +486,8 @@
         }
       }
 
-      ["f-funil","f-mes"].forEach(id=>document.getElementById(id).addEventListener("change", carregar));
+      document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregar(); });
+      document.getElementById("f-mes").addEventListener("change", carregar);
       document.getElementById("meta-edit").addEventListener("click", abrirMeta);
       document.getElementById("meta-cancel").addEventListener("click", fecharMeta);
       document.getElementById("meta-save").addEventListener("click", salvarMeta);
