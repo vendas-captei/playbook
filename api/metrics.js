@@ -18,6 +18,12 @@ const PROD_CA = "6843", PROD_INDICA = "6844";
 // Enxuga a varredura de deals abertos cross-funil (509 deals / 2 págs) vs varrer os ~15k abertos (31 págs).
 const FILTRO_CA_ABERTO = 80142;
 
+// Histórico consolidado congelado (meses fechados). Fonte da verdade p/ o passado:
+// o dashboard lê daqui em vez de recalcular ao vivo — imune a drift de campos e ao 500
+// de timeline em meses com importação em massa. Ver data/history.json.
+let HISTORY = {};
+try { HISTORY = require("../data/history.json"); } catch (_) { HISTORY = {}; }
+
 function setHas(raw, id) {
   // campo "set" do Pipedrive vem como string "6843" ou "6843,6860"
   return raw != null && String(raw).split(",").map((s) => s.trim()).includes(id);
@@ -244,32 +250,58 @@ module.exports = async function handler(req, res) {
     const ehMesAtual = ano === now.getFullYear() && mes === now.getMonth();
     const diaAtual = ehMesAtual ? now.getDate() : ultimoDiaMes;
 
-    const [pipe, user, stagesRaw, won, open] = await Promise.all([
+    // ── Roteamento mês fechado vs mês corrente ──────────────────────────────────
+    // SQL/OPP são uma FOTO DO ESTOQUE ATUAL do pipeline — não têm como ser reconstruídos
+    // para o passado (o Pipedrive não guarda estado histórico). Por isso, meses fechados
+    // são servidos do histórico CONGELADO (data/history.json, alimentado mensalmente pelo
+    // snapshot). Mês corrente continua ao vivo. Recorte por vendedor recalcula ao vivo
+    // (ainda não congelamos por vendedor) — nesse caso SQL/OPP vêm n/d p/ meses fechados.
+    const monthKey = monthStart.slice(0, 7);
+    const mesFechado = !ehMesAtual;
+    const histRec = (HISTORY[pipelineId] && HISTORY[pipelineId][monthKey]) || null;
+    const useHistory = mesFechado && histRec && !userId;
+
+    const [pipe, user, stagesRaw] = await Promise.all([
       pd(`${V1}/pipelines/${pipelineId}`, TK),
       userId ? pd(`${V1}/users/${userId}`, TK) : Promise.resolve(null),
       pd(`${V1}/stages?pipeline_id=${pipelineId}`, TK),
-      fetchWonMonth(pipelineId, userId, monthStart, TK),
-      fetchOpenDeals(pipelineId, userId, TK),
     ]);
 
-    // Funil 7 (Captação Ativa) usa definição de NEGÓCIO: MQL (criados no mês) → SQL (abertos, critério)
-    // → OPP (abertos, Proposta Enviada+) → Venda (won no mês). Demais funis mantêm definição por ETAPA.
-    let geracao;
-    if (pipelineId === 7) {
-      const [entrantesCF, dealsAbertosCA] = await Promise.all([
-        fetchEntrantesCrossFunil(userId, monthStart, TK),
-        fetchDealsFiltro(FILTRO_CA_ABERTO, userId, TK),
-      ]);
-      geracao = {
-        modo: "ca",
-        mql: contaMQL(entrantesCF),
-        sql: contaSQL(dealsAbertosCA),
-        opp: contaOPP(open, stagesRaw),
-        venda: won.count,
-      };
+    let won, open = [], geracao, historico = false, fonteHist = null;
+
+    if (useHistory) {
+      // Mês fechado, agregado → tudo congelado (0 varreduras de deals).
+      historico = true;
+      fonteHist = histRec.fonte || "historico";
+      won = { count: histRec.venda || 0, sum: histRec.faturamento || 0 };
+      geracao = pipelineId === 7
+        ? { modo: "ca", mql: histRec.mql ?? null, sql: histRec.sql ?? null, opp: histRec.opp ?? null, venda: histRec.venda || 0, historico: true, fonte: fonteHist }
+        : { modo: "etapa", mql: histRec.mql ?? null, sql: histRec.sql ?? null, reunioes: histRec.reunioes ?? null, historico: true, fonte: fonteHist };
     } else {
-      const entrantes = await fetchEntrantesMonth(pipelineId, userId, monthStart, TK);
-      geracao = computeGeracao(entrantes, stagesRaw);
+      [won, open] = await Promise.all([
+        fetchWonMonth(pipelineId, userId, monthStart, TK),
+        fetchOpenDeals(pipelineId, userId, TK),
+      ]);
+      if (pipelineId === 7 && mesFechado) {
+        // Mês fechado sem congelamento (ou recorte por vendedor): MQL/Venda confiáveis (carimbos
+        // imutáveis); SQL/OPP n/d. Timeline pode dar 500 em mês de importação → cai p/ histórico/null.
+        let mql = null;
+        try { mql = contaMQL(await fetchEntrantesCrossFunil(userId, monthStart, TK)); }
+        catch (_) { mql = histRec ? histRec.mql : null; }
+        historico = true;
+        fonteHist = histRec ? histRec.fonte : "reconstruido-ao-vivo";
+        geracao = { modo: "ca", mql, sql: histRec ? histRec.sql : null, opp: histRec ? histRec.opp : null, venda: won.count, historico: true, fonte: fonteHist };
+      } else if (pipelineId === 7) {
+        // Mês corrente (Captação Ativa) — definição de negócio ao vivo.
+        const [entrantesCF, dealsAbertosCA] = await Promise.all([
+          fetchEntrantesCrossFunil(userId, monthStart, TK),
+          fetchDealsFiltro(FILTRO_CA_ABERTO, userId, TK),
+        ]);
+        geracao = { modo: "ca", mql: contaMQL(entrantesCF), sql: contaSQL(dealsAbertosCA), opp: contaOPP(open, stagesRaw), venda: won.count };
+      } else {
+        const entrantes = await fetchEntrantesMonth(pipelineId, userId, monthStart, TK);
+        geracao = computeGeracao(entrantes, stagesRaw);
+      }
     }
 
     const metaParam = u.searchParams.get("meta");
@@ -285,8 +317,9 @@ module.exports = async function handler(req, res) {
     const funil = stages.map((s) => ({ etapa: s.name, quantidade: porStage.get(s.id) || 0 }));
     funil.push({ etapa: "Ganho (mês)", quantidade: won.count });
 
-    const pipelineAbertoTotal = open.reduce((acc, o) => acc + o.value, 0);
-    const abertoCount = open.length; // nº de leads em aberto (p/ teto saudável de 55)
+    // Estoque de pipeline é "agora" — para meses fechados vem congelado (ou n/d se não capturado).
+    const pipelineAbertoTotal = useHistory ? (histRec.pipelineAbertoTotal ?? null) : open.reduce((acc, o) => acc + o.value, 0);
+    const abertoCount = useHistory ? (histRec.abertoCount ?? null) : open.length; // nº de leads em aberto (p/ teto saudável de 55)
 
     res.status(200).json({
       mesReferencia: nomeMes(ano, mes),
@@ -300,6 +333,8 @@ module.exports = async function handler(req, res) {
       funil,
       geracao,
       forecastSemanal: buildForecast(open),
+      historico,
+      fonte: fonteHist,
       ...d,
       atualizadoEm: new Date().toISOString(),
     });
