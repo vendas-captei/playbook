@@ -30,6 +30,18 @@ async function getTpc(base, pid, month) {
   return r.json();
 }
 
+// Leads orgânicos do mês = novos deals cross-funil (topo de funil, proxy de MQL).
+// >400 ou erro (500 em mês de importação em massa) → null (não usar; recupera-se no backfill manual).
+async function leadsOrganicos(month) {
+  const PD = process.env.PIPEDRIVE_API_TOKEN;
+  if (!PD) return null;
+  const r = await fetch(`https://api.pipedrive.com/v1/deals/timeline?start_date=${month}-01&interval=month&amount=1&field_key=add_time&api_token=${PD}`, { cache: "no-store" });
+  if (!r.ok) return null;
+  const j = await r.json();
+  const n = ((j.data && j.data[0] && j.data[0].deals) || []).length;
+  return n > 400 ? null : n;
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const u = new URL(req.url, "http://localhost");
@@ -79,6 +91,7 @@ module.exports = async function handler(req, res) {
             registros[pid].tpc = tpc;
           }
         } catch (_) { /* TPC é best-effort; não derruba o snapshot */ }
+        try { const lo = await leadsOrganicos(month); if (lo != null) registros[pid].leadsOrg = lo; } catch (_) {}
       }
     }
 
@@ -108,7 +121,27 @@ module.exports = async function handler(req, res) {
     });
     if (!putR.ok) throw new Error(`GitHub PUT ${putR.status}: ${await putR.text()}`);
 
-    res.status(200).json({ ok: true, month, registros });
+    // Recalcula a conversão MEDIDA (novo deal→venda) com trailing dos últimos 6 meses e grava em params.json.
+    let convLeadVenda = null;
+    try {
+      const meses = Object.keys(hist["7"] || {}).filter((k) => /^\d{4}-\d{2}$/.test(k)).sort().slice(-6);
+      let sV = 0, sL = 0;
+      for (const k of meses) { const r = hist["7"][k]; if (r && r.leadsOrg > 0 && typeof r.venda === "number") { sV += r.venda; sL += r.leadsOrg; } }
+      const rate = sL > 0 ? sV / sL : null;
+      if (rate && rate >= 0.05 && rate <= 0.6) {
+        convLeadVenda = Math.round(rate * 100) / 100;
+        const pGet = await fetch(`https://api.github.com/repos/${REPO}/contents/params.json`, { headers: ghHeaders });
+        if (pGet.ok) {
+          const pj = await pGet.json();
+          const params = JSON.parse(Buffer.from(pj.content, "base64").toString("utf8"));
+          params["7"] = { ...(params["7"] || {}), convLeadVenda };
+          const pc = Buffer.from(JSON.stringify(params, null, 2) + "\n", "utf8").toString("base64");
+          await fetch(`https://api.github.com/repos/${REPO}/contents/params.json`, { method: "PUT", headers: ghHeaders, body: JSON.stringify({ message: `snapshot: convLeadVenda=${Math.round(rate * 100)}%`, content: pc, sha: pj.sha }) });
+        }
+      }
+    } catch (_) { /* best-effort */ }
+
+    res.status(200).json({ ok: true, month, registros, convLeadVenda });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
