@@ -107,6 +107,7 @@
         <div class="rounded-lg border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-700">Geração no mês <span id="geracao-fluxo" class="text-xs font-normal text-slate-400">(Entrada → SQL → Reunião)</span></p>
           <div id="geracao" class="mt-3 grid grid-cols-3 gap-3"></div>
+          <div id="geracao-legenda" class="mt-4 border-t border-slate-100 pt-3 space-y-0.5"></div>
         </div>
         <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <p class="text-sm font-medium text-slate-700">Fechamento / dia necessário</p>
@@ -265,26 +266,50 @@
       const mqlSub = espEntradas!=null
         ? `esperado ${espEntradas} (${META_ENTRADAS_DIA}/dia útil)`
         : `meta ${META_ENTRADAS_DIA}/dia útil por vendedor`;
-      // Funil 7 (Captação Ativa) usa definição de negócio: MQL → SQL → OPP → Venda.
-      // Demais funis mantêm Entrada → SQL → Reunião (por etapa).
+      // Funil 7 (Captação Ativa): MQL → SQL → OPP → Venda. Demais: Entrada → SQL → Reunião (etapa).
+      // Cada tile mostra número + TAXA DE CONVERSÃO vinda da etapa anterior. Explicações vão p/ a legenda.
+      const taxa = (a,b) => b>0 ? Math.round((a/b)*100)+"%" : "—";
       const ger = g.modo === "ca"
         ? [
-            ["MQL", g.mql, mqlCor, mqlSub],
-            ["SQL", g.sql, "", "abertos · base+CRECI ou fora+imobiliária"],
-            ["OPP", g.opp||0, "", "abertos em Proposta Enviada+"],
-            ["Venda", g.venda||0, "", "Ganho no mês"],
+            ["MQL", g.mql, mqlCor, mqlSub, null],
+            ["SQL", g.sql, "", "", taxa(g.sql, g.mql)],
+            ["OPP", g.opp||0, "", "", taxa(g.opp||0, g.sql)],
+            ["Venda", g.venda||0, "", "", taxa(g.venda||0, g.opp||0)],
           ]
         : [
-            ["Entradas (MQL)", g.mql, mqlCor, mqlSub],
-            ["SQL", g.sql, "", ""],
-            ["Reuniões", g.reunioes, "", ""],
+            ["Entradas (MQL)", g.mql, mqlCor, mqlSub, null],
+            ["SQL", g.sql, "", "", taxa(g.sql, g.mql)],
+            ["Reuniões", g.reunioes, "", "", taxa(g.reunioes, g.sql)],
           ];
       document.getElementById("geracao-fluxo").textContent =
         g.modo === "ca" ? "(MQL → SQL → OPP → Venda)" : "(Entrada → SQL → Reunião)";
       const geEl = document.getElementById("geracao");
       geEl.className = "mt-3 grid gap-3 " + (ger.length===4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3");
-      geEl.innerHTML = ger.map(([r,v,cor,sub])=>
-        `<div><p class="text-xl font-bold ${cor}">${num(v)}</p><p class="text-xs text-slate-500">${r}</p>${sub?`<p class="mt-0.5 text-[10px] text-slate-400">${sub}</p>`:""}</div>`).join("");
+      geEl.innerHTML = ger.map(([r,v,cor,sub,conv])=>
+        `<div>`+
+        (conv!=null
+          ? `<p class="text-[10px] font-semibold text-slate-400">→ ${conv}</p>`
+          : `<p class="text-[10px] text-transparent select-none">·</p>`)+
+        `<p class="text-xl font-bold ${cor}">${num(v)}</p>`+
+        `<p class="text-xs text-slate-500">${r}</p>`+
+        (sub?`<p class="mt-0.5 text-[10px] text-slate-400">${sub}</p>`:"")+
+        `</div>`).join("");
+      // Legenda (quadrante) — descrição de cada etapa, fora da periferia dos números.
+      const legenda = g.modo === "ca"
+        ? [
+            ["MQL","leads criados no mês · produto Captação Ativa ou Indica+ (qualquer funil)"],
+            ["SQL","leads em aberto no perfil · cidade-base + CRECI, ou fora + imobiliária (não-cliente)"],
+            ["OPP","leads em aberto no funil Captação Ativa · Proposta Enviada em diante"],
+            ["Venda","negócios ganhos (Ganho) no mês"],
+          ]
+        : [
+            ["MQL","entradas no funil no mês"],
+            ["SQL","alcançaram a etapa Qualificado"],
+            ["Reunião","alcançaram Reunião Agendada"],
+          ];
+      document.getElementById("geracao-legenda").innerHTML =
+        `<p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Legenda · o que conta em cada etapa</p>`+
+        legenda.map(([k,v])=>`<p class="text-[11px] leading-snug text-slate-500"><span class="font-semibold text-slate-600">${k}</span> — ${v}</p>`).join("");
       document.getElementById("fech-dia").textContent = brl(d.fechamentoDiarioNecessario);
       document.getElementById("fech-sub").textContent =
         `Para zerar o gap de ${brl(d.gapMeta)} nos ${d.diasUteisRestantes} dias úteis restantes.`;
