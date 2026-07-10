@@ -1,4 +1,14 @@
 {
-  "7": { "taxaReuniaoVenda": 0.85, "taxaLeadReuniao": 0.30, "ticketRef": 2950, "convLeadVenda": 0.21 },
-  "2": { "taxaReuniaoVenda": 0.85, "taxaLeadReuniao": 0.30, "ticketRef": 2950, "convLeadVenda": 0.21 }
+  "2": {
+    "taxaReuniaoVenda": 0.85,
+    "taxaLeadReuniao": 0.3,
+    "ticketRef": 2950,
+    "convLeadVenda": 0.21
+  },
+  "7": {
+    "taxaReuniaoVenda": 0.85,
+    "taxaLeadReuniao": 0.3,
+    "ticketRef": 3346,
+    "convLeadVenda": 0.06
+  }
 }
