@@ -391,6 +391,34 @@
         </div>`;
     }
 
+    // Formata minutos em min/h/dias (TPC varia de <1min a semanas).
+    function fmtMin(v){
+      if (v==null) return "—";
+      if (v<60) return Math.round(v)+" min";
+      if (v<1440) return (v/60).toFixed(1)+" h";
+      return (v/1440).toFixed(1)+" d";
+    }
+    // Sparkline diário do TPC (mediana/dia). Escala LOGARÍTMICA — o TPC estoura em dias de
+    // importação em massa, então log deixa picos e vales legíveis. Linhas-guia: meta/1h/1d.
+    function tpcSparkline(t){
+      const dias=t.dias||[], serie=t.serie||[], counts=t.counts||[];
+      const pts=dias.map((d,i)=>({d,v:serie[i],n:counts[i]})).filter(p=>p.v!=null);
+      if (!pts.length) return `<p class="text-xs text-slate-400">Sem dados de 1º contato no período.</p>`;
+      const W=720,H=150,padL=46,padR=10,padT=12,padB=20;
+      const meta=t.metaMin||5;
+      const maxV=Math.max(...pts.map(p=>p.v), 1440);
+      const Lg=v=>Math.log10((v||0)+1), y1=Lg(maxV)||1;
+      const X=d=>padL+((d-1)/Math.max(1,dias.length-1))*(W-padL-padR);
+      const Y=v=>padT+(1-Lg(v)/y1)*(H-padT-padB);
+      const cor=v=> v<=meta?"#10b981":(v<=15?"#f59e0b":"#f43f5e");
+      const refs=[{v:meta,l:`meta ${meta}min`},{v:60,l:"1h"},{v:1440,l:"1d"},{v:10080,l:"1sem"}].filter(r=>r.v<=maxV);
+      const refLines=refs.map(r=>`<line x1="${padL}" x2="${W-padR}" y1="${Y(r.v).toFixed(1)}" y2="${Y(r.v).toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3"/><text x="6" y="${(Y(r.v)+3).toFixed(1)}" font-size="10" fill="#94a3b8">${r.l}</text>`).join("");
+      const path=pts.map((p,i)=>`${i?'L':'M'}${X(p.d).toFixed(1)},${Y(p.v).toFixed(1)}`).join(" ");
+      const dots=pts.map(p=>`<circle cx="${X(p.d).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3" fill="${cor(p.v)}"><title>Dia ${p.d} · mediana ${fmtMin(p.v)} · ${p.n} deal(s)</title></circle>`).join("");
+      const xl=[1,Math.round(dias.length/2),dias.length].map(d=>`<text x="${X(d).toFixed(1)}" y="${H-5}" font-size="10" fill="#94a3b8" text-anchor="middle">${d}</text>`).join("");
+      return `<svg viewBox="0 0 ${W} ${H}" class="w-full" xmlns="http://www.w3.org/2000/svg">${refLines}<path d="${path}" fill="none" stroke="#3b82f6" stroke-width="1.6"/>${dots}${xl}</svg>`;
+    }
+
     // TPC — busca separada (mais lenta), não bloqueia o render principal.
     function carregarTPC(pid, uid, mes){
       const el = document.getElementById("tpc");
@@ -411,12 +439,18 @@
                <p class="mt-1 text-xl font-bold"${style?` style="${style}"`:""}>${valor}</p>
                ${sub?`<p class="mt-1 text-[11px] text-slate-400">${sub}</p>`:""}
              </div>`;
+          const quem = uid ? "deste vendedor" : "da equipe";
           el.innerHTML = `
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              ${tile("Mediana TPC", med.toLocaleString("pt-BR")+" min", rot, `color:${cor}`)}
+              ${tile("Mediana TPC", fmtMin(med), rot, `color:${cor}`)}
               ${tile("Dentro de 5 min", t.pctDentroMeta+"%", `${t.comContato} deals com contato`)}
               ${tile("Entradas no mês", num(t.totalEntrantes), t.capAtingido?`amostra de ${t.amostra} (mais recentes)`:"amostra completa")}
               ${tile("Meta", t.metaMin+" min", "1º contato após a entrada no funil")}
+            </div>
+            <div class="mt-4 rounded-lg border border-slate-200 p-3">
+              <p class="mb-1 text-xs font-medium text-slate-600">Evolução diária do TPC ${quem} <span class="font-normal text-slate-400">· mediana por dia de entrada · escala log${t.historico?' · 📅 histórico':''}</span></p>
+              ${tpcSparkline(t)}
+              <p class="mt-1 text-[10px] text-slate-400">🟢 ≤5min · 🟡 ≤15min · 🔴 acima · passe o mouse nos pontos p/ ver o dia, a mediana e o nº de deals.</p>
             </div>`;
         })
         .catch(e=>{ el.innerHTML = `<span class="text-rose-600">Erro no TPC: ${e.message}</span>`; });
