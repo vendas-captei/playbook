@@ -268,11 +268,13 @@ module.exports = async function handler(req, res) {
     ]);
 
     let won, open = [], geracao, historico = false, fonteHist = null;
+    let novosDeals = null; // novos deals do mês (base de "leads gerados" p/ o funil reverso)
 
     if (useHistory) {
       // Mês fechado, agregado → tudo congelado (0 varreduras de deals).
       historico = true;
       fonteHist = histRec.fonte || "historico";
+      novosDeals = histRec.leadsOrg ?? null;
       won = { count: histRec.venda || 0, sum: histRec.faturamento || 0 };
       geracao = pipelineId === 7
         ? { modo: "ca", mql: histRec.mql ?? null, sql: histRec.sql ?? null, opp: histRec.opp ?? null, venda: histRec.venda || 0, historico: true, fonte: fonteHist }
@@ -286,8 +288,8 @@ module.exports = async function handler(req, res) {
         // Mês fechado sem congelamento (ou recorte por vendedor): MQL/Venda confiáveis (carimbos
         // imutáveis); SQL/OPP n/d. Timeline pode dar 500 em mês de importação → cai p/ histórico/null.
         let mql = null;
-        try { mql = contaMQL(await fetchEntrantesCrossFunil(userId, monthStart, TK)); }
-        catch (_) { mql = histRec ? histRec.mql : null; }
+        try { const ecf = await fetchEntrantesCrossFunil(userId, monthStart, TK); mql = contaMQL(ecf); novosDeals = ecf.length; }
+        catch (_) { mql = histRec ? histRec.mql : null; novosDeals = histRec ? (histRec.leadsOrg ?? null) : null; }
         historico = true;
         fonteHist = histRec ? histRec.fonte : "reconstruido-ao-vivo";
         geracao = { modo: "ca", mql, sql: histRec ? histRec.sql : null, opp: histRec ? histRec.opp : null, venda: won.count, historico: true, fonte: fonteHist };
@@ -297,6 +299,7 @@ module.exports = async function handler(req, res) {
           fetchEntrantesCrossFunil(userId, monthStart, TK),
           fetchDealsFiltro(FILTRO_CA_ABERTO, userId, TK),
         ]);
+        novosDeals = entrantesCF.length;
         geracao = { modo: "ca", mql: contaMQL(entrantesCF), sql: contaSQL(dealsAbertosCA), opp: contaOPP(open, stagesRaw), venda: won.count };
       } else {
         const entrantes = await fetchEntrantesMonth(pipelineId, userId, monthStart, TK);
@@ -332,6 +335,7 @@ module.exports = async function handler(req, res) {
       abertoCount,
       funil,
       geracao,
+      novosDeals,
       forecastSemanal: buildForecast(open),
       historico,
       fonte: fonteHist,
@@ -342,3 +346,4 @@ module.exports = async function handler(req, res) {
     res.status(500).json({ error: e.message });
   }
 };
+
