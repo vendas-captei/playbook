@@ -121,8 +121,8 @@
   </main>
 
   <script>
-    const brl = (v) => (v||0).toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
-    const num = (v) => (v||0).toLocaleString("pt-BR");
+    const brl = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
+    const num = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR");
     // Gestão à vista: verde no/acima do ritmo, amarelo perto, vermelho abaixo.
     const tempBorder = (pct) => pct>=100 ? "border-emerald-500" : (pct>=90 ? "border-amber-500" : "border-rose-500");
     const TETO_ABERTO = 55; // teto saudável de leads em aberto por vendedor (daily 08/07)
@@ -231,7 +231,8 @@
 
     function render(d){
       document.getElementById("subtitle").innerHTML =
-        `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`;
+        `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`+
+        (d.historico ? ` · <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500" title="Mês fechado — dados congelados do histórico (${d.fonte||''})">📅 histórico</span>` : "");
 
       currentMeta = d.metaMensal;
       document.getElementById("meta-view").textContent = brl(d.metaMensal);
@@ -268,7 +269,7 @@
         : `meta ${META_ENTRADAS_DIA}/dia útil por vendedor`;
       // Funil 7 (Captação Ativa): MQL → SQL → OPP → Venda. Demais: Entrada → SQL → Reunião (etapa).
       // Cada tile mostra número + TAXA DE CONVERSÃO vinda da etapa anterior. Explicações vão p/ a legenda.
-      const taxa = (a,b) => b>0 ? Math.round((a/b)*100)+"%" : "—";
+      const taxa = (a,b) => (a==null||b==null||b<=0) ? "—" : Math.round((a/b)*100)+"%";
       const ger = g.modo === "ca"
         ? [
             ["MQL", g.mql, mqlCor, mqlSub, null],
@@ -290,7 +291,7 @@
         (conv!=null
           ? `<p class="text-[10px] font-semibold text-slate-400">→ ${conv}</p>`
           : `<p class="text-[10px] text-transparent select-none">·</p>`)+
-        `<p class="text-xl font-bold ${cor}">${num(v)}</p>`+
+        `<p class="text-xl font-bold ${cor}">${v==null?'<span class="text-slate-400" title="captura iniciada em jul/2026">n/d</span>':num(v)}</p>`+
         `<p class="text-xs text-slate-500">${r}</p>`+
         (sub?`<p class="mt-0.5 text-[10px] text-slate-400">${sub}</p>`:"")+
         `</div>`).join("");
