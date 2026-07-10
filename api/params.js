@@ -7,8 +7,8 @@ const GH = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
 
 // Defaults (premissas iniciais, editáveis pela Gestão). Fonte: medição jan–jun/2026.
 const DEFAULTS = {
-  "7": { taxaReuniaoVenda: 0.85, taxaLeadReuniao: 0.30, ticketRef: 2950 },
-  "2": { taxaReuniaoVenda: 0.85, taxaLeadReuniao: 0.30, ticketRef: 2950 },
+  "7": { taxaReuniaoVenda: 0.85, taxaLeadReuniao: 0.30, ticketRef: 2950, convLeadVenda: 0.21 },
+  "2": { taxaReuniaoVenda: 0.85, taxaLeadReuniao: 0.30, ticketRef: 2950, convLeadVenda: 0.21 },
 };
 
 async function readFile(tok) {
@@ -40,6 +40,7 @@ module.exports = async function handler(req, res) {
       const rate = (x) => (typeof x === "number" && x > 0 && x <= 1 ? x : null);
       if (rate(b.taxaReuniaoVenda) != null) cur.taxaReuniaoVenda = b.taxaReuniaoVenda;
       if (rate(b.taxaLeadReuniao) != null) cur.taxaLeadReuniao = b.taxaLeadReuniao;
+      if (rate(b.convLeadVenda) != null) cur.convLeadVenda = b.convLeadVenda;
       if (typeof b.ticketRef === "number" && b.ticketRef > 0) cur.ticketRef = Math.round(b.ticketRef);
       params[pid] = cur;
       const content = Buffer.from(JSON.stringify(params, null, 2)).toString("base64");
