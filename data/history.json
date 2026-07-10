@@ -1,88 +1,16 @@
 {
-  "2": {
-    "2026-07": {
-      "mql": 6,
-      "sql": 6,
-      "opp": null,
-      "reunioes": 5,
-      "venda": 1,
-      "faturamento": 17880,
-      "pipelineAbertoTotal": 325911.13,
-      "abertoCount": 1843,
-      "fonte": "snapshot-vivo-2026-07-10"
-    }
-  },
-  "7": {
-    "2026-01": {
-      "mql": 46,
-      "sql": null,
-      "opp": null,
-      "venda": 35,
-      "faturamento": 113099,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10"
-    },
-    "2026-02": {
-      "mql": 48,
-      "sql": null,
-      "opp": null,
-      "venda": 47,
-      "faturamento": 140294,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10"
-    },
-    "2026-03": {
-      "mql": 48,
-      "sql": null,
-      "opp": null,
-      "venda": 44,
-      "faturamento": 131322,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10"
-    },
-    "2026-04": {
-      "mql": 45,
-      "sql": null,
-      "opp": null,
-      "venda": 44,
-      "faturamento": 134525,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10"
-    },
-    "2026-05": {
-      "mql": 67,
-      "sql": null,
-      "opp": null,
-      "venda": 48,
-      "faturamento": 138593,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10"
-    },
-    "2026-06": {
-      "mql": 225,
-      "sql": null,
-      "opp": null,
-      "venda": 53,
-      "faturamento": 142001,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10"
-    },
-    "2026-07": {
-      "mql": 198,
-      "sql": 121,
-      "opp": 46,
-      "reunioes": null,
-      "venda": 10,
-      "faturamento": 33459,
-      "pipelineAbertoTotal": 182570.60400000002,
-      "abertoCount": 595,
-      "fonte": "snapshot-vivo-2026-07-10"
-    }
-  },
   "_meta": {
     "descricao": "Histórico consolidado e congelado dos indicadores mensais por funil. Fonte da verdade para MESES FECHADOS — o dashboard lê daqui em vez de recalcular ao vivo (imune a drift de campos e ao 500 de timeline em meses de importação em massa).",
     "chave": "pipeline_id -> 'YYYY-MM' -> { mql, sql, opp, venda, faturamento, abertoCount, fonte }",
     "regras": "sql/opp = null significa 'n/d' (estoque irrecuperável; captura ao vivo iniciada em jul/2026). MQL de jan-jun é reconstruído do produto ATUAL (drift possível em meses antigos). Venda/faturamento vêm de won_time (imutável).",
     "atualizado_em": "2026-07-10"
+  },
+  "7": {
+    "2026-01": { "mql": 46,  "sql": null, "opp": null, "venda": 35, "faturamento": 113099, "abertoCount": null, "fonte": "reconstruido-2026-07-10" },
+    "2026-02": { "mql": 48,  "sql": null, "opp": null, "venda": 47, "faturamento": 140294, "abertoCount": null, "fonte": "reconstruido-2026-07-10" },
+    "2026-03": { "mql": 48,  "sql": null, "opp": null, "venda": 44, "faturamento": 131322, "abertoCount": null, "fonte": "reconstruido-2026-07-10" },
+    "2026-04": { "mql": 45,  "sql": null, "opp": null, "venda": 44, "faturamento": 134525, "abertoCount": null, "fonte": "reconstruido-2026-07-10" },
+    "2026-05": { "mql": 67,  "sql": null, "opp": null, "venda": 48, "faturamento": 138593, "abertoCount": null, "fonte": "reconstruido-2026-07-10" },
+    "2026-06": { "mql": 225, "sql": null, "opp": null, "venda": 53, "faturamento": 142001, "abertoCount": null, "fonte": "reconstruido-2026-07-10" }
   }
 }
