@@ -4531,7 +4531,6 @@ function clearSettingsModal() {
          <div>
            <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Periodicidade</label>
            <select id="pc-ca-period" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px;">
-             <option value="mensal">Mensal</option>
              <option value="trimestral">Trimestral</option>
              <option value="semestral">Semestral</option>
              <option value="anual" selected>Anual (à vista)</option>
@@ -4540,8 +4539,21 @@ function clearSettingsModal() {
            <input id="pc-ca-users" type="number" min="1" value="1" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
            <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Consultas de proprietário / mês</label>
            <input id="pc-ca-consultas" type="number" min="0" value="80" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
-           <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Cidades extras (além da inclusa)</label>
-           <input id="pc-ca-cidades" type="number" min="0" value="0" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; box-sizing:border-box;">
+           <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Adicional avulso</label>
+           <select id="pc-ca-addon" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px;">
+             <option value="nenhum" selected>Nenhum</option>
+             <option value="capcoins">Capcoins extras</option>
+             <option value="cidades">Cidades extras</option>
+             <option value="ambos">Ambos (capcoins + cidades)</option>
+           </select>
+           <div id="pc-ca-cap-wrap" style="display:none;">
+             <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Capcoins extras (consultas avulsas / mês)</label>
+             <input id="pc-ca-capcoins" type="number" min="0" value="0" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
+           </div>
+           <div id="pc-ca-cid-wrap" style="display:none;">
+             <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Cidades extras (além da inclusa)</label>
+             <input id="pc-ca-cidades" type="number" min="0" value="0" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; box-sizing:border-box;">
+           </div>
          </div>
          <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:18px 20px; border-left:3px solid var(--accent);">
            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:6px;">Plano recomendado</div>
@@ -4656,13 +4668,19 @@ function clearSettingsModal() {
    // ===== Captação Ativa =====
    function calcCA(){
      var period=document.getElementById('pc-ca-period').value, months=CA_MONTHS[period];
-     var users=Math.max(1,gv('pc-ca-users')), consultas=gv('pc-ca-consultas'), cidades=gv('pc-ca-cidades');
+     var addon=document.getElementById('pc-ca-addon').value;
+     var useCap=(addon==='capcoins'||addon==='ambos'), useCid=(addon==='cidades'||addon==='ambos');
+     document.getElementById('pc-ca-cap-wrap').style.display=useCap?'block':'none';
+     document.getElementById('pc-ca-cid-wrap').style.display=useCid?'block':'none';
+     var users=Math.max(1,gv('pc-ca-users')), consultas=gv('pc-ca-consultas');
+     var capManual=useCap?gv('pc-ca-capcoins'):0, cidades=useCid?gv('pc-ca-cidades'):0;
      var rows=CA_PLANS.map(function(p){
        var base=p.price[period];
        var eu=Math.max(0,users-p.users), ec=Math.max(0,consultas-p.consultas);
-       var addUser=eu*CA_ADDON.usuario, addCap=ec*CA_ADDON.capcoin*months, addCid=cidades*CA_ADDON.cidade*months;
+       var capTot=ec+capManual;
+       var addUser=eu*CA_ADDON.usuario, addCap=capTot*CA_ADDON.capcoin*months, addCid=cidades*CA_ADDON.cidade*months;
        var avulsos=addUser+addCap+addCid;
-       return { p:p, base:base, eu:eu, ec:ec, cid:cidades, addUser:addUser, addCap:addCap, addCid:addCid,
+       return { p:p, base:base, eu:eu, ec:ec, capTot:capTot, cid:cidades, addUser:addUser, addCap:addCap, addCid:addCid,
                 avulsos:avulsos, total:(base==null?null:base+avulsos), fit:(eu===0&&ec===0) };
      });
      var reco = rows.filter(function(r){return r.fit;})[0] || rows[rows.length-1];
@@ -4673,7 +4691,7 @@ function clearSettingsModal() {
      var L=[]; var baseTxt=(reco.base==null)?warn('a validar','var(--accent)'):money(reco.base);
      L.push(line('Plano '+reco.p.key+' ('+reco.p.users+' usuário'+(reco.p.users>1?'s':'')+' · '+reco.p.consultas+' consultas/mês)', baseTxt));
      if(reco.eu>0)  L.push(line('+ '+reco.eu+' usuário extra × R$ '+fmt(CA_ADDON.usuario), money(reco.addUser)));
-     if(reco.ec>0)  L.push(line('+ '+iint(reco.ec)+' capcoins (consultas) × R$ '+fmt(CA_ADDON.capcoin)+'/mês', money(reco.addCap)));
+     if(reco.capTot>0)  L.push(line('+ '+iint(reco.capTot)+' capcoins × R$ '+fmt(CA_ADDON.capcoin)+'/mês', money(reco.addCap)));
      if(reco.cid>0) L.push(line('+ '+reco.cid+' cidade extra × R$ '+fmt(CA_ADDON.cidade)+'/mês', money(reco.addCid)));
      document.getElementById('pc-ca-lines').innerHTML=L.join('');
      document.getElementById('pc-ca-total-label').textContent='Total '+CA_PLABEL[period];
@@ -4683,8 +4701,8 @@ function clearSettingsModal() {
      } else {
        document.getElementById('pc-ca-total').textContent=money(reco.total);
        document.getElementById('pc-ca-note').textContent=(period==='anual')
-         ? 'Anual à vista (PIX/boleto) ou 12× sem juros no cartão. Cidade extra é sempre avulsa.'
-         : 'Cidade extra é sempre avulsa. Consultas acima da cota sobem o plano — não viram avulso.';
+         ? 'Anual à vista (PIX/boleto) ou 12× sem juros no cartão. Capcoins e cidades são sempre avulsos.'
+         : 'Capcoins e cidades são adicionais avulsos. Consultas acima da cota sobem o plano — não viram avulso.';
      }
 
      // ----- tabela -----
@@ -4760,7 +4778,7 @@ function clearSettingsModal() {
    };
 
    function bind(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener('input',fn); }
-   ['pc-ca-period','pc-ca-users','pc-ca-consultas','pc-ca-cidades'].forEach(function(id){bind(id,calcCA);});
+   ['pc-ca-period','pc-ca-addon','pc-ca-users','pc-ca-consultas','pc-ca-capcoins','pc-ca-cidades'].forEach(function(id){bind(id,calcCA);});
    ['pc-cop-agents','pc-cop-users','pc-cop-convos'].forEach(function(id){bind(id,calcCop);});
    calcCA(); calcCop(); window.pcShow('ca');
  })();
