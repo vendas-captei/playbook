@@ -10,9 +10,11 @@ const PATH = "data/history.json";
 const FUNIS = [7, 2];
 
 function baseUrl(req) {
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  // Usa o host da requisição (domínio de produção — sem deployment protection).
+  // VERCEL_URL (URL do deploy) é protegida e devolve HTML de login → não serve p/ fetch interno.
   const host = req.headers["x-forwarded-host"] || req.headers.host;
-  return `https://${host}`;
+  if (host) return `https://${host}`;
+  return "https://playbook-comercial-captei.vercel.app";
 }
 
 async function getMetrics(base, pid, month) {
