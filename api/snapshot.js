@@ -24,6 +24,12 @@ async function getMetrics(base, pid, month) {
   return r.json();
 }
 
+async function getTpc(base, pid, month) {
+  const r = await fetch(`${base}/api/tpc?pipeline_id=${pid}&month=${month}`, { cache: "no-store" });
+  if (!r.ok) throw new Error(`tpc ${r.status}`);
+  return r.json();
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const u = new URL(req.url, "http://localhost");
@@ -62,6 +68,18 @@ module.exports = async function handler(req, res) {
         abertoCount: atual.abertoCount ?? null,
         fonte: `snapshot-vivo-${new Date().toISOString().slice(0, 10)}`,
       };
+
+      // Série diária de TPC do mês-alvo (só funil 7 — onde 1º contato importa e o volume é limitado).
+      if (pid === 7) {
+        try {
+          const tpc = await getTpc(base, pid, month);
+          if (tpc && tpc.serie) {
+            delete tpc.atualizadoEm; delete tpc.historico;
+            tpc.fonte = `snapshot-vivo-${new Date().toISOString().slice(0, 10)}`;
+            registros[pid].tpc = tpc;
+          }
+        } catch (_) { /* TPC é best-effort; não derruba o snapshot */ }
+      }
     }
 
     // Lê history.json atual (sha) e mescla.
