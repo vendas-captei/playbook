@@ -340,14 +340,17 @@
       const el = document.getElementById("necessidade"); if(!el) return;
       const pid = document.getElementById("f-funil").value;
       const P = paramsMap[pid] || { taxaReuniaoVenda:0.85, taxaLeadReuniao:0.30, ticketRef:2950 };
-      const trv = clampRate(P.taxaReuniaoVenda), tlr = clampRate(P.taxaLeadReuniao);
+      const trv = clampRate(P.taxaReuniaoVenda);          // premissa: reunião → venda
+      const clv = clampRate(P.convLeadVenda || 0.21);     // MEDIDO: novo deal → venda (jan–jun ~21%)
       const meta = d.metaMensal || 0;
       // Ticket: usa o do mês se já há amostra (≥3 vendas); senão o de referência.
       const ticket = (d.ticketMedio && d.negociosGanhos>=3) ? d.ticketMedio : (P.ticketRef||2950);
       const vN = ticket>0 ? Math.ceil(meta/ticket) : 0;
-      const rN = Math.ceil(vN/trv), lN = Math.ceil(rN/tlr);
+      const lN = Math.ceil(vN/clv);   // leads/MQL via conversão MEDIDA (novo deal → venda)
+      const rN = Math.ceil(vN/trv);   // reuniões via premissa (estimativa paralela)
       const feitas = d.negociosGanhos || 0;
-      const fV = Math.max(0, vN-feitas), fR = Math.ceil(fV/trv), fL = Math.ceil(fR/tlr);
+      const fV = Math.max(0, vN-feitas);
+      const fL = Math.ceil(fV/clv), fR = Math.ceil(fV/trv);
       const diasRest = d.diasUteisRestantes || 0;
       const leadsDia = diasRest>0 ? Math.ceil(fL/diasRest) : fL;
       document.getElementById("nec-sub").textContent = `${brl(meta)} ÷ ticket ${brl(ticket)} = ${num(vN)} vendas`;
@@ -360,8 +363,8 @@
          </div>`;
       el.innerHTML = `
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          ${tile("Leads / MQL necessários", lN, fL, `topo · conv. ${Math.round(tlr*100)}% → reunião`)}
-          ${tile("Reuniões necessárias", rN, fR, `conv. ${Math.round(trv*100)}% → venda`)}
+          ${tile("Leads / MQL necessários", lN, fL, `📊 medido · ${Math.round(clv*100)}% novo deal→venda`)}
+          ${tile("Reuniões necessárias", rN, fR, `premissa · ${Math.round(trv*100)}% → venda`)}
           ${tile("Vendas necessárias", vN, fV, `${feitas} fechada(s)`)}
           <div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
             <p class="text-xs text-blue-700">Leads/dia útil p/ meta</p>
@@ -370,9 +373,8 @@
           </div>
         </div>
         <div id="nec-premissas" class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-slate-100 pt-3 text-[11px] text-slate-400">
-          <span>Premissas: lead→reunião <b class="text-slate-600">${Math.round(tlr*100)}%</b> · reunião→venda <b class="text-slate-600">${Math.round(trv*100)}%</b> · ticket ref <b class="text-slate-600">${brl(P.ticketRef||2950)}</b></span>
-          ${isAdmin?`<button id="nec-edit" class="text-blue-600 hover:underline">editar premissas</button>`:""}
-          <span>— premissas editáveis; serão medidas na Fase 2.</span>
+          <span><b class="text-emerald-700">📊 Conversão medida</b> (novo deal→venda): <b class="text-slate-600">${Math.round(clv*100)}%</b> · jan–jun. Premissas: reunião→venda <b class="text-slate-600">${Math.round(trv*100)}%</b> · ticket ref <b class="text-slate-600">${brl(P.ticketRef||2950)}</b></span>
+          ${isAdmin?`<button id="nec-edit" class="text-blue-600 hover:underline">editar</button>`:""}
         </div>`;
       if(isAdmin){ const b=document.getElementById("nec-edit"); if(b) b.onclick=()=>abrirEditNec(pid,P); }
     }
@@ -380,7 +382,7 @@
       const box=document.getElementById("nec-premissas"); if(!box) return;
       const inp=(id,val,w)=>`<input id="${id}" type="number" min="1" value="${val}" class="mt-0.5 w-${w} rounded border border-slate-300 px-2 py-1 text-sm">`;
       box.innerHTML=`<div class="flex flex-wrap items-end gap-3">
-        <label class="text-[11px] text-slate-500">lead→reunião (%)<br>${inp("ne-lr",Math.round(clampRate(P.taxaLeadReuniao)*100),20)}</label>
+        <label class="text-[11px] text-slate-500">novo deal→venda (%) 📊<br>${inp("ne-clv",Math.round(clampRate(P.convLeadVenda||0.21)*100),20)}</label>
         <label class="text-[11px] text-slate-500">reunião→venda (%)<br>${inp("ne-rv",Math.round(clampRate(P.taxaReuniaoVenda)*100),20)}</label>
         <label class="text-[11px] text-slate-500">ticket ref (R$)<br>${inp("ne-tk",P.ticketRef||2950,28)}</label>
         <button id="ne-save" class="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white">Salvar</button>
@@ -388,11 +390,11 @@
         <span id="ne-msg" class="text-[11px] text-slate-400"></span></div>`;
       document.getElementById("ne-cancel").onclick=()=>carregar();
       document.getElementById("ne-save").onclick=()=>{
-        const lr=Number(document.getElementById("ne-lr").value)/100;
+        const clv=Number(document.getElementById("ne-clv").value)/100;
         const rv=Number(document.getElementById("ne-rv").value)/100;
         const tk=Number(document.getElementById("ne-tk").value);
         const msg=document.getElementById("ne-msg"); msg.textContent="salvando…";
-        fetch("/api/params",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pipelineId:pid,taxaLeadReuniao:lr,taxaReuniaoVenda:rv,ticketRef:tk})})
+        fetch("/api/params",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pipelineId:pid,convLeadVenda:clv,taxaReuniaoVenda:rv,ticketRef:tk})})
           .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); paramsMap=j.params||paramsMap; carregar(); })
           .catch(e=>{ msg.textContent="erro: "+e.message; });
       };
