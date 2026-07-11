@@ -25391,8 +25391,32 @@ const RH = (() => {
      📊 TRACKING COMERCIAL (dashboard ao vivo embutido via iframe)
      ═══════════════════════════════════════════ -->
 <div class="section" id="sec-tracking" style="min-height:100vh;background:#f5f5f7;padding:0;margin-left:var(--sidebar-w);flex-direction:column;align-items:stretch;">
-  <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:100vh;border:0;display:block;"></iframe>
+  <!-- Sub-abas do Tracking: Dashboard (padrão) | Forecast -->
+  <div style="display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0;">
+    <button class="trk-tab" data-trk="dash" onclick="trackTab('dash',this)" style="cursor:pointer;border:0;border-bottom:2px solid #2563eb;background:none;padding:8px 14px;font-size:14px;font-weight:700;color:#2563eb;">📊 Dashboard</button>
+    <button class="trk-tab" data-trk="fc" onclick="trackTab('fc',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">🔮 Forecast</button>
+  </div>
+  <div id="trk-dash-wrap" style="flex:1;">
+    <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
+  </div>
+  <div id="trk-fc-wrap" style="flex:1;display:none;">
+    <iframe id="forecast-frame" data-src="/forecast.html" title="Forecast de Vendas" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
+  </div>
 </div>
+<script>
+/* Alterna as sub-abas do Tracking e carrega o iframe da aba na 1ª abertura (evita chamar o Pipedrive à toa). */
+function trackTab(which, btn){
+  document.querySelectorAll('.trk-tab').forEach(b=>{
+    const on = b.dataset.trk===which;
+    b.style.color = on ? '#2563eb' : '#64748b';
+    b.style.fontWeight = on ? '700' : '600';
+    b.style.borderBottomColor = on ? '#2563eb' : 'transparent';
+  });
+  document.getElementById('trk-dash-wrap').style.display = which==='dash' ? 'block' : 'none';
+  document.getElementById('trk-fc-wrap').style.display   = which==='fc'   ? 'block' : 'none';
+  if (which==='fc'){ const f=document.getElementById('forecast-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
+}
+</script>
 
 <script>
 /* === COMISSAO — Minha Comissão === */

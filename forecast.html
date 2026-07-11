@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forecast de Vendas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .tv .hide-tv { display: none !important; }
+    .tv main { max-width: 100% !important; padding: 1.5rem 2.5rem !important; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <header class="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">🔮</span>
+          <h1 class="text-2xl font-bold tracking-tight">Forecast de Vendas</h1>
+        </div>
+        <p id="subtitle" class="mt-1 text-sm text-slate-500">Captei · pipeline ponderado por etapa + 3 cenários</p>
+      </div>
+      <div class="text-left sm:text-right">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Hoje</p>
+        <p id="today" class="text-sm font-medium capitalize text-slate-700"></p>
+      </div>
+    </header>
+
+    <!-- Filtros -->
+    <section class="hide-tv mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div class="w-full sm:w-64">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Funil</label>
+        <select id="f-funil" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"></select>
+      </div>
+      <div id="user-filter-wrap" class="w-full sm:w-56">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Vendedor</label>
+        <select id="f-user" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"></select>
+      </div>
+      <div id="user-fixed" class="hidden w-full sm:w-56">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Vendedor</label>
+        <div id="user-fixed-label" class="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700"></div>
+      </div>
+      <div class="w-full sm:w-48">
+        <label class="mb-1 block text-xs font-medium text-slate-500">Mês</label>
+        <select id="f-mes" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"></select>
+      </div>
+      <div id="spinner" class="hidden items-center gap-2 pb-2 text-sm text-slate-400 sm:flex">
+        <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600"></span> calculando…
+      </div>
+    </section>
+
+    <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+      <span class="text-slate-500">Meta mensal do funil:</span>
+      <span id="meta-view" class="font-semibold text-slate-800">—</span>
+    </div>
+
+    <div id="erro" class="mt-6 hidden rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"></div>
+
+    <!-- Cenários -->
+    <section id="cenarios" class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3"></section>
+
+    <!-- Realista vs Meta -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Forecast Realista vs Meta</h2>
+        <span id="vs-sub" class="text-xs text-slate-500"></span>
+      </div>
+      <div id="vs-meta" class="mt-4 text-sm text-slate-400">—</div>
+    </section>
+
+    <!-- Pipeline ponderado por etapa -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Pipeline ponderado por etapa</h2>
+        <span class="text-xs text-slate-500">valor × probabilidade = ponderado · <span id="edit-probs" class="hidden cursor-pointer text-indigo-600 hover:underline">editar probabilidades</span></span>
+      </div>
+      <div id="tabela" class="mt-4 overflow-x-auto text-sm text-slate-400">—</div>
+    </section>
+
+    <footer id="footer" class="mt-8 border-t border-slate-200 pt-4 text-center text-xs text-slate-400"></footer>
+  </main>
+
+  <script>
+    const brl = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
+    const num = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR");
+    let metasMap = {}, probsMap = {}, lastData = null, editing = false;
+
+    function getSession(){ try { return JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}"); } catch(e){ return {}; } }
+    const session = getSession();
+    const framed = window.self !== window.top;
+    if ((!session || !session.name) && !framed) { location.replace("/"); }
+    const isAdmin = !!(session.isAdmin || session.team === "Gestão");
+
+    let usersByEmail = {}, metaByPdId = {}, pdUsers = [], myPdId = null;
+    let myName = session.name || "";
+    const FUNIL_TEAM = { 7: "CAP", 2: "COP" };
+    const teamDoPdUser = (u) => { const em=(u.email||"").toLowerCase(); return (usersByEmail[em]&&usersByEmail[em].team)||""; };
+    function popularVendedores(){
+      const selU = document.getElementById("f-user"); if (!selU) return;
+      const prev = selU.value;
+      const teamAlvo = FUNIL_TEAM[Number(document.getElementById("f-funil").value)] || null;
+      selU.innerHTML = "";
+      const todos=document.createElement("option"); todos.value=""; todos.textContent="Todos os vendedores"; selU.appendChild(todos);
+      (pdUsers||[]).forEach(u=>{ if (teamAlvo && teamDoPdUser(u)!==teamAlvo) return;
+        const o=document.createElement("option"); o.value=u.id; o.textContent=u.nome; selU.appendChild(o); });
+      selU.value = [...selU.options].some(o=>o.value==prev) ? prev : "";
+    }
+
+    document.getElementById("today").textContent = new Date().toLocaleDateString("pt-BR",{ weekday:"long", day:"2-digit", month:"long", year:"numeric" });
+    (function(){ const sel=document.getElementById("f-mes"); const hoje=new Date();
+      for (let i=0;i<6;i++){ const d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+        const valor=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+        let rot=d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"}); rot=rot.charAt(0).toUpperCase()+rot.slice(1);
+        const o=document.createElement("option"); o.value=valor; o.textContent=rot; sel.appendChild(o); } })();
+
+    function currentUid(){ if (isAdmin) return document.getElementById("f-user").value || ""; return myPdId!=null?String(myPdId):""; }
+
+    function cenarioCard(titulo, valor, cor, borda, rodape){
+      return `<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-t-4 ${borda}">
+        <p class="text-sm text-slate-500">${titulo}</p>
+        <p class="mt-1 text-2xl font-bold ${cor}">${valor}</p>
+        <p class="mt-3 text-xs text-slate-500">${rodape}</p></div>`;
+    }
+
+    function render(d){
+      lastData = d;
+      document.getElementById("subtitle").innerHTML =
+        `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`;
+      document.getElementById("meta-view").textContent = brl(d.metaMensal);
+
+      const c = d.cenarios;
+      document.getElementById("cenarios").innerHTML =
+        cenarioCard("Pessimista", brl(c.pessimista), "text-rose-600", "border-rose-400",
+          "só etapas finais (Proposta em diante), ponderadas + já ganho") +
+        cenarioCard("Realista", brl(c.realista), "text-indigo-700", "border-indigo-500",
+          `pipeline ponderado + já ganho · ${d.dealsAbertos} deals abertos`) +
+        cenarioCard("Otimista", brl(c.otimista), "text-emerald-600", "border-emerald-500",
+          "todo o pipeline aberto fecha + já ganho");
+
+      // Realista vs Meta
+      const pct = d.metaMensal>0 ? (c.realista/d.metaMensal)*100 : 0;
+      const cor = pct>=100 ? "#10b981" : (pct>=90 ? "#f59e0b" : "#f43f5e");
+      const rot = d.gapRealista>0 ? `gap de ${brl(d.gapRealista)} para a meta` : `${brl(-d.gapRealista)} acima da meta ✓`;
+      document.getElementById("vs-sub").textContent = `realizado ${brl(d.realizado)} (${d.negociosGanhos} ganhos) · ponderado em aberto ${brl(d.ponderado)}`;
+      document.getElementById("vs-meta").innerHTML = `
+        <div class="flex items-center gap-2 text-sm">
+          <span class="inline-block h-2.5 w-2.5 rounded-full" style="background:${cor}"></span>
+          <span class="font-semibold" style="color:${cor}">${pct.toFixed(0)}% da meta</span>
+          <span class="text-slate-500">— ${rot}</span>
+        </div>
+        <div class="relative mt-4 h-3 rounded-full bg-slate-100">
+          <div class="absolute left-0 top-0 h-3 rounded-full" style="width:${Math.min(100,pct)}%;background:${cor}"></div>
+        </div>
+        <div class="mt-2 flex justify-between text-[11px] text-slate-400"><span>R$ 0</span><span>meta ${brl(d.metaMensal)}</span></div>`;
+
+      renderTabela(d);
+      document.getElementById("footer").textContent = "Dados ao vivo do Pipedrive · atualizado " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    }
+
+    function renderTabela(d){
+      const el = document.getElementById("tabela");
+      const rows = d.porEtapa.map(e=>`
+        <tr class="border-b border-slate-100 ${e.final?'bg-indigo-50/40':''}">
+          <td class="py-2 pr-3">${e.etapa}${e.final?' <span class="ml-1 rounded bg-indigo-100 px-1 text-[10px] font-semibold text-indigo-700">final</span>':''}</td>
+          <td class="py-2 px-3 text-right">${num(e.quantidade)}</td>
+          <td class="py-2 px-3 text-right">${brl(e.valor)}</td>
+          <td class="py-2 px-3 text-right">${editing?`<input data-sid="${e.stageId}" type="number" min="0" max="100" value="${e.prob}" class="w-16 rounded border border-slate-300 px-1 py-0.5 text-right text-sm">`:`${e.prob}%`}</td>
+          <td class="py-2 pl-3 text-right font-semibold">${brl(e.ponderado)}</td>
+        </tr>`).join("");
+      el.innerHTML = `
+        <table class="w-full text-sm">
+          <thead><tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+            <th class="py-2 pr-3 text-left">Etapa</th><th class="py-2 px-3 text-right"># deals</th>
+            <th class="py-2 px-3 text-right">Valor total</th><th class="py-2 px-3 text-right">Prob.</th>
+            <th class="py-2 pl-3 text-right">Ponderado</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr class="border-t-2 border-slate-300 font-semibold">
+            <td class="py-2 pr-3">Total</td><td class="py-2 px-3 text-right">${num(d.dealsAbertos)}</td>
+            <td class="py-2 px-3 text-right">${brl(d.totalAberto)}</td><td class="py-2 px-3 text-right">—</td>
+            <td class="py-2 pl-3 text-right text-indigo-700">${brl(d.ponderado)}</td></tr></tfoot>
+        </table>
+        ${editing?`<div class="mt-3 flex items-center gap-2"><button id="probs-save" class="rounded bg-indigo-600 px-3 py-1 text-xs font-medium text-white">Salvar probabilidades</button><button id="probs-cancel" class="text-xs text-slate-500">cancelar</button><span id="probs-msg" class="text-[11px] text-slate-400"></span></div>`:''}`;
+      if (editing){
+        document.getElementById("probs-cancel").onclick=()=>{ editing=false; renderTabela(lastData); };
+        document.getElementById("probs-save").onclick=salvarProbs;
+      }
+    }
+
+    function salvarProbs(){
+      const pid = document.getElementById("f-funil").value;
+      const probs = {};
+      document.querySelectorAll("#tabela input[data-sid]").forEach(i=>{ probs[i.dataset.sid]=Number(i.value); });
+      const msg = document.getElementById("probs-msg"); msg.textContent="salvando…";
+      fetch("/api/fcparams",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pipelineId:pid,probs})})
+        .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); probsMap=j.params||probsMap; editing=false; carregar(); })
+        .catch(e=>{ msg.textContent="erro: "+e.message; });
+    }
+
+    function carregar(){
+      const pid = document.getElementById("f-funil").value; if (!pid) return;
+      const uid = currentUid(); const mes = document.getElementById("f-mes").value;
+      const erro = document.getElementById("erro");
+      document.getElementById("spinner").classList.remove("hidden"); erro.classList.add("hidden");
+      const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
+      if (uid) qs.set("user_id", uid);
+      if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
+      fetch(`/api/forecast?${qs.toString()}`).then(r=>r.json())
+        .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
+        .catch(e=>{ erro.textContent="Erro ao calcular forecast: "+e.message; erro.classList.remove("hidden"); })
+        .finally(()=> document.getElementById("spinner").classList.add("hidden"));
+    }
+
+    Promise.all([
+      fetch("/api/users").then(r=>r.json()).catch(()=>({users:[]})),
+      fetch("/api/filters").then(r=>r.json()),
+    ]).then(([ud, d])=>{
+      if (d.error) throw new Error(d.error);
+      (ud.users||[]).forEach(u=>{ const em=(u.user||u.email||"").toLowerCase(); if(!em)return;
+        const metaNum=u.meta?(parseInt(String(u.meta).replace(/[^0-9]/g,""))||0):0;
+        usersByEmail[em]={ meta:metaNum, name:u.name||em, team:u.team||"" }; });
+      let myEmail=null;
+      (ud.users||[]).forEach(u=>{ if((u.name||"").toLowerCase()===(myName||"").toLowerCase()) myEmail=(u.user||u.email||"").toLowerCase(); });
+      pdUsers = d.usuarios || [];
+      (d.usuarios||[]).forEach(u=>{ const em=(u.email||"").toLowerCase();
+        if(em&&usersByEmail[em]&&usersByEmail[em].meta>0) metaByPdId[u.id]=usersByEmail[em].meta;
+        if(em&&myEmail&&em===myEmail) myPdId=u.id; });
+
+      const selF = document.getElementById("f-funil");
+      const FUNIS_RADAR = [7, 2];
+      (d.funis||[]).filter(f=>FUNIS_RADAR.includes(Number(f.id)))
+        .forEach(f=>{ const o=document.createElement("option"); o.value=f.id; o.textContent=f.nome; selF.appendChild(o); });
+      if ([...selF.options].some(o=>o.value=="7")) selF.value="7";
+
+      if (isAdmin){
+        popularVendedores();
+        document.getElementById("f-user").addEventListener("change", carregar);
+        const ep=document.getElementById("edit-probs"); ep.classList.remove("hidden");
+        ep.onclick=()=>{ editing=true; renderTabela(lastData); };
+      } else {
+        document.getElementById("user-filter-wrap").classList.add("hidden");
+        const fixed=document.getElementById("user-fixed"); fixed.classList.remove("hidden");
+        const lbl=document.getElementById("user-fixed-label");
+        lbl.textContent = myPdId!=null ? (myName.split(" ")[0]+" (só o seu)") : "Funil geral";
+      }
+      document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregar(); });
+      document.getElementById("f-mes").addEventListener("change", carregar);
+      Promise.all([
+        fetch("/api/metas").then(r=>r.json()).then(m=>{ metasMap=m.metas||{}; }).catch(()=>{}),
+        fetch("/api/fcparams").then(r=>r.json()).then(p=>{ probsMap=p.params||{}; }).catch(()=>{}),
+      ]).finally(carregar);
+    }).catch(e=>{
+      const erro=document.getElementById("erro");
+      erro.textContent="Erro ao carregar filtros: "+e.message+" (verifique a env PIPEDRIVE_API_TOKEN na Vercel)";
+      erro.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
