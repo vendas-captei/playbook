@@ -51,8 +51,9 @@
     </section>
 
     <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
-      <span class="text-slate-500">Meta mensal do funil:</span>
+      <span id="meta-label" class="text-slate-500">Meta mensal do funil:</span>
       <span id="meta-view" class="font-semibold text-slate-800">—</span>
+      <span id="meta-hint" class="hidden text-xs text-slate-400">vinculada ao cadastro do vendedor</span>
     </div>
 
     <div id="erro" class="mt-6 hidden rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"></div>
@@ -123,6 +124,7 @@
     let metasMap = {}, probsMap = {}, lastData = null, editing = false;
     let commitVal = null, commitPor = "";
     let fcHist = {}; // histórico congelado do funil atual (data/forecast-history.json)
+    let viewIsIndividual = false; // recorte de um vendedor com meta individual cadastrada?
 
     function getSession(){ try { return JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}"); } catch(e){ return {}; } }
     const session = getSession();
@@ -166,6 +168,8 @@
       document.getElementById("subtitle").innerHTML =
         `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`;
       document.getElementById("meta-view").textContent = brl(d.metaMensal);
+      document.getElementById("meta-label").textContent = viewIsIndividual ? "Meta individual (mensal):" : "Meta mensal do funil:";
+      document.getElementById("meta-hint").classList.toggle("hidden", !viewIsIndividual);
 
       const c = d.cenarios;
       document.getElementById("cenarios").innerHTML =
@@ -358,9 +362,13 @@
       const uid = currentUid(); const mes = document.getElementById("f-mes").value;
       const erro = document.getElementById("erro");
       document.getElementById("spinner").classList.remove("hidden"); erro.classList.add("hidden");
+      // Recorte individual quando há um vendedor selecionado com meta cadastrada no users.json.
+      viewIsIndividual = !!(uid && metaByPdId[uid] != null);
       const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
       if (uid) qs.set("user_id", uid);
-      if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
+      // Meta: individual (cadastro do vendedor) tem prioridade; senão a do funil.
+      if (viewIsIndividual) qs.set("meta", metaByPdId[uid]);
+      else if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
       const cqs = new URLSearchParams({ pipeline_id: pid, month: mes }); if (uid) cqs.set("user_id", uid);
       Promise.all([
         fetch(`/api/forecast?${qs.toString()}`).then(r=>r.json()),
