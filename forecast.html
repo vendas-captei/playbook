@@ -69,6 +69,33 @@
       <div id="vs-meta" class="mt-4 text-sm text-slate-400">—</div>
     </section>
 
+    <!-- Indicadores do funil -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Indicadores do funil</h2>
+        <span class="text-xs text-slate-500">win-rate · ciclo de venda · resultado do mês</span>
+      </div>
+      <div id="indicadores" class="mt-4 text-sm text-slate-400">—</div>
+    </section>
+
+    <!-- Previsão semanal -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Previsão semanal <span class="text-xs font-normal text-slate-400">· ponderada por data de fechamento esperada</span></h2>
+        <span id="sem-sub" class="text-xs text-slate-500"></span>
+      </div>
+      <div id="semanal" class="mt-4 text-sm text-slate-400">—</div>
+    </section>
+
+    <!-- Forecast call: qualitativo × quantitativo -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Forecast call <span class="text-xs font-normal text-slate-400">· quantitativo × qualitativo</span></h2>
+        <span class="text-xs text-slate-500">confronta o modelo ponderado com o commit do vendedor/gestor</span>
+      </div>
+      <div id="forecast-call" class="mt-4 text-sm text-slate-400">—</div>
+    </section>
+
     <!-- Pipeline ponderado por etapa -->
     <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -85,6 +112,7 @@
     const brl = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
     const num = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR");
     let metasMap = {}, probsMap = {}, lastData = null, editing = false;
+    let commitVal = null, commitPor = "";
 
     function getSession(){ try { return JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}"); } catch(e){ return {}; } }
     const session = getSession();
@@ -154,8 +182,89 @@
         </div>
         <div class="mt-2 flex justify-between text-[11px] text-slate-400"><span>R$ 0</span><span>meta ${brl(d.metaMensal)}</span></div>`;
 
+      renderIndicadores(d);
+      renderSemanal(d);
+      renderForecastCall(d);
       renderTabela(d);
       document.getElementById("footer").textContent = "Dados ao vivo do Pipedrive · atualizado " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    }
+
+    function tileBox(t, v, sub, style){
+      return `<div class="rounded-lg border border-slate-200 p-3">
+        <p class="text-xs text-slate-500">${t}</p>
+        <p class="mt-1 text-xl font-bold"${style?` style="${style}"`:""}>${v}</p>
+        ${sub?`<p class="mt-1 text-[11px] text-slate-400">${sub}</p>`:""}</div>`;
+    }
+
+    function renderIndicadores(d){
+      const el = document.getElementById("indicadores"); const i = d.indicadores || {};
+      const wr = i.winRate;
+      const wrCor = wr==null ? "" : (wr>=40?"#10b981":(wr>=25?"#f59e0b":"#f43f5e"));
+      el.innerHTML = `<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        ${tileBox("Win-rate (oportunidades)", wr==null?"—":wr+"%", `${i.ganhos} ganho(s) · ${i.perdidosOpp} perda(s) em Proposta+`, wrCor?`color:${wrCor}`:"")}
+        ${tileBox("Ciclo médio de venda", i.cicloMedianoDias==null?"—":i.cicloMedianoDias+" dias", "mediana entrada → ganho (mês)")}
+        ${tileBox("Ganhos no mês", num(i.ganhos), brl(d.realizado))}
+        ${tileBox("Perdas totais", num(i.perdidosTotal), "inclui higienização (adm.)")}
+      </div>
+      <p class="mt-3 text-[11px] text-slate-400">Win-rate conta só oportunidades reais (perdas em Proposta em diante); perdas administrativas de etapas iniciais ficam fora para não distorcer a taxa.</p>`;
+    }
+
+    function renderSemanal(d){
+      const el = document.getElementById("semanal");
+      const sem = d.semanas || [];
+      const total = sem.reduce((a,s)=>a+s.valor,0);
+      document.getElementById("sem-sub").textContent = `${brl(total)} ponderado com data prevista` + (d.semData? ` · ${brl(d.semData)} sem data`:"");
+      if (!sem.length){ el.innerHTML = `<p class="text-xs text-slate-400">Nenhum deal aberto com data de fechamento esperada.${d.semData?` ${brl(d.semData)} ponderado está sem data prevista — preencha a data nos deals para ver a quebra semanal.`:""}</p>`; return; }
+      const max = Math.max(...sem.map(s=>s.valor), 1);
+      el.innerHTML = sem.map(s=>`
+        <div class="mb-2">
+          <div class="flex items-center justify-between text-xs"><span class="text-slate-600">${s.semana}</span><span class="font-semibold text-slate-700">${brl(s.valor)}</span></div>
+          <div class="mt-1 h-3 rounded-full bg-slate-100"><div class="h-3 rounded-full bg-indigo-500" style="width:${Math.max(2,(s.valor/max)*100)}%"></div></div>
+        </div>`).join("") +
+        (d.semData? `<p class="mt-3 text-[11px] text-slate-400">+ ${brl(d.semData)} ponderado <b>sem data de fechamento</b> — não entra na quebra semanal. Preencha "Data prevista de fechamento" nos deals para melhorar a precisão.</p>`:"");
+    }
+
+    function renderForecastCall(d){
+      const el = document.getElementById("forecast-call");
+      const quanti = d.cenarios.realista;
+      const commit = commitVal; // carregado do /api/fccommit
+      const linha = (t,v,cor)=>`<div class="rounded-lg border border-slate-200 p-3"><p class="text-xs text-slate-500">${t}</p><p class="mt-1 text-xl font-bold" style="color:${cor}">${brl(v)}</p></div>`;
+      let confronto = "";
+      if (commit!=null){
+        const dif = commit - quanti;
+        const cor = Math.abs(dif) <= quanti*0.1 ? "#10b981" : "#f59e0b";
+        confronto = `<div class="mt-3 rounded-lg border p-3 text-sm" style="border-color:${cor}33;background:${cor}0d;">
+          <b style="color:${cor}">${dif>=0?'+':'−'}${brl(Math.abs(dif))}</b> de diferença entre o commit e o modelo ponderado
+          ${Math.abs(dif)<=quanti*0.1?' — alinhados ✓':' — vale investigar (deal grande? otimismo/conservadorismo?)'}
+          ${commitPor?`<span class="block text-[11px] text-slate-400 mt-1">commit por ${commitPor}</span>`:""}
+        </div>`;
+      }
+      el.innerHTML = `
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          ${linha("Quantitativo (ponderado)", quanti, "#4f46e5")}
+          ${linha("Qualitativo (forecast call)", commit==null?0:commit, "#0891b2").replace(brl(0), commit==null?'—':brl(commit))}
+        </div>
+        ${confronto}
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-xs text-slate-500">${commit==null?"Definir":"Atualizar"} commit (R$):</span>
+          <input id="commit-input" type="number" min="0" step="1000" value="${commit==null?"":commit}" class="w-40 rounded border border-slate-300 px-2 py-1 text-sm">
+          <button id="commit-save" class="rounded bg-cyan-600 px-3 py-1 text-xs font-medium text-white">Salvar</button>
+          <span id="commit-msg" class="text-[11px] text-slate-400"></span>
+        </div>`;
+      document.getElementById("commit-save").onclick = salvarCommit;
+    }
+
+    function salvarCommit(){
+      const pid = document.getElementById("f-funil").value;
+      const mes = document.getElementById("f-mes").value;
+      const uid = currentUid();
+      const valor = Number(document.getElementById("commit-input").value);
+      const msg = document.getElementById("commit-msg");
+      if (!(valor>=0)){ msg.textContent="valor inválido"; return; }
+      msg.textContent="salvando…";
+      fetch("/api/fccommit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pipelineId:pid,month:mes,userId:uid||null,valor,por:myName})})
+        .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); commitVal=j.valor; commitPor=myName; renderForecastCall(lastData); })
+        .catch(e=>{ msg.textContent="erro: "+e.message; });
     }
 
     function renderTabela(d){
@@ -205,8 +314,11 @@
       const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
       if (uid) qs.set("user_id", uid);
       if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
-      fetch(`/api/forecast?${qs.toString()}`).then(r=>r.json())
-        .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
+      const cqs = new URLSearchParams({ pipeline_id: pid, month: mes }); if (uid) cqs.set("user_id", uid);
+      Promise.all([
+        fetch(`/api/forecast?${qs.toString()}`).then(r=>r.json()),
+        fetch(`/api/fccommit?${cqs.toString()}`).then(r=>r.json()).catch(()=>({valor:null})),
+      ]).then(([d, c])=>{ if(d.error) throw new Error(d.error); commitVal=(c&&c.valor!=null)?c.valor:null; commitPor=(c&&c.por)||""; render(d); })
         .catch(e=>{ erro.textContent="Erro ao calcular forecast: "+e.message; erro.classList.remove("hidden"); })
         .finally(()=> document.getElementById("spinner").classList.add("hidden"));
     }
