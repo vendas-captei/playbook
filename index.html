@@ -4785,6 +4785,102 @@ function clearSettingsModal() {
  })();
  </script>
 
+ <!-- Calculadora de Data de Fechamento (IA) -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">&#128197;</div>
+       <div><div class="card-title">Calculadora de Data de Fechamento (IA)</div><div class="card-subtitle">Estima a data prevista de fechamento cruzando IA + hist&#243;rico real do card no Pipedrive</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Como funciona</strong>
+       Informe o ID do card e responda as 4 perguntas de diagn&#243;stico. A IA cruza o hist&#243;rico real do funil (Pipedrive) com o seu diagn&#243;stico e estima a data prevista de fechamento &#8212; e voc&#234; pode gravar a data direto no card com um clique.
+     </div>
+
+     <div style="max-width:320px;margin-bottom:16px;">
+       <label style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-600);display:block;margin-bottom:6px;">ID do card (deal) no Pipedrive</label>
+       <input id="fd-deal" type="number" min="1" placeholder="ex: 2049" style="width:100%;padding:9px 12px;border:1px solid var(--n-100);border-radius:8px;font-size:13px;color:var(--n-900);font-family:inherit;background:white;box-sizing:border-box;">
+     </div>
+
+     <div id="fd-perguntas" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px;"></div>
+
+     <div style="margin-bottom:16px;">
+       <label style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-600);display:block;margin-bottom:6px;">Observa&#231;&#245;es (opcional)</label>
+       <textarea id="fd-obs" rows="2" placeholder="Contexto que ajude a IA (ex.: cliente pediu prazo, aguardando aprova&#231;&#227;o do diretor&#8230;)" style="width:100%;padding:9px 12px;border:1px solid var(--n-100);border-radius:8px;font-size:13px;color:var(--n-900);font-family:inherit;background:white;box-sizing:border-box;"></textarea>
+     </div>
+
+     <div style="display:flex;align-items:center;gap:12px;">
+       <button id="fd-run" onclick="fdCalcular()" style="background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Calcular data prevista</button>
+       <span id="fd-msg" style="font-size:13px;color:var(--n-400);"></span>
+     </div>
+
+     <div id="fd-resultado" style="display:none;margin-top:18px;"></div>
+   </div>
+ </div>
+
+ <script>
+ var FD_PERGUNTAS=[
+   ["q1","1. Urg\u00eancia (Compelling Event)","Tenho clareza do impacto financeiro/operacional que for\u00e7a o cliente a fechar NESTE per\u00edodo (e n\u00e3o no pr\u00f3ximo)?"],
+   ["q2","2. Processo de Decis\u00e3o","J\u00e1 validei e obtive o sinal verde com o DONO DO OR\u00c7AMENTO (quem tem a caneta), n\u00e3o s\u00f3 o contato t\u00e9cnico/influenciador?"],
+   ["q3","3. Burocracia (Legal/Procurement)","Mapeei as etapas burocr\u00e1ticas que faltam (homologa\u00e7\u00e3o, jur\u00eddico, suprimentos) e tenho margem de tempo at\u00e9 a data prevista?"],
+   ["q4","4. Cronograma Inverso","A data faz sentido calculando de tr\u00e1s pra frente, partindo de quando o cliente precisa do produto \u2212 nosso tempo de implementa\u00e7\u00e3o?"]
+ ];
+ function fdRenderPerguntas(){
+   var el=document.getElementById("fd-perguntas"); if(!el)return;
+   el.innerHTML=FD_PERGUNTAS.map(function(p){
+     return '<div style="border:1px solid var(--n-100);border-radius:8px;padding:12px;">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--n-800);">'+p[1]+'</div>'
+      +'<div style="font-size:12px;color:var(--n-400);margin-top:3px;line-height:1.5;">'+p[2]+'</div>'
+      +'<select id="fd-'+p[0]+'" style="margin-top:8px;width:100%;padding:9px 12px;border:1px solid var(--n-100);border-radius:8px;font-size:13px;color:var(--n-900);font-family:inherit;background:white;box-sizing:border-box;">'
+      +'<option value="">\u2014 selecione \u2014</option><option value="sim">Sim</option><option value="parcial">Parcial</option><option value="nao">N\u00e3o</option></select>'
+      +'</div>';
+   }).join("");
+ }
+ function fdCalcular(){
+   var deal=Number(document.getElementById("fd-deal").value);
+   var msg=document.getElementById("fd-msg"), out=document.getElementById("fd-resultado");
+   if(!deal){ msg.textContent="informe o ID do card"; return; }
+   var answers={ obs: document.getElementById("fd-obs").value };
+   FD_PERGUNTAS.forEach(function(p){ answers[p[0]]=document.getElementById("fd-"+p[0]).value; });
+   msg.textContent="calculando\u2026 (a IA est\u00e1 lendo o hist\u00f3rico do card)"; out.style.display="none";
+   document.getElementById("fd-run").disabled=true;
+   fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deal_id:deal,answers:answers})})
+    .then(function(r){return r.json();}).then(function(j){ if(j.error)throw new Error(j.error); msg.textContent=""; fdRender(j); })
+    .catch(function(e){ msg.textContent="erro: "+e.message; })
+    .finally(function(){ document.getElementById("fd-run").disabled=false; });
+ }
+ function fdRender(j){
+   var out=document.getElementById("fd-resultado"); out.style.display="block";
+   var dt=new Date(j.dataEstimada+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+   var cc=j.confianca==="alta"?"#059669":(j.confianca==="media"?"#B45309":"#DC2626");
+   var rc=function(n){return n==="alto"?"#DC2626":(n==="medio"?"#B45309":"#059669");};
+   var riscos=(j.riscos||[]).map(function(r){return '<span style="display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-size:11px;background:'+rc(r.nivel)+'1a;color:'+rc(r.nivel)+';"><b>'+r.dimensao+'</b>: '+r.nota+'</span>';}).join(" ");
+   out.innerHTML='<div style="border:2px solid '+cc+';border-radius:12px;padding:18px;">'
+     +'<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;">'
+     +'<div><div style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);">Data prevista estimada \u00b7 card '+j.dealId+'</div>'
+     +'<div style="font-family:\'Cabinet Grotesk\',sans-serif;font-weight:800;font-size:26px;color:'+cc+';">'+dt+'</div>'
+     +'<div style="font-size:12px;color:var(--n-600);margin-top:2px;">confian\u00e7a <b style="color:'+cc+'">'+j.confianca+'</b> \u00b7 ~'+j.diasEstimados+' dias \u00b7 '+j.titulo+'</div></div>'
+     +'<button id="fd-preencher" style="background:#059669;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-family:\'Cabinet Grotesk\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Preencher no card \u2713</button>'
+     +'</div>'
+     +'<p style="font-size:13px;color:var(--n-700);line-height:1.6;margin-top:14px;">'+(j.resumo||"")+'</p>'
+     +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">'+riscos+'</div>'
+     +'<p style="font-size:11px;color:var(--n-400);margin-top:12px;">Etapa atual: <b>'+j.etapaAtual+'</b> \u00b7 '+j.diasNoFunil+' dias no funil \u00b7 '+j.diasNaEtapaAtual+' dias parado na etapa'+(j.expectedCloseDateAtual?' \u00b7 data atual no card: '+j.expectedCloseDateAtual:' \u00b7 sem data no card')+'</p>'
+     +'<p id="fd-preencher-msg" style="font-size:11px;color:var(--n-400);margin-top:8px;"></p>'
+     +'</div>';
+   document.getElementById("fd-preencher").onclick=function(){ fdPreencher(j.dealId,j.dataEstimada); };
+ }
+ function fdPreencher(dealId,date){
+   var m=document.getElementById("fd-preencher-msg"); m.textContent="gravando no card\u2026";
+   fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"set",deal_id:dealId,date:date})})
+    .then(function(r){return r.json();}).then(function(j){ if(j.error)throw new Error(j.error); m.innerHTML='<span style="color:#059669;">\u2713 gravado no card '+dealId+': '+j.expected_close_date+'</span>'; })
+    .catch(function(e){ m.textContent="erro ao gravar: "+e.message; });
+ }
+ fdRenderPerguntas();
+ </script>
+
  </div>
 
  <!-- ============================================================ -->
