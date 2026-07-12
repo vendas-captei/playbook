@@ -57,6 +57,21 @@ module.exports = async function handler(req, res) {
     const b = JSON.parse(body || "{}");
     const dealId = Number(b.deal_id);
     if (!dealId) { res.status(400).json({ error: "deal_id obrigatório" }); return; }
+
+    // Ação de GRAVAR a data no card (expected_close_date). Mesmo endpoint p/ ficar no limite de 12 funções.
+    if (b.action === "set") {
+      const date = String(b.date || "");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { res.status(400).json({ error: "date (YYYY-MM-DD) obrigatória" }); return; }
+      const pr = await fetch(`${V1}/deals/${dealId}?api_token=${TK}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expected_close_date: date }),
+      });
+      const pj = await pr.json();
+      if (!pr.ok || !pj.success) { res.status(500).json({ error: `Pipedrive ${pr.status}: ${JSON.stringify(pj).slice(0, 200)}` }); return; }
+      res.status(200).json({ ok: true, dealId, expected_close_date: (pj.data && pj.data.expected_close_date) || date });
+      return;
+    }
+
     const a = b.answers || {};
 
     const dealR = await pd(`${V1}/deals/${dealId}`, TK);

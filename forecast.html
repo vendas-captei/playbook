@@ -468,7 +468,7 @@
     }
     function preencherData(dealId, date){
       const m = document.getElementById("calc-preencher-msg"); m.textContent="gravando no card…";
-      fetch("/api/set-close-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deal_id:dealId,date})})
+      fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"set",deal_id:dealId,date})})
         .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); m.innerHTML=`<span class="text-emerald-600">✓ gravado no card ${dealId}: ${j.expected_close_date}</span>`; })
         .catch(e=>{ m.textContent="erro ao gravar: "+e.message; });
     }
