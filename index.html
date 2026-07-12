@@ -2633,6 +2633,7 @@ function clearSettingsModal() {
       <div class="s-sub" onclick="showSection('tracking', this)" style="padding-left:32px;">Tracking Comercial</div>
       <div class="s-sub" onclick="showSection('ferramentas', this)" style="padding-left:32px;">Ferramentas</div>
       <div class="s-sub" onclick="showSection('processos', this)" style="padding-left:32px;">Processos & Rituais</div>
+      <div class="s-sub" onclick="showSection('motivos-perda', this)" style="padding-left:32px;">Motivos de Perda</div>
 
       <div class="s-rule"></div>
 
@@ -5366,6 +5367,380 @@ function clearSettingsModal() {
  <!-- OVERVIEW / PROCESSO COMERCIAL -->
  <!-- ============================================================ -->
  
+
+ <!-- ============================================================ -->
+ <!-- MATRIZ DE MOTIVOS DE PERDA (De-Para) -->
+ <!-- ============================================================ -->
+ <div class="section" id="sec-motivos-perda">
+ <div class="page-header">
+   <div class="crumb"><b>Institucional</b></div>
+   <h2>Matriz de Motivos de Perda</h2>
+   <p>Quando um deal for perdido, o motivo registrado no Pipedrive precisa ser um destes 13. Higienizamos dezenas de motivos antigos e os condensamos nestas categorias principais &#8212; elas passaram a ser os <strong>reais motivos de perda</strong> hoje no CRM. Clique em cada motivo para ver exatamente o que ele engloba.</p>
+ </div>
+
+ <div class="golden-rule">
+   <h3>Um motivo de perda claro hoje &#233; uma reativa&#231;&#227;o certeira amanh&#227;.</h3>
+   <p>Registrar o motivo certo n&#227;o &#233; burocracia: &#233; o que permite reabordar o lead na hora certa, medir onde perdemos e corrigir a rota. Motivo gen&#233;rico = deal perdido para sempre.</p>
+ </div>
+
+ <!-- MOTIVO 01: Fidelidade -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">01</div>
+       <div><div class="card-title">Fidelidade</div><div class="card-subtitle">O lead recusa a contratação atrelando a não compra à exigência de fidelidade ou tempo de contrato (ex: 12 meses).</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o cliente até tem interesse e forma de pagar, mas quer pagar mensalmente exclusivamente para poder cancelar a qualquer momento sem fidelidade. <strong>(Não confundir com Forma de Pagamento.)</strong>
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 1 motivo antigo (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Não quer fidelidade</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 02: Forma de pagamento -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon amber">02</div>
+       <div><div class="card-title">Forma de pagamento</div><div class="card-subtitle">Centraliza leads que apresentam barreiras operacionais ou financeiras vinculadas ao método de pagamento.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o lead não possui cartão de crédito, não tem limite disponível ou a estrutura de parcelamento/pagamento inviabiliza o negócio.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 2 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Sem Budget - Não tem limite disponível no cartão de crédito.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Sem Budget - Não trabalha com cartão de crédito.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 03: Sem orçamento -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon amber">03</div>
+       <div><div class="card-title">Sem orçamento</div><div class="card-subtitle">Unifica as antigas nomenclaturas de "budget", "preço" ou "sem capacidade financeira".</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o lead deixa claro que não tem verba, não tem orçamento disponível para a contratação ou achou o serviço caro.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 4 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Sem Budget.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Sem Budget - Desconto não atendeu.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Sem capacidade financeira.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Achou caro.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 04: Momento de Compra -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">04</div>
+       <div><div class="card-title">Momento de Compra</div><div class="card-subtitle">Substitui motivos como "timing" ou projetos para o futuro.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o lead demonstra interesse, mas afirma que não está no momento certo para investir ou adia a contratação.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 4 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Adiou o investimento - 60D.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Adiou o investimento - 30D.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Não está no momento certo.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Interesse futuro.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 05: Sem Fit -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">05</div>
+       <div><div class="card-title">Sem Fit</div><div class="card-subtitle">Categoria abrangente que agrupa leads fora do Perfil Ideal de Cliente (ICP). Substitui termos vagos como "curioso" ou "interessado apenas em preço".</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o lead for corretor autônomo (dependendo do funil), equipe muito pequena, sem dor de captação, sem intenção real de contratar ou não for o público-alvo do produto.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 18 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Interessado apenas em preço.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Não tem dor de captação.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">&#91;Corretor&#93; - Sem Budget - Iniciando na corretagem.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">&#91;Corretor&#93; - Lead sem CRECI.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">&#91;Corretor&#93; - A imobiliária adquiriu a ferramenta.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Curioso.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Menos de 5 pessoas na equipe.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Não investe em marketing além de portais.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Já fez reunião e não tem interesse.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Já foi cliente e não tem interesse.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Cortou na qualificação.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">CNPJ Inativo, imobiliária fechada.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Captação não é uma prioridade.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Corretor autônomo.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Corretor trabalha em uma imobiliária e possui CNPJ.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Sem intenção de contratar - Clicou no anúncio errado.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Sem intenção de contratar - Curioso.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Sistema não atende.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 06: Parou de responder -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">06</div>
+       <div><div class="card-title">Parou de responder</div><div class="card-subtitle">Substitui o antigo termo "Sumiu" para garantir mais profissionalismo.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Para casos de "ghosting": quando houve um contato inicial ou qualificação, mas o lead parou de dar retorno e sumiu.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 2 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Sumiu.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Sem contato.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 07: Tentativa de contato sem sucesso -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon blue">07</div>
+       <div><div class="card-title">Tentativa de contato sem sucesso</div><div class="card-subtitle">Unifica termos como "número inexistente", "nunca fomos atendidos" ou "secretária barrou".</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando a equipe de vendas tenta a prospecção, mas não consegue estabelecer nenhuma conexão inicial com o decisor.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 4 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Número inexistente.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">A secretária barrou o contato.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">O decisor nunca me atendeu.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Nunca fomos atendidos por ninguém.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 08: Funcionalidade não atendida -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">08</div>
+       <div><div class="card-title">Funcionalidade não atendida</div><div class="card-subtitle">O lead necessita de algo que a solução atual não entrega (ex: a tecnologia não agradou ou faltam integrações).</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Mantido para situações claras em que o lead busca uma funcionalidade, recurso ou característica que o sistema da empresa não possui.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 2 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Lead busca funcionalidades que não temos.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Não atendeu as expectativas - Tecnologia não agradou.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 09: Localização fora da região de atuação -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon green">09</div>
+       <div><div class="card-title">Localização fora da região de atuação</div><div class="card-subtitle">O lead está em uma área geográfica que a empresa não atende.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o endereço ou a praça de atuação da imobiliária/corretor não estiver coberta pelos serviços da empresa.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 1 motivo antigo (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Localização fora da região que atuamos.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 10: Perdido para a Concorrência -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">10</div>
+       <div><div class="card-title">Perdido para a Concorrência</div><div class="card-subtitle">O lead optou por outra ferramenta do mercado.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o contato informa que fechou negócio, renovou ou acabou de investir em uma solução concorrente.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 4 motivos antigos (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Fechou com o concorrente.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Acabou de investir em outra solução.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Fechou com Concorrente.</span>
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">IA Copiloto - Ficou com o sistema atual.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 11: Pediu para não ser contactado -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon red">11</div>
+       <div><div class="card-title">Pediu para não ser contactado</div><div class="card-subtitle">Renomeação direta da antiga opção "blocklist" para maior clareza.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o lead solicita explicitamente para ser removido das listas de contato e não receber mais ligações ou mensagens.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 1 motivo antigo (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">BlockList (Pediu para não ligarmos mais).</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 12: Renovação com o CS -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">12</div>
+       <div><div class="card-title">Renovação com o CS</div><div class="card-subtitle">O lead está fora da janela comercial e sob responsabilidade do Customer Success.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando o lead é um ex-cliente que deixou de ser cliente, mas ainda está dentro do prazo de 6 meses (ou prazo de CS), não podendo ser trabalhado como um novo lead pelo comercial.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 1 motivo antigo (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Renovação com o CS.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVO 13: Já é cliente -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon purple">13</div>
+       <div><div class="card-title">Já é cliente</div><div class="card-subtitle">O lead prospectado já faz parte da base ativa.</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="info-box">
+       <strong>Quando utilizar</strong>
+       Quando, durante o contato ou triagem, identifica-se que a empresa/pessoa já possui contrato vigente.
+     </div>
+     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);margin:16px 0 8px;">Condensa 1 motivo antigo (De &#8594; Para)</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;">
+         <span style="display:inline-flex;align-items:center;background:#F3F3F7;color:#444460;font-size:12px;line-height:1.4;padding:5px 11px;border-radius:6px;border:1px solid #E6E6EE;">Já é cliente.</span>
+     </div>
+   </div>
+ </div>
+
+ <!-- MOTIVOS EXCLUÍDOS -->
+ <div class="card">
+   <div class="card-header" onclick="toggleCard(this)">
+     <div class="card-header-left">
+       <div class="card-icon" style="background:var(--n-100);color:var(--n-600);">&#10007;</div>
+       <div><div class="card-title">Motivos exclu&#237;dos definitivamente</div><div class="card-subtitle">N&#227;o use mais &#8212; foram removidos do Pipedrive e por qu&#234;</div></div>
+     </div>
+     <span class="card-chevron">&#9660;</span>
+   </div>
+   <div class="card-body">
+     <div class="alert-box">
+       <strong>Aten&#231;&#227;o</strong>
+       Os motivos abaixo <strong>n&#227;o existem mais</strong> no Pipedrive. Se voc&#234; procurava algum deles, use um dos 13 motivos consolidados acima.
+     </div>
+     <div style="margin-top:8px;">
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Cortou no Pitch</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Excluído por ser muito vago, forçando o vendedor a classificar o real motivo.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Fez reunião há menos de 3 meses</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Excluído, pois as regras de cadência/contato mudaram e esse motivo perdeu o sentido.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Prospectado recentemente (60 dias)</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Servia apenas para Outbound, que não está sendo trabalhado no momento.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Lead duplicado no funil</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Excluído por ser um erro de processo, teoricamente não deve existir.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Sem interesse na parceria</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Removido por não se aplicar ao modelo.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Teste Interno</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Excluído.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Churn com 7 dias</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Descartado.</div>
+       </div>
+       <div style="display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--n-75);">
+         <div style="font-weight:600;font-size:13px;color:var(--n-700);">Outros (Já foi atendido por outra pessoa / Nutrição - E-mail / No-Show / Pitch-Yes)</div>
+         <div style="font-size:13px;color:var(--n-600);line-height:1.6;">Limpos do processo para reduzir a redundância e o excesso de dados no PipeDrive.</div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ </div>
+
  <div class="section" id="sec-base-atuacao">
  <div class="page-header">
    <div class="crumb"><b>Captação Ativa</b></div>
