@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "descricao": "Histórico congelado do Forecast por funil. O pipeline aberto é uma FOTO DO PRESENTE e não pode ser reconstruído no passado — por isso o snapshot mensal congela aqui. Alimentado por api/snapshot.js (mesmo cron do Tracking).",
+    "chave": "pipeline_id -> 'YYYY-MM' -> { forecastInicial:{cenarios,ponderado,totalAberto,dealsAbertos,metaMensal,semanas,semData,commit,snapshotEm}, fechamento:{realizado,negociosGanhos,winRate,cicloMedianoDias,perdidosOpp,perdidosTotal,metaMensal,snapshotEm} }",
+    "regras": "forecastInicial = foto do forecast capturada no dia 1 do PRÓPRIO mês (o que previmos). fechamento = indicadores capturados no dia 1 do mês SEGUINTE (won/lost são carimbos imutáveis, recuperáveis). Acurácia = forecastInicial.cenarios.realista vs fechamento.realizado.",
+    "atualizado_em": null
+  }
+}

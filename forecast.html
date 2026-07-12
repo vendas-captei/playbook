@@ -105,6 +105,15 @@
       <div id="tabela" class="mt-4 overflow-x-auto text-sm text-slate-400">—</div>
     </section>
 
+    <!-- Histórico & Acurácia -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Histórico & Acurácia <span class="text-xs font-normal text-slate-400">· forecast congelado mês a mês (repo)</span></h2>
+        <span class="text-xs text-slate-500">previsto (início do mês) × realizado (fechamento)</span>
+      </div>
+      <div id="historico" class="mt-4 overflow-x-auto text-sm text-slate-400">—</div>
+    </section>
+
     <footer id="footer" class="mt-8 border-t border-slate-200 pt-4 text-center text-xs text-slate-400"></footer>
   </main>
 
@@ -113,6 +122,7 @@
     const num = (v) => (v==null) ? "—" : v.toLocaleString("pt-BR");
     let metasMap = {}, probsMap = {}, lastData = null, editing = false;
     let commitVal = null, commitPor = "";
+    let fcHist = {}; // histórico congelado do funil atual (data/forecast-history.json)
 
     function getSession(){ try { return JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}"); } catch(e){ return {}; } }
     const session = getSession();
@@ -186,7 +196,44 @@
       renderSemanal(d);
       renderForecastCall(d);
       renderTabela(d);
+      renderHistorico();
       document.getElementById("footer").textContent = "Dados ao vivo do Pipedrive · atualizado " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    }
+
+    // Histórico congelado (repo): série de meses previsto × realizado + acurácia.
+    function renderHistorico(){
+      const el = document.getElementById("historico");
+      const meses = Object.keys(fcHist||{}).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
+      if (!meses.length){ el.innerHTML = `<p class="text-xs text-slate-400">Ainda sem histórico congelado. O snapshot mensal (dia 1) começa a preencher automaticamente; cada mês guarda o forecast previsto e, no mês seguinte, o realizado.</p>`; return; }
+      const rot = (m)=>{ const [y,mm]=m.split("-"); return new Date(y,mm-1,1).toLocaleDateString("pt-BR",{month:"short",year:"2-digit"}); };
+      const rows = meses.map(m=>{
+        const r = fcHist[m]||{}; const fi = r.forecastInicial||{}; const fc = r.fechamento||{};
+        const prev = fi.cenarios ? fi.cenarios.realista : null;
+        const real = fc.realizado!=null ? Math.round(fc.realizado) : null;
+        let acc = "—", accCor = "";
+        if (prev!=null && real!=null && prev>0){ const p=Math.round((real/prev)*100); acc=p+"%"; accCor = (p>=90&&p<=110)?"#10b981":(p>=75&&p<=125?"#f59e0b":"#f43f5e"); }
+        return `<tr class="border-b border-slate-100">
+          <td class="py-2 pr-3 font-medium capitalize">${rot(m)}</td>
+          <td class="py-2 px-3 text-right">${prev==null?'<span class="text-slate-300">—</span>':brl(prev)}</td>
+          <td class="py-2 px-3 text-right">${real==null?'<span class="text-slate-300">em aberto</span>':brl(real)}</td>
+          <td class="py-2 px-3 text-right font-semibold"${accCor?` style="color:${accCor}"`:""}>${acc}</td>
+          <td class="py-2 px-3 text-right">${fc.winRate==null?'—':fc.winRate+'%'}</td>
+          <td class="py-2 pl-3 text-right">${fc.cicloMedianoDias==null?'—':fc.cicloMedianoDias+'d'}</td>
+        </tr>`;
+      }).join("");
+      el.innerHTML = `<table class="w-full text-sm">
+        <thead><tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+          <th class="py-2 pr-3 text-left">Mês</th><th class="py-2 px-3 text-right">Previsto (realista)</th>
+          <th class="py-2 px-3 text-right">Realizado</th><th class="py-2 px-3 text-right">Acurácia</th>
+          <th class="py-2 px-3 text-right">Win-rate</th><th class="py-2 pl-3 text-right">Ciclo</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+        <p class="mt-3 text-[11px] text-slate-400">Acurácia = realizado ÷ previsto. 🟢 90–110% · 🟡 75–125% · 🔴 fora. Congelado no repo pelo snapshot mensal (mesmo cron do Tracking).</p>`;
+    }
+
+    function carregarHistorico(){
+      const pid = document.getElementById("f-funil").value;
+      fetch(`/api/fc-history?pipeline_id=${pid}`).then(r=>r.json())
+        .then(j=>{ fcHist = j.meses||{}; renderHistorico(); }).catch(()=>{ fcHist={}; });
     }
 
     function tileBox(t, v, sub, style){
@@ -355,8 +402,9 @@
         const lbl=document.getElementById("user-fixed-label");
         lbl.textContent = myPdId!=null ? (myName.split(" ")[0]+" (só o seu)") : "Funil geral";
       }
-      document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregar(); });
+      document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregarHistorico(); carregar(); });
       document.getElementById("f-mes").addEventListener("change", carregar);
+      carregarHistorico();
       Promise.all([
         fetch("/api/metas").then(r=>r.json()).then(m=>{ metasMap=m.metas||{}; }).catch(()=>{}),
         fetch("/api/fcparams").then(r=>r.json()).then(p=>{ probsMap=p.params||{}; }).catch(()=>{}),
