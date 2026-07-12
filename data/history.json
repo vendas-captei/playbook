@@ -1,4 +1,17 @@
 {
+  "2": {
+    "2026-06": {
+      "mql": 6,
+      "sql": 7,
+      "opp": null,
+      "reunioes": 6,
+      "venda": 5,
+      "faturamento": 124828,
+      "pipelineAbertoTotal": 325911.13,
+      "abertoCount": 1844,
+      "fonte": "snapshot-vivo-2026-07-12"
+    }
+  },
   "7": {
     "2026-01": {
       "mql": 46,
@@ -585,12 +598,14 @@
     },
     "2026-06": {
       "mql": 225,
-      "sql": null,
-      "opp": null,
+      "sql": 122,
+      "opp": 46,
+      "reunioes": null,
       "venda": 53,
       "faturamento": 142001,
-      "abertoCount": null,
-      "fonte": "reconstruido-2026-07-10",
+      "pipelineAbertoTotal": 179026.78400000004,
+      "abertoCount": 605,
+      "fonte": "snapshot-vivo-2026-07-12",
       "tpc": {
         "metaMin": 5,
         "totalEntrantes": 221,
@@ -695,15 +710,15 @@
           8,
           20
         ],
-        "fonte": "reconstruido-2026-07-10"
+        "fonte": "snapshot-vivo-2026-07-12"
       },
-      "leadsOrg": 245
+      "leadsOrg": 253
     }
   },
   "_meta": {
     "descricao": "Histórico consolidado e congelado dos indicadores mensais por funil. Fonte da verdade para MESES FECHADOS — o dashboard lê daqui em vez de recalcular ao vivo (imune a drift de campos e ao 500 de timeline em meses de importação em massa).",
     "chave": "pipeline_id -> 'YYYY-MM' -> { mql, sql, opp, venda, faturamento, abertoCount, fonte }",
     "regras": "sql/opp = null significa 'n/d' (estoque irrecuperável; captura ao vivo iniciada em jul/2026). MQL de jan-jun é reconstruído do produto ATUAL (drift possível em meses antigos). Venda/faturamento vêm de won_time (imutável).",
-    "atualizado_em": "2026-07-10"
+    "atualizado_em": "2026-07-12"
   }
 }
