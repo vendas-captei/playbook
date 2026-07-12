@@ -27,6 +27,13 @@
       </div>
     </header>
 
+    <!-- Sub-abas do Forecast: painel × calculadora IA -->
+    <div class="mt-5 flex gap-1 border-b border-slate-200">
+      <button id="fcsub-forecast" onclick="fcSubTab('forecast')" class="border-b-2 border-indigo-600 px-4 py-2 text-sm font-bold text-indigo-700">Forecast</button>
+      <button id="fcsub-calc" onclick="fcSubTab('calc')" class="border-b-2 border-transparent px-4 py-2 text-sm font-semibold text-slate-500">Calculadora de Data (IA)</button>
+    </div>
+
+    <div id="view-forecast">
     <!-- Filtros -->
     <section class="hide-tv mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
       <div class="w-full sm:w-64">
@@ -114,6 +121,35 @@
       </div>
       <div id="historico" class="mt-4 overflow-x-auto text-sm text-slate-400">—</div>
     </section>
+    </div><!-- /view-forecast -->
+
+    <!-- Calculadora de Data de Fechamento (IA) -->
+    <div id="view-calc" class="hidden">
+      <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-base font-semibold">Calculadora de Data de Fechamento <span class="text-xs font-normal text-slate-400">· IA + histórico do card</span></h2>
+        <p class="mt-1 text-sm text-slate-500">Responda as 4 perguntas e informe o ID do card. A IA cruza o histórico real do funil (Pipedrive) com o seu diagnóstico e estima a data prevista de fechamento.</p>
+
+        <div class="mt-4 grid grid-cols-1 gap-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-500">ID do card (deal) no Pipedrive</label>
+              <input id="calc-deal" type="number" min="1" placeholder="ex: 2049" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+            </div>
+          </div>
+          <div id="calc-perguntas" class="grid grid-cols-1 gap-4"></div>
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-500">Observações (opcional)</label>
+            <textarea id="calc-obs" rows="2" placeholder="Contexto que ajude a IA (ex.: cliente pediu prazo, aguardando aprovação do diretor…)" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="calc-run" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Calcular data prevista</button>
+            <span id="calc-msg" class="text-sm text-slate-400"></span>
+          </div>
+        </div>
+
+        <div id="calc-resultado" class="mt-5 hidden"></div>
+      </section>
+    </div><!-- /view-calc -->
 
     <footer id="footer" class="mt-8 border-t border-slate-200 pt-4 text-center text-xs text-slate-400"></footer>
   </main>
@@ -361,6 +397,83 @@
         .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); probsMap=j.params||probsMap; editing=false; carregar(); })
         .catch(e=>{ msg.textContent="erro: "+e.message; });
     }
+
+    // ── Sub-abas do Forecast (painel × calculadora IA) ──
+    function fcSubTab(which){
+      const on = (id,ativo)=>{ const b=document.getElementById(id); b.style && (b.className = ativo
+        ? "border-b-2 border-indigo-600 px-4 py-2 text-sm font-bold text-indigo-700"
+        : "border-b-2 border-transparent px-4 py-2 text-sm font-semibold text-slate-500"); };
+      on("fcsub-forecast", which==="forecast"); on("fcsub-calc", which==="calc");
+      document.getElementById("view-forecast").classList.toggle("hidden", which!=="forecast");
+      document.getElementById("view-calc").classList.toggle("hidden", which!=="calc");
+    }
+
+    // ── Calculadora de Data de Fechamento (IA) ──
+    const CALC_PERGUNTAS = [
+      ["q1","1. Urgência (Compelling Event)","Tenho clareza do impacto financeiro/operacional que força o cliente a fechar NESTE período (e não no próximo)?"],
+      ["q2","2. Processo de Decisão","Já validei e obtive o sinal verde com o DONO DO ORÇAMENTO (quem tem a caneta), não só o contato técnico/influenciador?"],
+      ["q3","3. Burocracia (Legal/Procurement)","Mapeei as etapas burocráticas que faltam (homologação, jurídico, suprimentos) e tenho margem de tempo até a data prevista?"],
+      ["q4","4. Cronograma Inverso","A data faz sentido calculando de trás pra frente, partindo de quando o cliente precisa do produto − nosso tempo de implementação?"],
+    ];
+    function renderCalcPerguntas(){
+      const el = document.getElementById("calc-perguntas"); if(!el) return;
+      el.innerHTML = CALC_PERGUNTAS.map(([k,t,d])=>`
+        <div class="rounded-lg border border-slate-200 p-3">
+          <p class="text-sm font-medium text-slate-700">${t}</p>
+          <p class="mt-0.5 text-xs text-slate-400">${d}</p>
+          <select id="calc-${k}" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+            <option value="">— selecione —</option>
+            <option value="sim">Sim</option>
+            <option value="parcial">Parcial</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>`).join("");
+    }
+    function calcularData(){
+      const deal = Number(document.getElementById("calc-deal").value);
+      const msg = document.getElementById("calc-msg");
+      const out = document.getElementById("calc-resultado");
+      if (!deal){ msg.textContent="informe o ID do card"; return; }
+      const answers = { obs: document.getElementById("calc-obs").value };
+      CALC_PERGUNTAS.forEach(([k])=> answers[k]=document.getElementById("calc-"+k).value);
+      msg.textContent="calculando… (a IA está lendo o histórico do card)"; out.classList.add("hidden");
+      document.getElementById("calc-run").disabled=true;
+      fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deal_id:deal,answers})})
+        .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); msg.textContent=""; renderCalcResultado(j); })
+        .catch(e=>{ msg.textContent="erro: "+e.message; })
+        .finally(()=>{ document.getElementById("calc-run").disabled=false; });
+    }
+    function renderCalcResultado(j){
+      const out = document.getElementById("calc-resultado"); out.classList.remove("hidden");
+      const dt = new Date(j.dataEstimada+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+      const confCor = j.confianca==="alta"?"#10b981":(j.confianca==="media"?"#f59e0b":"#f43f5e");
+      const riscoCor = n=> n==="alto"?"#f43f5e":(n==="medio"?"#f59e0b":"#10b981");
+      const riscos = (j.riscos||[]).map(r=>`<span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style="background:${riscoCor(r.nivel)}1a;color:${riscoCor(r.nivel)}"><b>${r.dimensao}</b>: ${r.nota}</span>`).join(" ");
+      out.innerHTML = `
+        <div class="rounded-xl border-2 p-4" style="border-color:${confCor}">
+          <div class="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p class="text-xs uppercase tracking-wide text-slate-400">Data prevista estimada · card ${j.dealId}</p>
+              <p class="text-2xl font-bold" style="color:${confCor}">${dt}</p>
+              <p class="mt-0.5 text-xs text-slate-500">confiança <b style="color:${confCor}">${j.confianca}</b> · ~${j.diasEstimados} dias · ${j.titulo}</p>
+            </div>
+            <button id="calc-preencher" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Preencher no card ✓</button>
+          </div>
+          <p class="mt-3 text-sm text-slate-600">${j.resumo||""}</p>
+          <div class="mt-3 flex flex-wrap gap-1.5">${riscos}</div>
+          <p class="mt-3 text-[11px] text-slate-400">Etapa atual: <b>${j.etapaAtual}</b> · ${j.diasNoFunil} dias no funil · ${j.diasNaEtapaAtual} dias parado na etapa${j.expectedCloseDateAtual?` · data atual no card: ${j.expectedCloseDateAtual}`:" · sem data no card"}</p>
+          <p id="calc-preencher-msg" class="mt-2 text-[11px] text-slate-400"></p>
+        </div>`;
+      document.getElementById("calc-preencher").onclick=()=>preencherData(j.dealId, j.dataEstimada);
+    }
+    function preencherData(dealId, date){
+      const m = document.getElementById("calc-preencher-msg"); m.textContent="gravando no card…";
+      fetch("/api/set-close-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deal_id:dealId,date})})
+        .then(r=>r.json()).then(j=>{ if(j.error)throw new Error(j.error); m.innerHTML=`<span class="text-emerald-600">✓ gravado no card ${dealId}: ${j.expected_close_date}</span>`; })
+        .catch(e=>{ m.textContent="erro ao gravar: "+e.message; });
+    }
+    renderCalcPerguntas();
+    document.getElementById("calc-run").addEventListener("click", calcularData);
 
     function carregar(){
       const pid = document.getElementById("f-funil").value; if (!pid) return;
