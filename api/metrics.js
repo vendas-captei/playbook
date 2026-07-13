@@ -14,6 +14,8 @@ const F_CRECI   = "806f3f6384d7d9b503e4e25a9375818d187a18bc"; // enum: 6734 Sim,
 const F_CLIENTE = "75afcc85302974a298be36d95bb743ce7e9b2fc7"; // enum: 7096 Sim, 7097 Não
 const F_IMOB    = "dca89917133f0345cb886860d6343f65d37cd2f4"; // enum: 6786 Imobiliária, 6787 Corretor autônomo
 const PROD_CA = "6843", PROD_INDICA = "6844";
+// Rótulos do campo Produto p/ a comemoração de vendas (celebrate.js).
+const PRODUTO_LABEL = { "6843": "Captação Ativa", "6844": "Indica+", "6860": "IA Copiloto", "7173": "Não informado" };
 // Filtro salvo no Pipedrive (criado 2026-07-10, id 80142): Produto ∈ {CA, Indica+} E status=open.
 // Enxuga a varredura de deals abertos cross-funil (509 deals / 2 págs) vs varrer os ~15k abertos (31 págs).
 const FILTRO_CA_ABERTO = 80142;
@@ -75,6 +77,26 @@ function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, m
 function nomeMes(ano, mes) {
   const s = new Date(ano, mes, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Vendas ganhas HOJE (America/Sao_Paulo), qualquer funil — alimenta celebrate.js (fogos globais).
+async function fetchWinsToday(TK) {
+  const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+  const r = await pd(`${V1}/deals/timeline?start_date=${hojeSP}&interval=day&amount=1&field_key=won_time&status=won`, TK);
+  const deals = (r.data && r.data[0] && r.data[0].deals) || [];
+  const wins = deals.map((d) => {
+    let produto = null;
+    const raw = d[F_PRODUTO];
+    for (const k in PRODUTO_LABEL) if (setHas(raw, k)) { produto = PRODUTO_LABEL[k]; break; }
+    return {
+      id: d.id,
+      produto,
+      valor: Number(d.value) || 0,
+      vendedor: d.owner_name || (d.user_id && d.user_id.name) || "—",
+      cliente: d.org_name || d.person_name || "",
+    };
+  });
+  return { data: hojeSP, total: wins.length, wins, atualizadoEm: new Date().toISOString() };
 }
 
 async function fetchWonMonth(pipelineId, userId, monthStart, TK) {
@@ -234,6 +256,13 @@ module.exports = async function handler(req, res) {
   }
   try {
     const u = new URL(req.url, "http://localhost");
+
+    // Comemoração de vendas (fogos globais no Playbook): GET /api/metrics?action=wins
+    if (u.searchParams.get("action") === "wins") {
+      res.status(200).json(await fetchWinsToday(TK));
+      return;
+    }
+
     const pipelineId = Number(u.searchParams.get("pipeline_id")) || 7;
     const userId = u.searchParams.get("user_id") ? Number(u.searchParams.get("user_id")) : null;
     const month = u.searchParams.get("month");
