@@ -4672,6 +4672,7 @@ function clearSettingsModal() {
              <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Cidades extras (além da inclusa)</label>
              <input id="pc-ca-cidades" type="number" min="0" value="0" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; box-sizing:border-box;">
            </div>
+           <button type="button" onclick="pcReset('ca')" style="margin-top:16px; background:var(--n-75); color:var(--n-600); border:1px solid var(--n-100); padding:9px 16px; border-radius:8px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer;">&#8635; Limpar dados</button>
          </div>
          <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:18px 20px; border-left:3px solid var(--accent);">
            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin-bottom:6px;">Plano recomendado</div>
@@ -4713,6 +4714,7 @@ function clearSettingsModal() {
            <input id="pc-cop-users" type="number" min="1" value="2" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; margin-bottom:16px; box-sizing:border-box;">
            <label style="font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--n-600); display:block; margin-bottom:6px;">Conversas / mês</label>
            <input id="pc-cop-convos" type="number" min="0" value="500" style="width:100%; padding:9px 12px; border:1px solid var(--n-100); border-radius:8px; font-size:13px; color:var(--n-900); font-family:inherit; background:white; box-sizing:border-box;">
+           <button type="button" onclick="pcReset('cop')" style="margin-top:16px; background:var(--n-75); color:var(--n-600); border:1px solid var(--n-100); padding:9px 16px; border-radius:8px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px; cursor:pointer;">&#8635; Limpar dados</button>
          </div>
          <div style="background:white; border:1px solid var(--n-100); border-radius:10px; padding:18px 20px; border-left:3px solid var(--purple);">
            <div style="font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin-bottom:6px;">Plano recomendado</div>
@@ -4895,6 +4897,24 @@ function clearSettingsModal() {
      document.getElementById('pc-tab-cop').style.cssText += ';'+(isCA?INA:ACT);
    };
 
+   // ===== reset (restaura defaults e recalcula) =====
+   window.pcReset=function(which){
+     if(which==='cop'){
+       document.getElementById('pc-cop-agents').value='1';
+       document.getElementById('pc-cop-users').value='2';
+       document.getElementById('pc-cop-convos').value='500';
+       calcCop();
+     } else {
+       document.getElementById('pc-ca-period').value='anual';
+       document.getElementById('pc-ca-users').value='1';
+       document.getElementById('pc-ca-consultas').value='80';
+       document.getElementById('pc-ca-addon').value='nenhum';
+       document.getElementById('pc-ca-capcoins').value='0';
+       document.getElementById('pc-ca-cidades').value='0';
+       calcCA();
+     }
+   };
+
    function bind(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener('input',fn); }
    ['pc-ca-period','pc-ca-addon','pc-ca-users','pc-ca-consultas','pc-ca-capcoins','pc-ca-cidades'].forEach(function(id){bind(id,calcCA);});
    ['pc-cop-agents','pc-cop-users','pc-cop-convos'].forEach(function(id){bind(id,calcCop);});
@@ -4931,6 +4951,7 @@ function clearSettingsModal() {
 
      <div style="display:flex;align-items:center;gap:12px;">
        <button id="fd-run" onclick="fdCalcular()" style="background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">Calcular data prevista</button>
+       <button type="button" onclick="fdReset()" style="background:var(--n-75);color:var(--n-600);border:1px solid var(--n-100);padding:10px 18px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">&#8635; Limpar dados</button>
        <span id="fd-msg" style="font-size:13px;color:var(--n-400);"></span>
      </div>
 
@@ -4969,7 +4990,14 @@ function clearSettingsModal() {
     .catch(function(e){ msg.textContent="erro: "+e.message; })
     .finally(function(){ document.getElementById("fd-run").disabled=false; });
  }
- function fdRender(j){
+ function fdReset(){
+  document.getElementById("fd-deal").value="";
+  document.getElementById("fd-obs").value="";
+  FD_PERGUNTAS.forEach(function(p){ var s=document.getElementById("fd-"+p[0]); if(s) s.value=""; });
+  var out=document.getElementById("fd-resultado"); out.style.display="none"; out.innerHTML="";
+  document.getElementById("fd-msg").textContent="";
+}
+function fdRender(j){
    var out=document.getElementById("fd-resultado"); out.style.display="block";
    var dt=new Date(j.dataEstimada+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
    var cc=j.confianca==="alta"?"#059669":(j.confianca==="media"?"#B45309":"#DC2626");
