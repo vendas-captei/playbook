@@ -2634,6 +2634,7 @@ function clearSettingsModal() {
       <div class="s-sub" onclick="showSection('ferramentas', this)" style="padding-left:32px;">Ferramentas</div>
       <div class="s-sub" onclick="showSection('processos', this)" style="padding-left:32px;">Processos & Rituais</div>
       <div class="s-sub" onclick="showSection('motivos-perda', this)" style="padding-left:32px;">Motivos de Perda</div>
+      <div class="s-sub" onclick="showSection('treinamentos', this)" style="padding-left:32px;">Treinamentos</div>
 
       <div class="s-rule"></div>
 
@@ -4342,6 +4343,122 @@ function clearSettingsModal() {
  <!-- ============================================================ -->
  <!-- FERRAMENTAS -->
  <!-- ============================================================ -->
+ <div class="section" id="sec-treinamentos">
+  <div class="page-header">
+    <div class="crumb"><b>Institucional</b> / Capacitação</div>
+    <h2>Treinamentos</h2>
+    <p>Gravações do treinamento intensivo de Copiloto + Captação Ativa (jun/2026). Assista na ordem cronológica: começa pelos fundamentos do mercado imobiliário e avança até a operação completa da plataforma e a venda. Player integrado — é preciso estar logado na conta Google Captei.</p>
+  </div>
+
+  <!-- VÍDEO 1 -->
+  <div class="card open">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon accent">1</div>
+        <div><div class="card-title">Fundamentos do mercado imobiliário</div><div class="card-subtitle">25/06 · 10h42 · ~1h · Luiz Norberto</div></div>
+      </div>
+      <span class="card-chevron">&#9660;</span>
+    </div>
+    <div class="card-body">
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;background:#000;">
+        <iframe src="https://drive.google.com/file/d/1dQuvh0g2Y8MSKcPwcUI9PeONE6qMXave/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe>
+      </div>
+      <p style="margin:0 0 12px;"><b>Como funciona o mercado imobiliário e onde o Copiloto + Captação Ativa se encaixam.</b> Base de conhecimento comercial sobre o universo das imobiliárias antes de posicionar o produto. Luiz Norberto explica como uma imobiliária opera de ponta a ponta e mostra na prática CRMs imobiliários (Vista/Loft) e portais (Zap, Viva Real, OLX, Quinto Andar), ilustrando a dor central: a demora no primeiro atendimento faz perder o lead. Conclusão estratégica — o Copiloto deve integrar-se ao CRM da imobiliária (não aos portais), replicando a pauta de imóveis para responder o cliente de imediato.</p>
+      <ul style="margin:0;padding-left:20px;line-height:1.7;">
+        <li>Estrutura operacional: origem dos leads (captação própria × campanha), pré-atendimento por SDR, sistema de plantão/roleta.</li>
+        <li>A dor dos 5 minutos: lead não atendido é repassado — o Copiloto garante resposta consistente 24/7, dispensando SDR.</li>
+        <li>Regulação e formação: curso TTI e registro no CRECI; corretor é prestador de serviço, não celetista.</li>
+        <li>Comissões (5–6% do negócio, ~30–40% ao corretor) e diferença entre lançamentos e imóveis de terceiros.</li>
+        <li>Captação ativa e a "pauta": quanto maior a pauta, mais competitiva a imobiliária; contratos de exclusividade como trava.</li>
+        <li>Portais como marketplaces: cobram por volume de anúncios e destaques, intermediam o contato — não a venda.</li>
+        <li>Papel do CRM e diretriz de posicionamento: integrar ao CRM do cliente (hoje via Viook ou API), não aos portais.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- VÍDEO 2 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon accent">2</div>
+        <div><div class="card-title">Operação: dashboards, configuração de agentes e distribuição</div><div class="card-subtitle">25/06 · 14h17 · ~3h30 · Natan Luz</div></div>
+      </div>
+      <span class="card-chevron">&#9660;</span>
+    </div>
+    <div class="card-body">
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;background:#000;">
+        <iframe src="https://drive.google.com/file/d/1s02_QxGXaqTh7m-aKxdffrxErNjyXQqF/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe>
+      </div>
+      <p style="margin:0 0 12px;"><b>Operação de ponta a ponta do Copiloto e da Captação Ativa.</b> Percorre o dashboard de monitoramento do WhatsApp (conversas, agentes, campanhas, status), o dashboard do CRM (valor de pipeline, taxa de conversão, cycle time, idade do pipeline e estagnação por etapa) e toda a configuração de um agente de IA — da criação (JSON/template ou conversa) ao prompt, ações, handoff humano, integração com funil e regras de distribuição. Também cobre conexão via API oficial da Meta ou QR Code, subagentes para disparo em massa, janelas de 24h e custo de agentes extras (R$ 320).</p>
+      <ul style="margin:0;padding-left:20px;line-height:1.7;">
+        <li>Terminologia: "roleta" = distribuição automática; agente (número WhatsApp) × usuário (pessoa com acesso).</li>
+        <li>Dashboard do Copiloto: filtros por agente/campanha/responsável/período/status; métricas de mensagens, lead time, etiquetas e exportação.</li>
+        <li>Dashboard do CRM: valor de pipeline, conversão, cycle time, idade × estagnação por etapa, velocity (P50/P90) e motivos de perda.</li>
+        <li>API de Conversão da Meta: devolve conversões reais ao algoritmo de anúncios; implantação com apoio do CS.</li>
+        <li>Criação de agentes: comportamento por JSON / "Guia para IA", template ou conversa; clonagem × subagentes; limites de plano.</li>
+        <li>Agente "Juracilda": recepção/qualificação/agendamento com SPIN + BANT, coleta obrigatória antes do handoff, nunca informar preço.</li>
+        <li>Reativação e ritmo: máx. 3 follow-ups, janela 8h–20h, rajadas de 3–7 msgs com pausas para simular comportamento humano.</li>
+        <li>Distribuição: campos personalizados, round robin, último atendente (30 dias), redistribuição por inatividade, seguidores/equipes.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- VÍDEO 3 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon accent">3</div>
+        <div><div class="card-title">Módulo de Campanhas (disparo em massa) e CRM/Negócios</div><div class="card-subtitle">26/06 · 10h59 · ~1h20 · Natan Luz</div></div>
+      </div>
+      <span class="card-chevron">&#9660;</span>
+    </div>
+    <div class="card-body">
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;background:#000;">
+        <iframe src="https://drive.google.com/file/d/1iwoiXBO0R88mwIJR6Aj2upij_THwR8o6/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe>
+      </div>
+      <p style="margin:0 0 12px;"><b>Módulo de Campanhas e módulo de Negócios/CRM do Copiloto.</b> A primeira metade detalha o disparo em massa de WhatsApp com múltiplos agentes ("instância" = agente/número conectado), monitoramento de saúde e, sobretudo, as estratégias anti-bloqueio da Meta. A segunda metade percorre o CRM (funil configurável estilo Pipedrive com classificação por IA, forecast, produtos), importação de imóveis via XML, cadastro de pessoas/organizações, atividades, WhatsApp nativo e chat interno estilo Slack.</p>
+      <ul style="margin:0;padding-left:20px;line-height:1.7;">
+        <li>Campanhas: ativas/pausadas/rascunhos/agendadas; pausar para trocar agentes; agendamento; exportação de sucessos e falhas.</li>
+        <li>Múltiplos agentes como diferencial: vários números multiplicam a capacidade de envio.</li>
+        <li>Anti-bloqueio Meta: ~20 disparos/dia sem API oficial × ~2.000/dia com API; intervalos 8–15s, pausas a cada 3–7 msgs, janela 8h–20h.</li>
+        <li>Importação: leads via CSV com colunas como variáveis (nome, imobiliária, cidade), validação de números e modelos randomizados.</li>
+        <li>CRM/Negócios: funil tipo Pipedrive, classificação por IA, probabilidade para forecast, catálogo de produtos.</li>
+        <li>Imóveis e XML: cadastro manual e importação de pauta via URL pública; fluxo "Subir minha pauta" no Captei.</li>
+        <li>Comunicação: WhatsApp nativo, atividades/tarefas personalizadas e chat interno estilo Slack (canais, DMs, arquivos).</li>
+      </ul>
+      <p style="margin:12px 0 0;font-size:13px;opacity:.7;"><i>Obs.: anotações automáticas — alguns pontos (book fotográfico, condomínios, movimentação automática de cards) eram hipóteses da equipe, a confirmar com o time técnico.</i></p>
+    </div>
+  </div>
+
+  <!-- VÍDEO 4 -->
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="card-icon accent">4</div>
+        <div><div class="card-title">Capacitação comercial: Captação Ativa, planos e API oficial da Meta</div><div class="card-subtitle">26/06 · 14h01 · ~2h20 · Paulo Lourenço + Natan Luz</div></div>
+      </div>
+      <span class="card-chevron">&#9660;</span>
+    </div>
+    <div class="card-body">
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;background:#000;">
+        <iframe src="https://drive.google.com/file/d/1w-t7l_KUczewgIcyppHI9nTMOLKmSbdf/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"></iframe>
+      </div>
+      <p style="margin:0 0 12px;"><b>Demonstração prática da Captação Ativa e do Copiloto, com planos e API oficial da Meta.</b> Paulo demonstra as funcionalidades de captação (Localizar Proprietários, Anúncio de Imóveis, Mapa de Anúncios, Avaliação, Analisar Concorrentes, CRM, Agenciamento e Vistoria) e detalha a estrutura de planos e preços. Natan aprofunda o Copiloto, a integração via token de API, os fluxos de envio e, principalmente, as regras, categorias e custos da API oficial da Meta. Ponto de decisão registrado: o cliente arca diretamente com os custos de disparo da Meta — isso precisa ser comunicado com clareza na venda.</p>
+      <ul style="margin:0;padding-left:20px;line-height:1.7;">
+        <li>Localizar Proprietários: busca por endereço, consumo de Capcoins só após confirmar, limitações da base (LGPD), exportação em TXT.</li>
+        <li>Análise de mercado: Anúncio de Imóveis (OLX/Zap/Viva Real...), Mapa de Anúncios, Avaliação (PDF) e Analisar Concorrentes.</li>
+        <li>CRM, Agenciamento e Vistoria: funil editável, centralização de documentos e PDF de vistoria de entrada/saída.</li>
+        <li>Planos: Corretor (R$ 2.583,60/ano), Light (R$ 4.191,60), Pro (R$ 5.871,60) e Enterprise (R$ 7.551,60); descontos 5–20%; extras (usuário R$ 39, Capcoin R$ 1, Vistoria/Agenciamento/Avaliação R$ 89, cidade R$ 49).</li>
+        <li>Copiloto: otimiza o captador (não é autônomo); "Acionar Agora" até ~10 contatos × campanha para volumes maiores; integração por token de API.</li>
+        <li>API oficial da Meta: cliente paga os disparos (cartão obrigatório) — Atendimento R$ 0,08, Autenticação R$ 0,17, Marketing R$ 0,35.</li>
+        <li>Compliance: não usar template de Atendimento para prospecção — risco de recategorização e suspensão do número.</li>
+        <li>Avançado: templates com botões/rodapé, Autoajuste de IA, equipes/permissões, API de Conversão (lookalike) e webhooks RD/Pipedrive.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
  <div class="section" id="sec-ferramentas">
  <div class="page-header">
    <div class="crumb"><b>Institucional</b> / Operação Comercial</div>
