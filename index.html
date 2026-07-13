@@ -2639,7 +2639,7 @@ function clearSettingsModal() {
       <div class="s-rule"></div>
 
       <!-- CAPTAÇÃO ATIVA -->
-      <div class="s-group" id="nav-ca" data-perm="ca">
+      <div class="s-group" id="nav-ca">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-orange">CA</div>
           <div class="s-group-text">
@@ -2675,7 +2675,7 @@ function clearSettingsModal() {
       </div>
 
       <!-- INDICA+ -->
-      <div class="s-group" id="nav-indica" data-perm="indica">
+      <div class="s-group" id="nav-indica">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-blue">I+</div>
           <div class="s-group-text">
@@ -2701,7 +2701,7 @@ function clearSettingsModal() {
       </div>
 
       <!-- COPILOTO -->
-      <div class="s-group" id="nav-copiloto" data-perm="copiloto">
+      <div class="s-group" id="nav-copiloto">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-purple">CP</div>
           <div class="s-group-text">
@@ -2736,7 +2736,7 @@ function clearSettingsModal() {
       <div class="s-rule"></div>
 
       <!-- SALESOPS -->
-      <div class="s-group" id="nav-salesops" data-perm="salesops">
+      <div class="s-group" id="nav-salesops">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-red">SO</div>
           <div class="s-group-text">
@@ -2774,7 +2774,7 @@ function clearSettingsModal() {
       </div>
 
       <!-- SUPERVISOR COMERCIAL -->
-      <div class="s-group" id="nav-supervisor" data-perm="supervisor">
+      <div class="s-group" id="nav-supervisor">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-green">SC</div>
           <div class="s-group-text">
@@ -2813,7 +2813,7 @@ function clearSettingsModal() {
       <div class="s-rule"></div>
 
       <!-- PDI & GAMIFICAÇÃO -->
-      <div class="s-group" id="nav-gamificacao" data-perm="gamificacao">
+      <div class="s-group" id="nav-gamificacao">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-gold">🏆</div>
           <div class="s-group-text">
@@ -23206,51 +23206,87 @@ const SKB = {
 };
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => SKB.init(), 800); });
 
-/* ── REGISTRO DE MÓDULOS (permissão por usuário × módulo) ──
-   14 chaves. Cada chave casa com [data-perm] na sidebar e com as seções
-   (sec-*) que pertencem ao módulo. `pfx` = prefixo de seção do grupo.
-   Seções não mapeadas (ex.: ranking-home = landing) ficam SEMPRE liberadas. */
-var PB_MODULES = {
-  'home':          { label: 'Institucional (Início)', secs: ['home'] },
-  'cargos':        { label: 'Cargos & Comissões',     secs: ['cargos'] },
-  'metas':         { label: 'Metas & Atividades',     secs: ['metas'] },
-  'tracking':      { label: 'Tracking Comercial',     secs: ['tracking'] },
-  'ferramentas':   { label: 'Ferramentas',            secs: ['ferramentas'] },
-  'processos':     { label: 'Processos & Rituais',    secs: ['processos'] },
-  'motivos-perda': { label: 'Motivos de Perda',       secs: ['motivos-perda'] },
-  'treinamentos':  { label: 'Treinamentos',           secs: ['treinamentos'] },
-  'ca':            { label: 'Captação Ativa',         secs: ['platform','base-atuacao','concorrentes','outbound','inbound','whatsapp','emails','objections','rapport','valores','pre-reuniao','guia-reuniao','exemplo-real','fechamento','negociacao','cs'] },
-  'indica':        { label: 'Indica+',                pfx: 'indica-' },
-  'copiloto':      { label: 'Copiloto',               pfx: 'copiloto-' },
-  'salesops':      { label: 'SalesOps',               secs: ['salesops-home'], pfx: 'so-' },
-  'supervisor':    { label: 'Supervisor Comercial',   secs: ['supervisor-home'], pfx: 'sc-' },
-  'gamificacao':   { label: 'PDI & Gamificação',      secs: ['tabuleiro-comercial','comissao'], pfx: 'pdi-' },
-};
-var PB_MODULE_ORDER = ['home','cargos','metas','tracking','ferramentas','processos','motivos-perda','treinamentos','ca','indica','copiloto','salesops','supervisor','gamificacao'];
+/* ── REGISTRO DE CATEGORIAS × SUB-ABAS (permissão granular) ──
+   Cada sub-aba é uma chave = o id da seção usado em showSection('<id>').
+   O usuário recebe um allowlist dessas chaves no campo `perms`.
+   Seções não listadas (ex.: ranking-home = landing) ficam SEMPRE liberadas. */
+var PB_CATEGORIES = [
+  { key:'institucional', label:'Institucional', items:[
+    ['home','Início'],['cargos','Cargos & Comissões'],['metas','Metas & Atividades'],
+    ['tracking','Tracking Comercial'],['ferramentas','Ferramentas'],['processos','Processos & Rituais'],
+    ['motivos-perda','Motivos de Perda'],['treinamentos','Treinamentos'] ]},
+  { key:'ca', label:'Captação Ativa', items:[
+    ['platform','Sobre a Plataforma'],['base-atuacao','Base de Atuação'],['concorrentes','Concorrentes'],
+    ['outbound','Outbound (Scripts)'],['inbound','Inbound (Lead Inscrito)'],['whatsapp','WhatsApp'],
+    ['emails','Cadência de E-mails'],['objections','Objeções'],['rapport','Banco de Rapports'],
+    ['valores','Valores & Apresentação'],['pre-reuniao','Pré-Reunião'],['guia-reuniao','Guia da Reunião'],
+    ['exemplo-real','Situações da Reunião'],['fechamento','Fechamento'],['negociacao','Negociação Avançada'],
+    ['cs','Passagem de Bastão CS'] ]},
+  { key:'indica', label:'Indica+', items:[
+    ['indica-platform','Sobre o Indica+'],['indica-outbound','Outbound (Scripts)'],['indica-whatsapp','WhatsApp'],
+    ['indica-objecoes','Objeções'],['indica-guia-reuniao','Guia da Reunião'],['indica-fechamento','Fechamento'] ]},
+  { key:'copiloto', label:'Copiloto', items:[
+    ['copiloto-platform','Sobre o Copiloto'],['copiloto-concorrentes','Concorrentes'],['copiloto-outbound','Outbound (Scripts)'],
+    ['copiloto-inbound','Inbound'],['copiloto-objecoes','Objeções'],['copiloto-valores','Valores & Apresentação'],
+    ['copiloto-pre-reuniao','Pré-Reunião'],['copiloto-guia-reuniao','Guia da Demo'],['copiloto-objecoes-reuniao','Objeções na Reunião'],
+    ['copiloto-situacoes','Situações da Reunião'],['copiloto-fechamento','Fechamento'] ]},
+  { key:'salesops', label:'SalesOps', items:[
+    ['salesops-home','Visão Geral'],['so-500k-missao','Missão & Matemática'],['so-500k-copiloto100','Meta Copiloto 100'],
+    ['so-500k-volume','Motor de Volume'],['so-500k-conversao','Motor de Conversão'],['so-500k-reativacao','Motor de Reativação'],
+    ['so-500k-upsell','Motor de Upsell'],['so-500k-rotina','Rotina Operacional'],['so-500k-kpis','KPIs & Alertas'],
+    ['so-500k-roadmap','Roadmap 10 Meses'],['so-auditoria-crm','Auditoria de CRM'],['so-pipeline','Pipeline & Funil'],
+    ['so-atividades','Atividades do Time'],['so-relatorios','Relatórios & Dashboards'],['so-rdstation','Fluxos RD Station'],
+    ['so-metas','Metas & Comissões'],['so-forecast','Forecast & Relatório Executivo'],['so-pipedrive','Dashboard Pipedrive'],
+    ['so-kanban','Quadro de Tarefas'] ]},
+  { key:'supervisor', label:'Supervisor Comercial', items:[
+    ['supervisor-home','Visão Geral'],['sc-500k-missao','Missão do Supervisor'],['sc-500k-copiloto100','Meta Copiloto 100'],
+    ['sc-500k-ritmo','Motor de Ritmo'],['sc-500k-conversao','Motor de Conversão'],['sc-500k-destravamento','Motor de Destravamento'],
+    ['sc-500k-cultura','Motor de Cultura'],['sc-500k-roadmap','Roadmap 10 Meses'],['sc-daily','Condução da Daily'],
+    ['sc-one-on-one','1:1 Semanal'],['sc-pitstop','Pit Stop Mensal'],['sc-brainstorm','Brainstorm (Sexta)'],
+    ['sc-alinhamento','Alinhamento Semanal'],['sc-postura','Postura de Liderança'],['sc-pipeline','Gestão de Pipeline'],
+    ['sc-feedback','Feedback & Desenvolvimento'],['sc-onboarding','Onboarding de Novos'],['sc-atividades','Painel de Atividades'],
+    ['sc-kanban','Quadro de Tarefas'] ]},
+  { key:'gamificacao', label:'PDI & Gamificação', items:[
+    ['tabuleiro-comercial','Tabuleiro Comercial'],['comissao','Minha Comissão'] ]},
+];
+window.PB_CATEGORIES = PB_CATEGORIES;
+window.PB_ALL_KEYS = new Set();
+PB_CATEGORIES.forEach(function(c){ c.items.forEach(function(it){ window.PB_ALL_KEYS.add(it[0]); }); });
 
-/* Dado um id de seção, devolve a chave do módulo dono — ou null se livre */
-window.pbSecModule = function(id) {
-  if (!id) return null;
-  for (var k in PB_MODULES) {
-    var m = PB_MODULES[k];
-    if (m.secs && m.secs.indexOf(id) >= 0) return k;
-    if (m.pfx && id.indexOf(m.pfx) === 0) return k;
-  }
-  return null;
+/* Auto-marca data-perm em cada item do menu a partir do onclick showSection('<id>') */
+function pbAutoTagPerms(){
+  document.querySelectorAll('.s-sub, .s-item').forEach(function(el){
+    if (el.getAttribute('data-perm')) return;
+    var m = (el.getAttribute('onclick')||'').match(/showSection\('([^']+)'/);
+    if (m) el.setAttribute('data-perm', m[1]);
+  });
+}
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(pbAutoTagPerms, 60); });
+
+/* Seção controlada? devolve a própria chave (=id) ou null se for seção livre */
+window.pbSecModule = function(id){
+  return (id && window.PB_ALL_KEYS && window.PB_ALL_KEYS.has(id)) ? id : null;
 };
 
-/* Aplica um allowlist de módulos: esconde do menu o que não está liberado
-   e arma a trava de navegação (window.__pbPerms consumido por showSection). */
-function applyModulePerms(perms) {
+/* Aplica allowlist: mostra/esconde cada sub-aba + esconde o grupo sem nenhuma sub-aba visível */
+function applyModulePerms(perms){
+  pbAutoTagPerms();
   var allowed = new Set(perms);
   window.__pbPerms = allowed;
-  document.querySelectorAll('[data-perm]').forEach(function(el) {
+  document.querySelectorAll('[data-perm]').forEach(function(el){
     el.style.display = allowed.has(el.getAttribute('data-perm')) ? '' : 'none';
+  });
+  // Esconde um grupo inteiro quando nenhuma de suas sub-abas está liberada
+  document.querySelectorAll('.s-group').forEach(function(g){
+    var subs = g.querySelectorAll('.s-sub[data-perm]');
+    if (!subs.length) return;
+    var any = Array.prototype.some.call(subs, function(s){ return allowed.has(s.getAttribute('data-perm')); });
+    g.style.display = any ? '' : 'none';
   });
   // Se a seção ativa não é permitida, volta pro landing (ranking-home é sempre livre)
   var active = document.querySelector('.section.active');
-  if (active) {
-    var mod = window.pbSecModule(active.id.replace(/^sec-/, ''));
+  if (active){
+    var mod = window.pbSecModule(active.id.replace(/^sec-/,''));
     if (mod && !allowed.has(mod) && window.showSection) window.showSection('ranking-home', null);
   }
 }
@@ -23775,10 +23811,7 @@ const USERMGMT = (() => {
 
       const uperms = Array.isArray(u.perms) ? u.perms : null;
       const isGestaoUser = (u.team === 'Gestão') || u.admin;
-      const permsBoxes = (window.PB_MODULE_ORDER || []).map(function(k){
-        const on = uperms === null || uperms.indexOf(k) >= 0;
-        return '<label style="display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--n-700);" onmouseover="this.style.background=\'var(--ink-15)\'" onmouseout="this.style.background=\'transparent\'"><input type="checkbox" class="um-perm-cb-'+i+'" value="'+k+'"'+(on?' checked':'')+' style="accent-color:#059669;width:15px;height:15px;cursor:pointer;flex-shrink:0;">'+window.PB_MODULES[k].label+'</label>';
-      }).join('');
+      const permsBoxes = buildPermsEditor(i, uperms);
 
       return `<div id="${rowId}">
         <div class="um-user-row" style="margin-bottom:0; border-radius: 10px 10px 0 0; border-bottom: none;" id="${rowId}-main">
@@ -23837,7 +23870,7 @@ const USERMGMT = (() => {
         </div>
         <div id="um-perms-${i}" style="display:none; background:var(--ink-15); border:1px solid rgba(5,150,105,0.3); border-top:none; border-radius:0 0 10px 10px; padding:12px 14px; margin-bottom:8px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-            <div style="font-size:10px; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:0.4px;">🔒 Módulos liberados para ${u.name}</div>
+            <div style="font-size:10px; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:0.4px;">🔒 Abas liberadas para ${u.name}</div>
             <div style="display:flex; gap:6px;">
               <button onclick="USERMGMT.permsAll(${i}, true)" style="background:var(--ink-30); color:var(--n-500); border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:700; cursor:pointer; font-family:inherit;">Marcar tudo</button>
               <button onclick="USERMGMT.permsAll(${i}, false)" style="background:var(--ink-30); color:var(--n-500); border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:700; cursor:pointer; font-family:inherit;">Limpar</button>
@@ -23845,7 +23878,7 @@ const USERMGMT = (() => {
           </div>
           ${isGestaoUser ? '<div style="font-size:11px; color:var(--n-500); background:rgba(3,105,161,0.08); border-radius:6px; padding:7px 9px; margin-bottom:8px;">⚙️ Usuário <b>Gestão</b> vê tudo — as permissões abaixo só passam a valer se a equipe deixar de ser Gestão.</div>' : ''}
           ${uperms === null ? '<div style="font-size:11px; color:var(--n-500); margin-bottom:8px;">Sem restrição definida (vê tudo pela equipe). Ajuste e salve para restringir por módulo.</div>' : ''}
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px 10px; margin-bottom:10px;">${permsBoxes}</div>
+          <div style="max-height:360px; overflow-y:auto; padding-right:4px; margin-bottom:10px;">${permsBoxes}</div>
           <div style="display:flex; gap:6px;">
             <button onclick="USERMGMT.savePerms(${i}, '${u.user}')" style="background:#059669; color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar permissões</button>
             <button onclick="USERMGMT.togglePerms(${i}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
@@ -23986,8 +24019,40 @@ const USERMGMT = (() => {
     }
   }
 
+  // Monta o editor: uma <details> por categoria + checkbox-mestre + sub-abas
+  function buildPermsEditor(i, uperms) {
+    var cats = window.PB_CATEGORIES || [];
+    return cats.map(function(cat){
+      var children = cat.items.map(function(it){
+        var key = it[0], label = it[1];
+        var on = uperms === null || uperms.indexOf(key) >= 0;
+        return '<label style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:11.5px;color:var(--n-700);" onmouseover="this.style.background=\'var(--ink-15)\'" onmouseout="this.style.background=\'transparent\'">'
+          + '<input type="checkbox" class="um-perm-cb-'+i+'" value="'+key+'"'+(on?' checked':'')+' style="accent-color:#059669;width:14px;height:14px;cursor:pointer;flex-shrink:0;">'
+          + label + '</label>';
+      }).join('');
+      var total = cat.items.length;
+      var onCount = cat.items.filter(function(it){ return uperms === null || uperms.indexOf(it[0]) >= 0; }).length;
+      var allOn = onCount === total;
+      return '<details'+(onCount>0?' open':'')+' style="margin-bottom:6px;border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden;">'
+        + '<summary style="display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;background:var(--ink-15);font-size:12px;font-weight:700;color:var(--n-800);">'
+        + '<input type="checkbox" class="um-cat-cb-'+i+'"'+(allOn?' checked':'')+' onclick="event.stopPropagation();USERMGMT.permsCat('+i+',this)" style="accent-color:#059669;width:15px;height:15px;cursor:pointer;flex-shrink:0;">'
+        + '<span style="flex:1;">'+cat.label+'</span>'
+        + '<span style="font-size:10px;font-weight:600;color:var(--n-500);">'+onCount+'/'+total+'</span>'
+        + '</summary>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 8px;padding:8px 10px;">'+children+'</div>'
+        + '</details>';
+    }).join('');
+  }
+
+  // Checkbox-mestre da categoria: marca/desmarca todas as sub-abas dela
+  function permsCat(i, cb) {
+    var details = cb.closest('details');
+    if (!details) return;
+    details.querySelectorAll('.um-perm-cb-' + i).forEach(function(x){ x.checked = cb.checked; });
+  }
+
   function permsAll(i, val) {
-    document.querySelectorAll('.um-perm-cb-' + i).forEach(function(cb){ cb.checked = val; });
+    document.querySelectorAll('.um-perm-cb-' + i + ', .um-cat-cb-' + i).forEach(function(cb){ cb.checked = val; });
   }
 
   function savePerms(i, userLogin) {
@@ -24005,7 +24070,7 @@ const USERMGMT = (() => {
     setTimeout(function(){ togglePerms(i, userLogin); renderList(); }, 1500);
   }
 
-  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam, togglePerms, permsAll, savePerms };
+  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam, togglePerms, permsAll, permsCat, savePerms };
 })();
 
 /* ════════════════════════════════════════════════════════
