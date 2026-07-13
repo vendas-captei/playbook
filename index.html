@@ -4466,7 +4466,7 @@ function clearSettingsModal() {
    <p>Stack completa do time comercial. O que cada ferramenta faz, quando usar e como se encaixa no processo de vendas.</p>
  </div>
 
- <div class="card open">
+ <div class="card open" data-perm="ferr-stack">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">13</div>
@@ -4596,7 +4596,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- Fluxo das ferramentas no processo -->
- <div class="card">
+ <div class="card" data-perm="ferr-fluxo">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon blue">→</div>
@@ -4627,7 +4627,7 @@ function clearSettingsModal() {
  </div>
 
  <!-- Calculadora de Pacotes -->
- <div class="card">
+ <div class="card" data-perm="ferr-calc-pacotes">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon accent">🧮</div>
@@ -4923,7 +4923,7 @@ function clearSettingsModal() {
  </script>
 
  <!-- Calculadora de Data de Fechamento (IA) -->
- <div class="card">
+ <div class="card" data-perm="ferr-calc-data">
    <div class="card-header" onclick="toggleCard(this)">
      <div class="card-header-left">
        <div class="card-icon blue">&#128197;</div>
@@ -20061,9 +20061,8 @@ function toggleProduct(el) {
 
 function showSection(id, el) {
   // 🔒 Trava de permissão — impede acesso a módulos não liberados (menu já fica oculto; isto é defesa extra)
-  if (window.__pbPerms && typeof window.pbSecModule === 'function') {
-    var _mod = window.pbSecModule(id);
-    if (_mod && !window.__pbPerms.has(_mod)) { id = 'ranking-home'; el = null; }
+  if (window.__pbPerms && typeof window.pbSecAllowed === 'function') {
+    if (window.pbSecModule && window.pbSecModule(id) && !window.pbSecAllowed(id)) { id = 'ranking-home'; el = null; }
   }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.s-sub, .s-item').forEach(n => n.classList.remove('active'));
@@ -23241,7 +23240,9 @@ document.addEventListener('DOMContentLoaded', () => { setTimeout(() => SKB.init(
 var PB_CATEGORIES = [
   { key:'institucional', label:'Institucional', items:[
     ['home','Início'],['cargos','Cargos & Comissões'],['metas','Metas & Atividades'],
-    ['tracking','Tracking Comercial'],['ferramentas','Ferramentas'],['processos','Processos & Rituais'],
+    ['tracking','Tracking Comercial'],
+    ['ferramentas','Ferramentas',[['ferr-stack','Stack de Ferramentas'],['ferr-fluxo','Fluxo: Quando Usar'],['ferr-calc-pacotes','Calculadora de Pacotes'],['ferr-calc-data','Calculadora de Data de Fechamento']]],
+    ['processos','Processos & Rituais'],
     ['motivos-perda','Motivos de Perda'],['treinamentos','Treinamentos'] ]},
   { key:'ca', label:'Captação Ativa', items:[
     ['platform','Sobre a Plataforma'],['base-atuacao','Base de Atuação'],['concorrentes','Concorrentes'],
@@ -23279,7 +23280,16 @@ var PB_CATEGORIES = [
 ];
 window.PB_CATEGORIES = PB_CATEGORIES;
 window.PB_ALL_KEYS = new Set();
-PB_CATEGORIES.forEach(function(c){ c.items.forEach(function(it){ window.PB_ALL_KEYS.add(it[0]); }); });
+window.PB_CHILDREN = {};   // { chaveDoNoPai: [chavesFilhas] } — sub-abas que empacotam ferramentas
+PB_CATEGORIES.forEach(function(c){ c.items.forEach(function(it){
+  var kids = it[2];
+  if (kids && kids.length){
+    window.PB_CHILDREN[it[0]] = kids.map(function(k){ return k[0]; });
+    kids.forEach(function(k){ window.PB_ALL_KEYS.add(k[0]); });
+  } else {
+    window.PB_ALL_KEYS.add(it[0]);
+  }
+}); });
 
 /* Auto-marca data-perm em cada item do menu a partir do onclick showSection('<id>') */
 function pbAutoTagPerms(){
@@ -23291,31 +23301,53 @@ function pbAutoTagPerms(){
 }
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(pbAutoTagPerms, 60); });
 
-/* Seção controlada? devolve a própria chave (=id) ou null se for seção livre */
+/* Seção controlada? (chave-folha OU nó-pai que empacota ferramentas) → devolve id, senão null (seção livre) */
 window.pbSecModule = function(id){
-  return (id && window.PB_ALL_KEYS && window.PB_ALL_KEYS.has(id)) ? id : null;
+  return (id && ((window.PB_ALL_KEYS && window.PB_ALL_KEYS.has(id)) || (window.PB_CHILDREN && window.PB_CHILDREN[id]))) ? id : null;
 };
 
-/* Aplica allowlist: mostra/esconde cada sub-aba + esconde o grupo sem nenhuma sub-aba visível */
+/* Expande chave-nó (pai) → inclui suas filhas. Retrocompat: perms antigos com 'ferramentas' seguem liberando as 4 ferramentas */
+window.pbExpandPerms = function(perms){
+  var out = [];
+  (perms||[]).forEach(function(k){
+    out.push(k);
+    if (window.PB_CHILDREN && window.PB_CHILDREN[k]) window.PB_CHILDREN[k].forEach(function(c){ out.push(c); });
+  });
+  return out;
+};
+
+/* id liberado no allowlist atual? Nó-pai libera se QUALQUER filho estiver liberado */
+window.pbSecAllowed = function(id){
+  var allowed = window.__pbPerms; if (!allowed) return true;
+  if (window.PB_CHILDREN && window.PB_CHILDREN[id])
+    return window.PB_CHILDREN[id].some(function(c){ return allowed.has(c); });
+  return allowed.has(id);
+};
+
+/* Aplica allowlist: mostra/esconde cada sub-aba E cada ferramenta interna + esconde grupo/sub-aba vazios */
 function applyModulePerms(perms){
   pbAutoTagPerms();
-  var allowed = new Set(perms);
+  var allowed = new Set(window.pbExpandPerms(perms));
   window.__pbPerms = allowed;
   document.querySelectorAll('[data-perm]').forEach(function(el){
-    el.style.display = allowed.has(el.getAttribute('data-perm')) ? '' : 'none';
+    var k = el.getAttribute('data-perm');
+    var vis = (window.PB_CHILDREN && window.PB_CHILDREN[k])
+      ? window.PB_CHILDREN[k].some(function(c){ return allowed.has(c); })  // nó-pai (nav da sub-aba): visível se algum tool liberado
+      : allowed.has(k);                                                    // folha (sub-aba comum ou card de ferramenta)
+    el.style.display = vis ? '' : 'none';
   });
   // Esconde um grupo inteiro quando nenhuma de suas sub-abas está liberada
   document.querySelectorAll('.s-group').forEach(function(g){
     var subs = g.querySelectorAll('.s-sub[data-perm]');
     if (!subs.length) return;
-    var any = Array.prototype.some.call(subs, function(s){ return allowed.has(s.getAttribute('data-perm')); });
+    var any = Array.prototype.some.call(subs, function(s){ return window.pbSecAllowed(s.getAttribute('data-perm')); });
     g.style.display = any ? '' : 'none';
   });
   // Se a seção ativa não é permitida, volta pro landing (ranking-home é sempre livre)
   var active = document.querySelector('.section.active');
   if (active){
-    var mod = window.pbSecModule(active.id.replace(/^sec-/,''));
-    if (mod && !allowed.has(mod) && window.showSection) window.showSection('ranking-home', null);
+    var id = active.id.replace(/^sec-/,'');
+    if (window.pbSecModule(id) && !window.pbSecAllowed(id) && window.showSection) window.showSection('ranking-home', null);
   }
 }
 
@@ -23906,6 +23938,7 @@ const USERMGMT = (() => {
           </div>
           ${isGestaoUser ? '<div style="font-size:11px; color:var(--n-500); background:rgba(3,105,161,0.08); border-radius:6px; padding:7px 9px; margin-bottom:8px;">⚙️ Usuário <b>Gestão</b> vê tudo — as permissões abaixo só passam a valer se a equipe deixar de ser Gestão.</div>' : ''}
           ${uperms === null ? '<div style="font-size:11px; color:var(--n-500); margin-bottom:8px;">Sem restrição definida (vê tudo pela equipe). Ajuste e salve para restringir por módulo.</div>' : ''}
+          <input type="text" placeholder="🔎 Buscar categoria, aba ou ferramenta..." oninput="USERMGMT.permsSearch(${i}, this.value)" style="width:100%; box-sizing:border-box; background:var(--ink-00); border:1px solid rgba(5,150,105,0.25); border-radius:7px; padding:7px 10px; font-size:11.5px; color:var(--n-700); font-family:inherit; margin-bottom:8px;" />
           <div style="max-height:360px; overflow-y:auto; padding-right:4px; margin-bottom:10px;">${permsBoxes}</div>
           <div style="display:flex; gap:6px;">
             <button onclick="USERMGMT.savePerms(${i}, '${u.user}')" style="background:#059669; color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar permissões</button>
@@ -24050,37 +24083,109 @@ const USERMGMT = (() => {
   // Monta o editor: uma <details> por categoria + checkbox-mestre + sub-abas
   function buildPermsEditor(i, uperms) {
     var cats = window.PB_CATEGORIES || [];
+    function isOn(k){ return uperms === null || uperms.indexOf(k) >= 0; }
+    var esc = function(s){ return String(s).replace(/"/g,'&quot;'); };
     return cats.map(function(cat){
+      var leafKeys = [];  // chaves realmente salváveis desta categoria (folhas + filhas)
       var children = cat.items.map(function(it){
-        var key = it[0], label = it[1];
-        var on = uperms === null || uperms.indexOf(key) >= 0;
-        return '<label style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:11.5px;color:var(--n-700);" onmouseover="this.style.background=\'var(--ink-15)\'" onmouseout="this.style.background=\'transparent\'">'
-          + '<input type="checkbox" class="um-perm-cb-'+i+'" value="'+key+'"'+(on?' checked':'')+' style="accent-color:#059669;width:14px;height:14px;cursor:pointer;flex-shrink:0;">'
+        var key = it[0], label = it[1], kids = it[2];
+        if (kids && kids.length){
+          // Sub-aba que empacota ferramentas → nó com filhos
+          var kidHtml = kids.map(function(k){
+            var ck=k[0], cl=k[1], on=isOn(ck); leafKeys.push(ck);
+            return '<label class="um-perm-child" data-label="'+esc(cl.toLowerCase())+'" style="display:flex;align-items:center;gap:6px;padding:3px 6px 3px 26px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--n-600);" onmouseover="this.style.background=\'var(--ink-15)\'" onmouseout="this.style.background=\'transparent\'">'
+              + '<input type="checkbox" class="um-perm-cb-'+i+'" value="'+ck+'"'+(on?' checked':'')+' onchange="USERMGMT.permsSync('+i+')" style="accent-color:#059669;width:13px;height:13px;cursor:pointer;flex-shrink:0;">'
+              + '↳ '+cl+'</label>';
+          }).join('');
+          var kOn = kids.filter(function(k){ return isOn(k[0]); }).length;
+          return '<div class="um-perm-node" data-label="'+esc(label.toLowerCase())+'" style="grid-column:1/-1;border-top:1px dashed rgba(0,0,0,0.08);margin-top:2px;padding-top:2px;">'
+            + '<label class="um-perm-noderow" style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--n-700);">'
+            + '<input type="checkbox" class="um-node-cb-'+i+'"'+(kOn===kids.length?' checked':'')+' onclick="USERMGMT.permsNode('+i+',this)" style="accent-color:#059669;width:14px;height:14px;cursor:pointer;flex-shrink:0;">'
+            + '📂 '+label+' <span class="um-node-count" style="font-size:9.5px;color:var(--n-500);font-weight:600;">('+kOn+'/'+kids.length+')</span></label>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 8px;">'+kidHtml+'</div></div>';
+        }
+        var on=isOn(key); leafKeys.push(key);
+        return '<label class="um-perm-leaf" data-label="'+esc(label.toLowerCase())+'" style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:11.5px;color:var(--n-700);" onmouseover="this.style.background=\'var(--ink-15)\'" onmouseout="this.style.background=\'transparent\'">'
+          + '<input type="checkbox" class="um-perm-cb-'+i+'" value="'+key+'"'+(on?' checked':'')+' onchange="USERMGMT.permsSync('+i+')" style="accent-color:#059669;width:14px;height:14px;cursor:pointer;flex-shrink:0;">'
           + label + '</label>';
       }).join('');
-      var total = cat.items.length;
-      var onCount = cat.items.filter(function(it){ return uperms === null || uperms.indexOf(it[0]) >= 0; }).length;
+      var total = leafKeys.length;
+      var onCount = leafKeys.filter(isOn).length;
       var allOn = onCount === total;
-      return '<details'+(onCount>0?' open':'')+' style="margin-bottom:6px;border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden;">'
+      return '<details class="um-perm-cat" data-label="'+esc(cat.label.toLowerCase())+'"'+(onCount>0?' open':'')+' style="margin-bottom:6px;border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden;">'
         + '<summary style="display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;background:var(--ink-15);font-size:12px;font-weight:700;color:var(--n-800);">'
         + '<input type="checkbox" class="um-cat-cb-'+i+'"'+(allOn?' checked':'')+' onclick="event.stopPropagation();USERMGMT.permsCat('+i+',this)" style="accent-color:#059669;width:15px;height:15px;cursor:pointer;flex-shrink:0;">'
         + '<span style="flex:1;">'+cat.label+'</span>'
-        + '<span style="font-size:10px;font-weight:600;color:var(--n-500);">'+onCount+'/'+total+'</span>'
+        + '<span class="um-cat-count" style="font-size:10px;font-weight:600;color:var(--n-500);">'+onCount+'/'+total+'</span>'
         + '</summary>'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px 8px;padding:8px 10px;">'+children+'</div>'
         + '</details>';
     }).join('');
   }
 
-  // Checkbox-mestre da categoria: marca/desmarca todas as sub-abas dela
+  // Recalcula contadores e checkboxes-mestre (nó + categoria) do editor i
+  function permsSync(i) {
+    var root = document.getElementById('um-perms-' + i); if (!root) return;
+    root.querySelectorAll('.um-perm-node').forEach(function(node){
+      var nb = node.querySelector('.um-node-cb-' + i); if (!nb) return;
+      var kids = node.querySelectorAll('.um-perm-cb-' + i);
+      var on = Array.prototype.filter.call(kids, function(x){ return x.checked; }).length;
+      nb.checked = kids.length > 0 && on === kids.length;
+      var cnt = node.querySelector('.um-node-count'); if (cnt) cnt.textContent = '('+on+'/'+kids.length+')';
+    });
+    root.querySelectorAll('.um-perm-cat').forEach(function(cat){
+      var cb = cat.querySelector('.um-cat-cb-' + i); if (!cb) return;
+      var leaves = cat.querySelectorAll('.um-perm-cb-' + i);
+      var on = Array.prototype.filter.call(leaves, function(x){ return x.checked; }).length;
+      cb.checked = leaves.length > 0 && on === leaves.length;
+      var cnt = cat.querySelector('.um-cat-count'); if (cnt) cnt.textContent = on+'/'+leaves.length;
+    });
+  }
+
+  // Checkbox-mestre da categoria: marca/desmarca todas as sub-abas + ferramentas dela
   function permsCat(i, cb) {
-    var details = cb.closest('details');
-    if (!details) return;
-    details.querySelectorAll('.um-perm-cb-' + i).forEach(function(x){ x.checked = cb.checked; });
+    var details = cb.closest('details'); if (!details) return;
+    details.querySelectorAll('.um-perm-cb-'+i+', .um-node-cb-'+i).forEach(function(x){ x.checked = cb.checked; });
+    permsSync(i);
+  }
+
+  // Checkbox-mestre do nó (sub-aba que empacota ferramentas)
+  function permsNode(i, cb) {
+    var node = cb.closest('.um-perm-node'); if (!node) return;
+    node.querySelectorAll('.um-perm-cb-' + i).forEach(function(x){ x.checked = cb.checked; });
+    permsSync(i);
   }
 
   function permsAll(i, val) {
-    document.querySelectorAll('.um-perm-cb-' + i + ', .um-cat-cb-' + i).forEach(function(cb){ cb.checked = val; });
+    var root = document.getElementById('um-perms-' + i) || document;
+    root.querySelectorAll('.um-perm-cb-'+i+', .um-cat-cb-'+i+', .um-node-cb-'+i).forEach(function(cb){ cb.checked = val; });
+    permsSync(i);
+  }
+
+  // Busca: filtra categorias/sub-abas/ferramentas por texto
+  function permsSearch(i, q) {
+    var root = document.getElementById('um-perms-' + i); if (!root) return;
+    q = (q||'').trim().toLowerCase();
+    root.querySelectorAll('.um-perm-cat').forEach(function(cat){
+      if (!cat.querySelector('.um-cat-cb-' + i)) return;
+      var anyCat = false;
+      cat.querySelectorAll('.um-perm-node').forEach(function(node){
+        var nodeHit = !q || node.getAttribute('data-label').indexOf(q) >= 0;
+        var anyChild = false;
+        node.querySelectorAll('.um-perm-child').forEach(function(row){
+          var hit = !q || nodeHit || row.getAttribute('data-label').indexOf(q) >= 0;
+          row.style.display = hit ? '' : 'none'; if (hit) anyChild = true;
+        });
+        var show = !q || nodeHit || anyChild;
+        node.style.display = show ? '' : 'none'; if (show) anyCat = true;
+      });
+      cat.querySelectorAll('.um-perm-leaf').forEach(function(row){
+        var hit = !q || row.getAttribute('data-label').indexOf(q) >= 0;
+        row.style.display = hit ? '' : 'none'; if (hit) anyCat = true;
+      });
+      cat.style.display = anyCat ? '' : 'none';
+      if (q && anyCat) cat.setAttribute('open','');
+    });
   }
 
   function savePerms(i, userLogin) {
@@ -24098,7 +24203,7 @@ const USERMGMT = (() => {
     setTimeout(function(){ togglePerms(i, userLogin); renderList(); }, 1500);
   }
 
-  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam, togglePerms, permsAll, permsCat, savePerms };
+  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam, togglePerms, permsAll, permsCat, permsNode, permsSync, permsSearch, savePerms };
 })();
 
 /* ════════════════════════════════════════════════════════
