@@ -411,6 +411,7 @@
       const baseDia = tot > 0 ? meta / tot : 0;                 // R$ 7.942/dia no funil 7
       const espHoje = tot > 0 ? meta * (dec / tot) : 0;         // alvo acumulado até hoje
       const pct     = espHoje > 0 ? real / espHoje : (real > 0 ? 1 : 0);
+      const gapHoje = Math.max(0, espHoje - real);              // total que falta p/ zerar o atraso da trilha
       const cor     = pct >= 1 ? "#10b981" : (pct >= 0.9 ? "#f59e0b" : "#f43f5e");
       const rotulo  = pct >= 1 ? "no ritmo (ou à frente)" : (pct >= 0.9 ? "levemente atrás" : "atrás da trilha");
       // Posição na régua (em dias úteis): tempo decorrido vs equivalente do realizado.
@@ -465,7 +466,7 @@
           ${tile("Esperado até hoje", brl(espHoje), `${dec}/${tot} dias úteis`)}
           ${tile("Realizado", brl(real), `${(pct*100).toFixed(0)}% do esperado`, `color:${cor}`)}
           ${tile("Base do funil", brl(baseDia), "por dia útil (meta ÷ dias úteis)")}
-          ${tile("Precisa por dia útil", brl(d.fechamentoDiarioNecessario), `amortiza conforme fecha · ${d.diasUteisRestantes} dias restantes`, "color:#ea580c")}
+          ${tile("Falta p/ zerar o gap", brl(gapHoje), "esperado até hoje − realizado", "color:#ea580c")}
           ${tile("Ritmo vs base", `${sinalDelta}${brl(Math.abs(deltaRitmo))}`, subDelta, `color:${corDelta}`)}
         </div>`;
     }
