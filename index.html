@@ -2625,21 +2625,21 @@ function clearSettingsModal() {
     </div>
     <nav class="s-nav">
 
-      <div class="s-item active" onclick="showSection('home', this)">
+      <div class="s-item active" data-perm="home" onclick="showSection('home', this)">
         <span class="s-dot" style="background:var(--accent);"></span> Institucional
       </div>
-      <div class="s-sub" onclick="showSection('cargos', this)" style="padding-left:32px;">Cargos & Comissões</div>
-      <div class="s-sub" onclick="showSection('metas', this)" style="padding-left:32px;">Metas & Atividades</div>
-      <div class="s-sub" onclick="showSection('tracking', this)" style="padding-left:32px;">Tracking Comercial</div>
-      <div class="s-sub" onclick="showSection('ferramentas', this)" style="padding-left:32px;">Ferramentas</div>
-      <div class="s-sub" onclick="showSection('processos', this)" style="padding-left:32px;">Processos & Rituais</div>
-      <div class="s-sub" onclick="showSection('motivos-perda', this)" style="padding-left:32px;">Motivos de Perda</div>
-      <div class="s-sub" onclick="showSection('treinamentos', this)" style="padding-left:32px;">Treinamentos</div>
+      <div class="s-sub" data-perm="cargos" onclick="showSection('cargos', this)" style="padding-left:32px;">Cargos & Comissões</div>
+      <div class="s-sub" data-perm="metas" onclick="showSection('metas', this)" style="padding-left:32px;">Metas & Atividades</div>
+      <div class="s-sub" data-perm="tracking" onclick="showSection('tracking', this)" style="padding-left:32px;">Tracking Comercial</div>
+      <div class="s-sub" data-perm="ferramentas" onclick="showSection('ferramentas', this)" style="padding-left:32px;">Ferramentas</div>
+      <div class="s-sub" data-perm="processos" onclick="showSection('processos', this)" style="padding-left:32px;">Processos & Rituais</div>
+      <div class="s-sub" data-perm="motivos-perda" onclick="showSection('motivos-perda', this)" style="padding-left:32px;">Motivos de Perda</div>
+      <div class="s-sub" data-perm="treinamentos" onclick="showSection('treinamentos', this)" style="padding-left:32px;">Treinamentos</div>
 
       <div class="s-rule"></div>
 
       <!-- CAPTAÇÃO ATIVA -->
-      <div class="s-group" id="nav-ca">
+      <div class="s-group" id="nav-ca" data-perm="ca">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-orange">CA</div>
           <div class="s-group-text">
@@ -2675,7 +2675,7 @@ function clearSettingsModal() {
       </div>
 
       <!-- INDICA+ -->
-      <div class="s-group" id="nav-indica">
+      <div class="s-group" id="nav-indica" data-perm="indica">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-blue">I+</div>
           <div class="s-group-text">
@@ -2701,7 +2701,7 @@ function clearSettingsModal() {
       </div>
 
       <!-- COPILOTO -->
-      <div class="s-group">
+      <div class="s-group" id="nav-copiloto" data-perm="copiloto">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-purple">CP</div>
           <div class="s-group-text">
@@ -2736,7 +2736,7 @@ function clearSettingsModal() {
       <div class="s-rule"></div>
 
       <!-- SALESOPS -->
-      <div class="s-group" id="nav-salesops">
+      <div class="s-group" id="nav-salesops" data-perm="salesops">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-red">SO</div>
           <div class="s-group-text">
@@ -2774,7 +2774,7 @@ function clearSettingsModal() {
       </div>
 
       <!-- SUPERVISOR COMERCIAL -->
-      <div class="s-group" id="nav-supervisor">
+      <div class="s-group" id="nav-supervisor" data-perm="supervisor">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-green">SC</div>
           <div class="s-group-text">
@@ -2813,7 +2813,7 @@ function clearSettingsModal() {
       <div class="s-rule"></div>
 
       <!-- PDI & GAMIFICAÇÃO -->
-      <div class="s-group" id="nav-gamificacao">
+      <div class="s-group" id="nav-gamificacao" data-perm="gamificacao">
         <div class="s-group-header" onclick="toggleProduct(this)">
           <div class="s-group-icon t-gold">🏆</div>
           <div class="s-group-text">
@@ -20032,6 +20032,11 @@ function toggleProduct(el) {
 }
 
 function showSection(id, el) {
+  // 🔒 Trava de permissão — impede acesso a módulos não liberados (menu já fica oculto; isto é defesa extra)
+  if (window.__pbPerms && typeof window.pbSecModule === 'function') {
+    var _mod = window.pbSecModule(id);
+    if (_mod && !window.__pbPerms.has(_mod)) { id = 'ranking-home'; el = null; }
+  }
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.s-sub, .s-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.card.open').forEach(c => c.classList.remove('open'));
@@ -23201,6 +23206,55 @@ const SKB = {
 };
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => SKB.init(), 800); });
 
+/* ── REGISTRO DE MÓDULOS (permissão por usuário × módulo) ──
+   14 chaves. Cada chave casa com [data-perm] na sidebar e com as seções
+   (sec-*) que pertencem ao módulo. `pfx` = prefixo de seção do grupo.
+   Seções não mapeadas (ex.: ranking-home = landing) ficam SEMPRE liberadas. */
+var PB_MODULES = {
+  'home':          { label: 'Institucional (Início)', secs: ['home'] },
+  'cargos':        { label: 'Cargos & Comissões',     secs: ['cargos'] },
+  'metas':         { label: 'Metas & Atividades',     secs: ['metas'] },
+  'tracking':      { label: 'Tracking Comercial',     secs: ['tracking'] },
+  'ferramentas':   { label: 'Ferramentas',            secs: ['ferramentas'] },
+  'processos':     { label: 'Processos & Rituais',    secs: ['processos'] },
+  'motivos-perda': { label: 'Motivos de Perda',       secs: ['motivos-perda'] },
+  'treinamentos':  { label: 'Treinamentos',           secs: ['treinamentos'] },
+  'ca':            { label: 'Captação Ativa',         secs: ['platform','base-atuacao','concorrentes','outbound','inbound','whatsapp','emails','objections','rapport','valores','pre-reuniao','guia-reuniao','exemplo-real','fechamento','negociacao','cs'] },
+  'indica':        { label: 'Indica+',                pfx: 'indica-' },
+  'copiloto':      { label: 'Copiloto',               pfx: 'copiloto-' },
+  'salesops':      { label: 'SalesOps',               secs: ['salesops-home'], pfx: 'so-' },
+  'supervisor':    { label: 'Supervisor Comercial',   secs: ['supervisor-home'], pfx: 'sc-' },
+  'gamificacao':   { label: 'PDI & Gamificação',      secs: ['tabuleiro-comercial','comissao'], pfx: 'pdi-' },
+};
+var PB_MODULE_ORDER = ['home','cargos','metas','tracking','ferramentas','processos','motivos-perda','treinamentos','ca','indica','copiloto','salesops','supervisor','gamificacao'];
+
+/* Dado um id de seção, devolve a chave do módulo dono — ou null se livre */
+window.pbSecModule = function(id) {
+  if (!id) return null;
+  for (var k in PB_MODULES) {
+    var m = PB_MODULES[k];
+    if (m.secs && m.secs.indexOf(id) >= 0) return k;
+    if (m.pfx && id.indexOf(m.pfx) === 0) return k;
+  }
+  return null;
+};
+
+/* Aplica um allowlist de módulos: esconde do menu o que não está liberado
+   e arma a trava de navegação (window.__pbPerms consumido por showSection). */
+function applyModulePerms(perms) {
+  var allowed = new Set(perms);
+  window.__pbPerms = allowed;
+  document.querySelectorAll('[data-perm]').forEach(function(el) {
+    el.style.display = allowed.has(el.getAttribute('data-perm')) ? '' : 'none';
+  });
+  // Se a seção ativa não é permitida, volta pro landing (ranking-home é sempre livre)
+  var active = document.querySelector('.section.active');
+  if (active) {
+    var mod = window.pbSecModule(active.id.replace(/^sec-/, ''));
+    if (mod && !allowed.has(mod) && window.showSection) window.showSection('ranking-home', null);
+  }
+}
+
 /* ── TEAM VISIBILITY FILTER ── */
 function applyTeamFilter() {
   try {
@@ -23210,8 +23264,12 @@ function applyTeamFilter() {
     if (!user || user.admin) return; // admin sees everything
 
     var team = user.team;
-    if (!team) return; // no team = sees everything
     if (team === 'Gestão') return; // Gestão vê tudo — sem restrições
+
+    // Permissão explícita por módulo tem precedência sobre o filtro por equipe
+    if (Array.isArray(user.perms)) { applyModulePerms(user.perms); return; }
+
+    if (!team) return; // sem equipe e sem perms = vê tudo
 
     // 1. Hide/show cards with data-team attribute (CAP vê CAP, COP vê COP)
     document.querySelectorAll('[data-team]').forEach(function(el) {
@@ -23715,6 +23773,13 @@ const USERMGMT = (() => {
       const teamLabel = u.team === 'COP' ? '🟣 COP' : (u.team === 'CAP' ? '🟠 CAP' : (u.team === 'Gestão' ? '⚙️ Gestão' : ''));
       const metaSuffix = u.meta ? ` · ${u.meta}` : '';
 
+      const uperms = Array.isArray(u.perms) ? u.perms : null;
+      const isGestaoUser = (u.team === 'Gestão') || u.admin;
+      const permsBoxes = (window.PB_MODULE_ORDER || []).map(function(k){
+        const on = uperms === null || uperms.indexOf(k) >= 0;
+        return '<label style="display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--n-700);" onmouseover="this.style.background=\'var(--ink-15)\'" onmouseout="this.style.background=\'transparent\'"><input type="checkbox" class="um-perm-cb-'+i+'" value="'+k+'"'+(on?' checked':'')+' style="accent-color:#059669;width:15px;height:15px;cursor:pointer;flex-shrink:0;">'+window.PB_MODULES[k].label+'</label>';
+      }).join('');
+
       return `<div id="${rowId}">
         <div class="um-user-row" style="margin-bottom:0; border-radius: 10px 10px 0 0; border-bottom: none;" id="${rowId}-main">
           <div class="${avatarClass}">${getInitials(u.name)}</div>
@@ -23729,6 +23794,7 @@ const USERMGMT = (() => {
           <div style="display:flex;gap:4px;flex-shrink:0;">
             <button class="um-del-btn" onclick="USERMGMT.toggleEditPass(${i}, ${extraIdx}, '${u.user}')" title="Alterar senha" style="color:var(--accent);border-color:transparent;">🔑</button>
             ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.toggleEditTeam(${i}, ${extraIdx}, '${u.user}')" title="Alterar equipe/meta" style="color:#a78bfa;border-color:transparent;">✏️</button>` : ''}
+            ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.togglePerms(${i}, '${u.user}')" title="Permissões de módulos" style="color:#059669;border-color:transparent;">🔒</button>` : ''}
             <div style="display:flex;gap:4px;flex-shrink:0;">
           <label class="um-del-btn" style="cursor:pointer;" title="Foto do usuário">📷<input type="file" accept="image/*" style="display:none;" onchange="PDI.uploadPhoto('${u.user}', this.files[0])"></label>
           ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.deleteUser(${extraIdx})" title="Remover usuário">🗑</button>` : '<div style="width:32px;"></div>'}
@@ -23768,6 +23834,23 @@ const USERMGMT = (() => {
             <button onclick="USERMGMT.toggleEditTeam(${i}, ${extraIdx}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
           </div>
           <div id="um-team-${i}-msg" style="font-size:12px; color:#a78bfa; margin-top:6px; display:none;"></div>
+        </div>
+        <div id="um-perms-${i}" style="display:none; background:var(--ink-15); border:1px solid rgba(5,150,105,0.3); border-top:none; border-radius:0 0 10px 10px; padding:12px 14px; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <div style="font-size:10px; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:0.4px;">🔒 Módulos liberados para ${u.name}</div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="USERMGMT.permsAll(${i}, true)" style="background:var(--ink-30); color:var(--n-500); border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:700; cursor:pointer; font-family:inherit;">Marcar tudo</button>
+              <button onclick="USERMGMT.permsAll(${i}, false)" style="background:var(--ink-30); color:var(--n-500); border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:700; cursor:pointer; font-family:inherit;">Limpar</button>
+            </div>
+          </div>
+          ${isGestaoUser ? '<div style="font-size:11px; color:var(--n-500); background:rgba(3,105,161,0.08); border-radius:6px; padding:7px 9px; margin-bottom:8px;">⚙️ Usuário <b>Gestão</b> vê tudo — as permissões abaixo só passam a valer se a equipe deixar de ser Gestão.</div>' : ''}
+          ${uperms === null ? '<div style="font-size:11px; color:var(--n-500); margin-bottom:8px;">Sem restrição definida (vê tudo pela equipe). Ajuste e salve para restringir por módulo.</div>' : ''}
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px 10px; margin-bottom:10px;">${permsBoxes}</div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="USERMGMT.savePerms(${i}, '${u.user}')" style="background:#059669; color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar permissões</button>
+            <button onclick="USERMGMT.togglePerms(${i}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
+          </div>
+          <div id="um-perms-${i}-msg" style="font-size:12px; color:#059669; margin-top:6px; display:none;"></div>
         </div>
       </div>`;
     }).join('');
@@ -23891,7 +23974,38 @@ const USERMGMT = (() => {
     renderList();
   }
 
-  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam };
+  function togglePerms(i, userLogin) {
+    const el = document.getElementById('um-perms-' + i);
+    const rowMain = document.getElementById('um-row-' + i + '-main');
+    if (!el) return;
+    const isOpen = el.style.display !== 'none';
+    el.style.display = isOpen ? 'none' : 'block';
+    if (rowMain) {
+      rowMain.style.borderRadius = isOpen ? '10px' : '10px 10px 0 0';
+      rowMain.style.borderBottom = isOpen ? '' : 'none';
+    }
+  }
+
+  function permsAll(i, val) {
+    document.querySelectorAll('.um-perm-cb-' + i).forEach(function(cb){ cb.checked = val; });
+  }
+
+  function savePerms(i, userLogin) {
+    const boxes = document.querySelectorAll('.um-perm-cb-' + i);
+    const perms = [];
+    boxes.forEach(function(cb){ if (cb.checked) perms.push(cb.value); });
+    const extra = AUTH.loadExtra();
+    const ei = extra.findIndex(u => u.user === userLogin);
+    if (ei >= 0) { extra[ei].perms = perms; AUTH.saveExtra(extra); }
+    const msg = document.getElementById('um-perms-' + i + '-msg');
+    if (msg) {
+      msg.textContent = '✅ Permissões salvas (' + perms.length + ' módulo(s)). Efetiva no próximo login/reload do usuário.';
+      msg.style.display = 'block';
+    }
+    setTimeout(function(){ togglePerms(i, userLogin); renderList(); }, 1500);
+  }
+
+  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam, togglePerms, permsAll, savePerms };
 })();
 
 /* ════════════════════════════════════════════════════════
