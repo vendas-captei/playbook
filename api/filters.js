@@ -31,6 +31,21 @@ async function pdJson(url, tries = 3) {
 
 module.exports = async function handler(req, res) {
   const TK = process.env.PIPEDRIVE_API_TOKEN;
+
+  // Boot do dashboard: ?src=cache serve o snapshot commitado direto — ZERO Pipedrive.
+  // Política sob demanda (2026-07-15): só o botão "Atualizar" pode tocar o Pipedrive.
+  if (/[?&]src=cache(&|$)/.test(req.url || "") && CACHE && Array.isArray(CACHE.funis) && CACHE.funis.length) {
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).json({
+      funis: CACHE.funis,
+      usuarios: CACHE.usuarios || [],
+      stale: true,
+      fromCache: true,
+      atualizadoEm: (CACHE._meta && CACHE._meta.atualizado_em) || null,
+    });
+    return;
+  }
+
   try {
     if (!TK) throw new Error("PIPEDRIVE_API_TOKEN não configurado na Vercel");
     const [pipes, users] = await Promise.all([

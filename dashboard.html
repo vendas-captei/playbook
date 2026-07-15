@@ -54,10 +54,14 @@
         <label class="mb-1 block text-xs font-medium text-slate-500">Mês</label>
         <select id="f-mes" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
       </div>
+      <button id="btn-atualizar" class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60">
+        <span id="btn-atualizar-ico">↻</span> Atualizar
+      </button>
       <div id="spinner" class="hidden items-center gap-2 pb-2 text-sm text-slate-400 sm:flex">
-        <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600"></span> atualizando…
+        <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600"></span> consultando Pipedrive…
       </div>
     </section>
+    <p id="cache-selo" class="hide-tv mt-2 text-xs text-slate-400"></p>
 
     <!-- Meta -->
     <div class="hide-tv mt-4 flex flex-wrap items-center gap-2 text-sm">
@@ -559,37 +563,87 @@
         .catch(e=>{ st.textContent = "erro: "+e.message; });
     }
 
-    function carregar(){
+    function mesAtual(){ return new Date().toLocaleDateString("en-CA").slice(0,7); }
+
+    // Params da view atual (funil/vendedor/mês/meta) — compartilhado por carregar/atualizar.
+    function viewQS(){
       const pid = document.getElementById("f-funil").value;
-      if (!pid) return;
       const uid = currentUid();
       const mes = document.getElementById("f-mes").value;
-      const erro = document.getElementById("erro");
-      document.getElementById("spinner").classList.remove("hidden");
-      erro.classList.add("hidden");
-
-      // Recorte individual quando há um vendedor selecionado com meta cadastrada.
       viewIsIndividual = !!(uid && metaByPdId[uid] != null);
-
       const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
       if (uid) qs.set("user_id", uid);
-      // Meta: individual (users.json) tem prioridade; senão a do funil (metas.json).
       if (viewIsIndividual) qs.set("meta", metaByPdId[uid]);
       else if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
+      return { pid, uid, mes, qs };
+    }
 
+    // Foto cacheável = mês corrente, sem recorte por vendedor, funil 7/2.
+    function ehCacheavel(pid, uid, mes){
+      return mes === mesAtual() && !uid && (Number(pid)===7 || Number(pid)===2);
+    }
+
+    function tpcPlaceholder(){
+      const el = document.getElementById("tpc");
+      if (el) el.innerHTML = '<span class="text-slate-400">Clique em <b>Atualizar</b> para calcular o TPC ao vivo.</span>';
+    }
+
+    function atualizaSelo(d){
+      const selo = document.getElementById("cache-selo");
+      const c = d && d._cache;
+      if (c && c.updatedAt){
+        const t = new Date(c.updatedAt).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",dateStyle:"short",timeStyle:"short"});
+        selo.textContent = `📸 Foto do Pipedrive de ${t}${c.updatedBy?` · por ${c.updatedBy}`:""} · clique em Atualizar para dados ao vivo.`;
+      } else {
+        selo.textContent = "Dados ao vivo do Pipedrive.";
+      }
+    }
+
+    // LEITURA — 0 chamadas ao Pipedrive. Boot e troca de filtros leem a foto congelada
+    // (Edge Config). Views não cacheadas pedem clique em Atualizar. (Política 2026-07-15.)
+    function carregar(){
+      const { pid, uid, mes } = viewQS();
+      if (!pid) return;
+      document.getElementById("erro").classList.add("hidden");
+      const selo = document.getElementById("cache-selo");
+
+      if (ehCacheavel(pid, uid, mes)){
+        fetch(`/api/metrics?action=cache&pipeline_id=${pid}`)
+          .then(r=>r.json())
+          .then(d=>{
+            if (d.cacheVazio){ selo.textContent = "Sem foto salva ainda — clique em Atualizar para consultar o Pipedrive."; return; }
+            render(d); atualizaSelo(d);
+          })
+          .catch(()=>{ selo.textContent = "Sem foto salva — clique em Atualizar."; });
+      } else {
+        selo.textContent = "Esta visão (mês fechado ou por vendedor) não tem foto salva — clique em Atualizar para consultar o Pipedrive.";
+      }
+      tpcPlaceholder();
+    }
+
+    // ESCRITA/AO VIVO — a ÚNICA porta ao Pipedrive. Só o botão "Atualizar" dispara.
+    // Na foto cacheável, repovoa o Edge Config (dashboard + Modo TV se beneficiam).
+    function atualizar(){
+      const { pid, uid, mes, qs } = viewQS();
+      if (!pid) return;
+      const erro = document.getElementById("erro");
+      const btn = document.getElementById("btn-atualizar");
+      document.getElementById("spinner").classList.remove("hidden");
+      btn.disabled = true;
+      erro.classList.add("hidden");
+      if (ehCacheavel(pid, uid, mes)){ qs.set("refreshCache","1"); if (myName) qs.set("by", myName.split(" ")[0]); }
       fetch(`/api/metrics?${qs.toString()}`)
         .then(r=>r.json())
-        .then(d=>{ if(d.error) throw new Error(d.error); render(d); })
+        .then(d=>{ if(d.error) throw new Error(d.error); render(d); atualizaSelo(d); })
         .catch(e=>{ erro.textContent = "Erro ao buscar dados do Pipedrive: "+e.message; erro.classList.remove("hidden"); })
-        .finally(()=> document.getElementById("spinner").classList.add("hidden"));
-
+        .finally(()=>{ document.getElementById("spinner").classList.add("hidden"); btn.disabled=false; });
       carregarTPC(pid, uid, mes);
     }
 
     // Init: carrega usuários (users.json) + filtros (Pipedrive) e faz a junção por e-mail.
     Promise.all([
       fetch("/api/users").then(r=>r.json()).catch(()=>({users:[]})),
-      fetch("/api/filters").then(r=>r.json()),
+      fetch("/api/filters?src=cache").then(r=>r.json()),
     ]).then(([ud, d])=>{
       if (d.error) throw new Error(d.error);
 
@@ -641,6 +695,7 @@
 
       document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregar(); });
       document.getElementById("f-mes").addEventListener("change", carregar);
+      document.getElementById("btn-atualizar").addEventListener("click", atualizar);
       document.getElementById("meta-edit").addEventListener("click", abrirMeta);
       document.getElementById("meta-cancel").addEventListener("click", fecharMeta);
       document.getElementById("meta-save").addEventListener("click", salvarMeta);

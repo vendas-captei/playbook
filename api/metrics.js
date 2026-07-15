@@ -6,6 +6,36 @@ const V2 = "https://api.pipedrive.com/api/v2";
 const META_POR_FUNIL = { 7: 160000, 2: 80000 }; // ajuste por funil
 const META_PADRAO = 160000;
 
+// ── Cache sob demanda (Vercel Edge Config) ──────────────────────────────────
+// Política (2026-07-15, Natan): o Pipedrive só é consultado quando um usuário
+// LOGADO clica "Atualizar" no painel. O dashboard e o Modo TV (deploy separado)
+// leem esta foto congelada — ZERO chamada ao Pipedrive em background. Escrita
+// via API Vercel (só server-side); leitura via endpoint HTTPS com read token.
+const EC_ID = process.env.EDGE_CONFIG_ID;
+const EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
+const EC_TEAM = process.env.EDGE_CONFIG_TEAM;
+const EC_WRITE = process.env.VERCEL_WRITE_TOKEN;
+
+async function cacheRead(pid) {
+  if (!EC_ID || !EC_READ) return null;
+  try {
+    const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/live${pid}?token=${EC_READ}`, { cache: "no-store" });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (_) { return null; }
+}
+async function cacheWrite(pid, value) {
+  if (!EC_ID || !EC_WRITE) return false;
+  try {
+    const r = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${EC_WRITE}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ operation: "upsert", key: `live${pid}`, value }] }),
+    });
+    return r.ok;
+  } catch (_) { return false; }
+}
+
 // ── Campos custom e opções para a definição de negócio de MQL/SQL/OPP (Captação Ativa, funil 7) ──
 // Verificado via API em 2026-07-09. Ver memória project_pipedrive_estrutura / reference_cidade_lead_e_base.
 const F_PRODUTO = "4a67c7a7684177402784cf8773a45dd8e1670b59"; // set: 6843 CA, 6844 Indica+, 6860 IA, 7173 NI
@@ -272,6 +302,17 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    // Leitura do cache sob demanda: GET /api/metrics?action=cache&pipeline_id=7
+    // Devolve a última foto congelada no Edge Config — ZERO chamada ao Pipedrive.
+    // Usado pelo boot do dashboard e pelo Modo TV. Só existe p/ mês corrente, funis 7/2.
+    if (u.searchParams.get("action") === "cache") {
+      const pid = Number(u.searchParams.get("pipeline_id")) || 7;
+      const cached = await cacheRead(pid);
+      res.setHeader("Cache-Control", "no-store");
+      res.status(200).json(cached || { cacheVazio: true, pipelineId: pid });
+      return;
+    }
+
     const pipelineId = Number(u.searchParams.get("pipeline_id")) || 7;
     const userId = u.searchParams.get("user_id") ? Number(u.searchParams.get("user_id")) : null;
     const month = u.searchParams.get("month");
@@ -362,10 +403,7 @@ module.exports = async function handler(req, res) {
     const pipelineAbertoTotal = useHistory ? (histRec.pipelineAbertoTotal ?? null) : open.reduce((acc, o) => acc + o.value, 0);
     const abertoCount = useHistory ? (histRec.abertoCount ?? null) : open.length; // nº de leads em aberto (p/ teto saudável de 55)
 
-    // Cache de borda: até 2min stale + revalida em background. Colapsa TV mode e
-    // múltiplos viewers do painel numa única varredura ao Pipedrive (corta o 429).
-    res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=600");
-    res.status(200).json({
+    const payload = {
       mesReferencia: nomeMes(ano, mes),
       funilNome: (pipe.data && pipe.data.name) || `Funil ${pipelineId}`,
       usuarioNome: (user && user.data && user.data.name) || "Todos os vendedores",
@@ -382,7 +420,20 @@ module.exports = async function handler(req, res) {
       fonte: fonteHist,
       ...d,
       atualizadoEm: new Date().toISOString(),
-    });
+    };
+
+    // Grava no cache sob demanda SÓ quando é a foto cacheável (mês corrente, sem
+    // recorte por vendedor, funil 7/2) E o cliente pediu refresh explícito — ou seja,
+    // o clique no botão "Atualizar". Nunca grava em views filtradas nem em leituras
+    // incidentais. É o único momento em que o cache do dashboard/TV é renovado.
+    const cacheavel = ehMesAtual && !userId && (pipelineId === 7 || pipelineId === 2);
+    if (cacheavel && u.searchParams.get("refreshCache") === "1") {
+      payload._cache = { updatedAt: payload.atualizadoEm, updatedBy: u.searchParams.get("by") || null };
+      await cacheWrite(pipelineId, payload);
+    }
+
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).json(payload);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
