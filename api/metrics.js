@@ -31,12 +31,21 @@ function setHas(raw, id) {
   return raw != null && String(raw).split(",").map((s) => s.trim()).includes(id);
 }
 
-function pd(url, TK) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// GET no Pipedrive com retry/backoff em 429/5xx (Cloudflare devolve 429 "Too many requests"
+// como texto puro quando o token compartilhado estoura a cota de borda). Ver api/filters.js.
+async function pd(url, TK, tries = 3) {
   const sep = url.includes("?") ? "&" : "?";
-  return fetch(`${url}${sep}api_token=${TK}`, { cache: "no-store" }).then((r) => {
-    if (!r.ok) throw new Error(`Pipedrive ${r.status} em ${url.split("?")[0]}`);
-    return r.json();
-  });
+  let last = "";
+  for (let i = 0; i < tries; i++) {
+    const r = await fetch(`${url}${sep}api_token=${TK}`, { cache: "no-store" });
+    if (r.ok) return r.json();
+    last = `Pipedrive ${r.status} em ${url.split("?")[0]}`;
+    if (r.status === 429 || r.status >= 500) { await sleep((i + 1) * 700); continue; }
+    throw new Error(last);
+  }
+  throw new Error(`${last} (rate limit persistente)`);
 }
 
 // Feriados nacionais BR (fixos + móveis) — dias úteis = seg-sex que NÃO são feriado.
@@ -353,6 +362,9 @@ module.exports = async function handler(req, res) {
     const pipelineAbertoTotal = useHistory ? (histRec.pipelineAbertoTotal ?? null) : open.reduce((acc, o) => acc + o.value, 0);
     const abertoCount = useHistory ? (histRec.abertoCount ?? null) : open.length; // nº de leads em aberto (p/ teto saudável de 55)
 
+    // Cache de borda: até 2min stale + revalida em background. Colapsa TV mode e
+    // múltiplos viewers do painel numa única varredura ao Pipedrive (corta o 429).
+    res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=600");
     res.status(200).json({
       mesReferencia: nomeMes(ano, mes),
       funilNome: (pipe.data && pipe.data.name) || `Funil ${pipelineId}`,

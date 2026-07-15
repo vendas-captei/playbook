@@ -8,7 +8,42 @@
 const REPO = "vendas-captei/playbook";
 const PATH = "data/history.json";
 const FC_PATH = "data/forecast-history.json";
+const FILTERS_PATH = "data/filters.json";
 const FUNIS = [7, 2];
+
+// Refresca o snapshot de filtros (funis + usuários ativos) commitado no repo.
+// É o fallback de api/filters.js — mantém o painel de pé quando o token estoura no Cloudflare.
+async function snapshotFilters(ghHeaders) {
+  const PD = process.env.PIPEDRIVE_API_TOKEN;
+  if (!PD) return false;
+  const V1 = "https://api.pipedrive.com/v1";
+  const [pr, ur] = await Promise.all([
+    fetch(`${V1}/pipelines?api_token=${PD}`, { cache: "no-store" }),
+    fetch(`${V1}/users?api_token=${PD}`, { cache: "no-store" }),
+  ]);
+  if (!pr.ok || !ur.ok) throw new Error(`filters upstream ${pr.status}/${ur.status}`);
+  const pipes = await pr.json(), users = await ur.json();
+  const funis = (pipes.data || [])
+    .filter((p) => p.active && !/^OLD|Testes/i.test(p.name))
+    .map((p) => ({ id: p.id, nome: p.name }));
+  const usuarios = (users.data || [])
+    .filter((u) => u.active_flag)
+    .map((u) => ({ id: u.id, nome: u.name, email: (u.email || "").toLowerCase() }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  if (!funis.length) throw new Error("0 funis — abortando (não sobrescreve snapshot bom)");
+  const payload = { funis, usuarios, _meta: { atualizado_em: new Date().toISOString().slice(0, 10), fonte: "snapshot-cron" } };
+  const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILTERS_PATH}`, { headers: ghHeaders });
+  let sha;
+  if (getR.ok) sha = (await getR.json()).sha;
+  else if (getR.status !== 404) throw new Error(`GitHub GET filters ${getR.status}`);
+  const novo = Buffer.from(JSON.stringify(payload, null, 2) + "\n", "utf8").toString("base64");
+  const putR = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILTERS_PATH}`, {
+    method: "PUT", headers: ghHeaders,
+    body: JSON.stringify({ message: `snapshot filtros: ${funis.length} funis, ${usuarios.length} usuários`, content: novo, ...(sha ? { sha } : {}) }),
+  });
+  if (!putR.ok) throw new Error(`GitHub PUT filters ${putR.status}`);
+  return true;
+}
 
 function baseUrl(req) {
   // Usa o host da requisição (domínio de produção — sem deployment protection).
@@ -102,6 +137,14 @@ module.exports = async function handler(req, res) {
   }
   const GH = process.env.GITHUB_TOKEN;
   if (!GH) { res.status(500).json({ error: "GITHUB_TOKEN ausente" }); return; }
+  const ghHeaders0 = { Authorization: `Bearer ${GH}`, Accept: "application/vnd.github+json", "User-Agent": "captei-playbook" };
+
+  // Atalho leve: só refresca o fallback dos filtros (2 chamadas). GET /api/snapshot?key=…&only=filters
+  if (u.searchParams.get("only") === "filters") {
+    try { const ok = await snapshotFilters(ghHeaders0); res.status(200).json({ ok, only: "filters" }); }
+    catch (e) { res.status(500).json({ error: e.message }); }
+    return;
+  }
 
   try {
     // Mês-alvo: parâmetro ou mês anterior (UTC).
@@ -201,7 +244,11 @@ module.exports = async function handler(req, res) {
       forecastOk = true;
     } catch (e) { /* forecast é best-effort; não derruba o snapshot do Tracking */ }
 
-    res.status(200).json({ ok: true, month, registros, convLeadVenda, forecastOk });
+    // Refresca o fallback dos filtros (best-effort; não derruba o snapshot do Tracking).
+    let filtersOk = false;
+    try { filtersOk = await snapshotFilters(ghHeaders); } catch (_) {}
+
+    res.status(200).json({ ok: true, month, registros, convLeadVenda, forecastOk, filtersOk });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
