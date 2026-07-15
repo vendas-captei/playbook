@@ -1,0 +1,75 @@
+{
+  "funis": [
+    {
+      "id": 7,
+      "nome": "🥇 Captação Ativa"
+    },
+    {
+      "id": 2,
+      "nome": "🚀 IA - Copiloto"
+    },
+    {
+      "id": 20,
+      "nome": "🚀 IA Copiloto - BDR IA"
+    },
+    {
+      "id": 21,
+      "nome": "🚀 IA Copiloto - BDR Humana"
+    },
+    {
+      "id": 8,
+      "nome": "🔔 Recepção"
+    }
+  ],
+  "usuarios": [
+    {
+      "id": 24330468,
+      "nome": "Ana Luiza",
+      "email": "ana.goncalves@captei.com.br"
+    },
+    {
+      "id": 24213076,
+      "nome": "Eduardo Sousa",
+      "email": "eduardo.sousa@captei.com.br"
+    },
+    {
+      "id": 16776298,
+      "nome": "Elaine de Paula",
+      "email": "elaine.ribeiro@captei.com.br"
+    },
+    {
+      "id": 26132438,
+      "nome": "Eloise",
+      "email": "eloise.miranda@captei.com.br"
+    },
+    {
+      "id": 24720484,
+      "nome": "John Faber",
+      "email": "john.blueoceansem@gmail.com"
+    },
+    {
+      "id": 14587695,
+      "nome": "Leonardo Fabra Gomez",
+      "email": "financeiro@captei.com.br"
+    },
+    {
+      "id": 26325774,
+      "nome": "Luiz Norberto",
+      "email": "luiz.souza@captei.com.br"
+    },
+    {
+      "id": 16776320,
+      "nome": "Paulo Lourenço",
+      "email": "paulo.lourenco@captei.com.br"
+    },
+    {
+      "id": 26325796,
+      "nome": "Tamara",
+      "email": "tamara.sousa@captei.com.br"
+    }
+  ],
+  "_meta": {
+    "atualizado_em": "2026-07-15",
+    "fonte": "snapshot-cron"
+  }
+}
