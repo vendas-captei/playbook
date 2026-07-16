@@ -35,6 +35,25 @@ async function cacheWrite(pid, value) {
     return r.ok;
   } catch (_) { return false; }
 }
+// Registro diário (decomposição do dia) no Edge Config, chave daily<pid> = { "YYYY-MM-DD": {...} }.
+// Upsert por data → acumula o mês ao vivo, sem redeploy. O snapshot.js flusha p/ data/daily.json (repo).
+async function dailyUpsert(pid, rec) {
+  if (!EC_ID || !EC_WRITE) return false;
+  try {
+    let mapa = {};
+    try {
+      const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
+      if (r.ok) mapa = (await r.json()) || {};
+    } catch (_) { mapa = {}; }
+    mapa[rec.data] = rec;
+    const r2 = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${EC_WRITE}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ operation: "upsert", key: `daily${pid}`, value: mapa }] }),
+    });
+    return r2.ok;
+  } catch (_) { return false; }
+}
 
 // ── Campos custom e opções para a definição de negócio de MQL/SQL/OPP (Captação Ativa, funil 7) ──
 // Verificado via API em 2026-07-09. Ver memória project_pipedrive_estrutura / reference_cidade_lead_e_base.
@@ -150,7 +169,16 @@ async function fetchWonToday(pipelineId, userId, TK) {
   const r = await pd(url, TK);
   const deals = (r.data && r.data[0] && r.data[0].deals) || [];
   const sum = deals.reduce((acc, d) => acc + (Number(d.value) || 0), 0);
-  return { count: deals.length, sum };
+  // Decomposição por vendedor (nome + valor + nº de vendas), maior receita primeiro.
+  const byV = new Map();
+  for (const d of deals) {
+    const nome = d.owner_name || (d.user_id && d.user_id.name) || "—";
+    const cur = byV.get(nome) || { vendedor: nome, valor: 0, count: 0 };
+    cur.valor += Number(d.value) || 0; cur.count += 1;
+    byV.set(nome, cur);
+  }
+  const porVendedor = [...byV.values()].sort((a, b) => b.valor - a.valor);
+  return { count: deals.length, sum, porVendedor };
 }
 
 async function fetchWonMonth(pipelineId, userId, monthStart, TK) {
@@ -409,9 +437,9 @@ module.exports = async function handler(req, res) {
     const d = deriveMetrics({ ano, mes, diaAtual, faturamentoAtual: won.sum, negociosGanhos: won.count, metaMensal });
 
     // Vendas de HOJE (só faz sentido no mês corrente) — abatem a meta do dia no card.
-    let vendasHoje = 0, vendasHojeCount = 0;
+    let vendasHoje = 0, vendasHojeCount = 0, vendasHojePorVendedor = [];
     if (ehMesAtual) {
-      try { const wt = await fetchWonToday(pipelineId, userId, TK); vendasHoje = wt.sum; vendasHojeCount = wt.count; }
+      try { const wt = await fetchWonToday(pipelineId, userId, TK); vendasHoje = wt.sum; vendasHojeCount = wt.count; vendasHojePorVendedor = wt.porVendedor; }
       catch (_) { /* mantém 0 se a chamada falhar */ }
     }
 
@@ -439,6 +467,7 @@ module.exports = async function handler(req, res) {
       novosDeals,
       vendasHoje,
       vendasHojeCount,
+      vendasHojePorVendedor,
       forecastSemanal: buildForecast(open),
       historico,
       fonte: fonteHist,
@@ -454,6 +483,16 @@ module.exports = async function handler(req, res) {
     if (cacheavel && u.searchParams.get("refreshCache") === "1") {
       payload._cache = { updatedAt: payload.atualizadoEm, updatedBy: u.searchParams.get("by") || null };
       await cacheWrite(pipelineId, payload);
+      // Registra a foto diária (decomposição do dia) no Edge Config p/ controle macro no detalhe.
+      const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+      await dailyUpsert(pipelineId, {
+        data: hojeSP, funil: pipelineId,
+        metaMensal, faturamentoAtual: won.sum, gapMeta: d.gapMeta,
+        baseDia: d.metaDiariaFixa, necessarioHoje: d.fechamentoDiarioNecessario,
+        vendidoHoje: vendasHoje, vendasCount: vendasHojeCount, porVendedor: vendasHojePorVendedor,
+        diasUteisDecorridos: d.diasUteisDecorridos, diasUteisRestantes: d.diasUteisRestantes,
+        atualizadoEm: payload.atualizadoEm,
+      });
     }
 
     res.setHeader("Cache-Control", "no-store");

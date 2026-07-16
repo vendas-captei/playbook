@@ -9,7 +9,41 @@ const REPO = "vendas-captei/playbook";
 const PATH = "data/history.json";
 const FC_PATH = "data/forecast-history.json";
 const FILTERS_PATH = "data/filters.json";
+const DAILY_PATH = "data/daily.json";
 const FUNIS = [7, 2];
+
+// Flush do registro diário ao vivo (Edge Config daily<pid>) → data/daily.json no repo.
+// Arquivo histórico macro: { "<pid>": { "YYYY-MM-DD": {decomposição do dia + vendedores} } }.
+// Chamado por cron/manual (GET /api/snapshot?key=…&only=daily) — nunca a cada "Atualizar",
+// pra não disparar redeploy da Vercel a cada clique. O dado do dia corrente vive no Edge Config.
+async function snapshotDaily(ghHeaders) {
+  const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
+  if (!EC_ID || !EC_READ) throw new Error("Edge Config não configurado");
+  const vivo = {};
+  for (const pid of FUNIS) {
+    try {
+      const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
+      vivo[pid] = r.ok ? ((await r.json()) || {}) : {};
+    } catch (_) { vivo[pid] = {}; }
+  }
+  const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${DAILY_PATH}`, { headers: ghHeaders });
+  let arq = { _meta: {} }, sha;
+  if (getR.ok) { const j = await getR.json(); sha = j.sha; try { arq = JSON.parse(Buffer.from(j.content, "base64").toString("utf8")); } catch (_) { arq = { _meta: {} }; } }
+  else if (getR.status !== 404) throw new Error(`GitHub GET daily ${getR.status}`);
+  let dias = 0;
+  for (const pid of FUNIS) {
+    arq[pid] = arq[pid] || {};
+    for (const data in (vivo[pid] || {})) { arq[pid][data] = vivo[pid][data]; dias++; }
+  }
+  arq._meta = arq._meta || {}; arq._meta.atualizado_em = new Date().toISOString().slice(0, 10);
+  const novo = Buffer.from(JSON.stringify(arq, null, 2) + "\n", "utf8").toString("base64");
+  const putR = await fetch(`https://api.github.com/repos/${REPO}/contents/${DAILY_PATH}`, {
+    method: "PUT", headers: ghHeaders,
+    body: JSON.stringify({ message: `snapshot diário: ${dias} registro(s) dia×funil`, content: novo, ...(sha ? { sha } : {}) }),
+  });
+  if (!putR.ok) throw new Error(`GitHub PUT daily ${putR.status}`);
+  return dias;
+}
 
 // Refresca o snapshot de filtros (funis + usuários ativos) commitado no repo.
 // É o fallback de api/filters.js — mantém o painel de pé quando o token estoura no Cloudflare.
@@ -142,6 +176,13 @@ module.exports = async function handler(req, res) {
   // Atalho leve: só refresca o fallback dos filtros (2 chamadas). GET /api/snapshot?key=…&only=filters
   if (u.searchParams.get("only") === "filters") {
     try { const ok = await snapshotFilters(ghHeaders0); res.status(200).json({ ok, only: "filters" }); }
+    catch (e) { res.status(500).json({ error: e.message }); }
+    return;
+  }
+
+  // Atalho leve: flush do registro diário (Edge Config) → data/daily.json. GET /api/snapshot?key=…&only=daily
+  if (u.searchParams.get("only") === "daily") {
+    try { const dias = await snapshotDaily(ghHeaders0); res.status(200).json({ ok: true, only: "daily", dias }); }
     catch (e) { res.status(500).json({ error: e.message }); }
     return;
   }

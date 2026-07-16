@@ -107,27 +107,29 @@
         <h2 class="text-base font-semibold">Ritmo Diário Necessário</h2>
         <span id="ritmo-sub" class="text-xs text-slate-500"></span>
       </div>
-      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <!-- Bloco 1 · Geração do mês -->
         <div class="rounded-lg border border-slate-200 p-4">
           <p class="text-sm font-medium text-slate-700">Geração no mês <span id="geracao-fluxo" class="text-xs font-normal text-slate-400">(Entrada → SQL → Reunião)</span></p>
           <div id="geracao" class="mt-3 grid grid-cols-3 gap-3"></div>
           <div id="geracao-legenda" class="mt-4 border-t border-slate-100 pt-3 space-y-0.5"></div>
         </div>
-        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <p class="text-sm font-medium text-slate-700">Fechamento / dia necessário</p>
-          <p id="fech-dia" class="mt-3 text-2xl font-bold"></p>
-          <p id="fech-sub" class="mt-2 text-xs text-slate-500"></p>
-          <!-- Meta de hoje: base fixa abatida pelas vendas registradas hoje -->
-          <div id="fech-hoje-wrap" class="mt-4 border-t border-slate-200 pt-3">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-medium text-slate-600">Meta de hoje</span>
-              <span id="fech-hoje-status" class="font-semibold"></span>
-            </div>
-            <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-              <div id="fech-hoje-bar" class="h-full rounded-full transition-all" style="width:0%"></div>
-            </div>
-            <p id="fech-hoje-sub" class="mt-1.5 text-[11px] text-slate-500"></p>
+        <!-- Bloco 2 · Necessário por dia útil (ritmo) -->
+        <div class="rounded-lg border border-slate-200 p-4">
+          <p class="text-sm font-medium text-slate-700">Necessário por dia útil <span class="text-xs font-normal text-slate-400">(ritmo p/ zerar o gap)</span></p>
+          <p id="nec-dia" class="mt-3 text-2xl font-bold"></p>
+          <div id="nec-vars" class="mt-3 space-y-1.5 border-t border-slate-100 pt-3 text-xs"></div>
+        </div>
+        <!-- Bloco 3 · Receita do dia (decomposta pelo que já foi vendido hoje) -->
+        <div id="bloco-dia" class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <p class="text-sm font-medium text-slate-700">Receita do dia <span class="text-xs font-normal text-slate-400">(o que já entrou hoje)</span></p>
+          <div class="mt-3 flex items-end justify-between">
+            <div><p id="dia-vendido" class="text-2xl font-bold"></p><p class="text-[11px] text-slate-500">vendido hoje</p></div>
+            <div class="text-right"><p id="dia-falta" class="text-sm font-semibold"></p><p class="text-[11px] text-slate-400">falta p/ a meta do dia</p></div>
           </div>
+          <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200"><div id="dia-bar" class="h-full rounded-full transition-all" style="width:0%"></div></div>
+          <p id="dia-meta-sub" class="mt-1.5 text-[11px] text-slate-500"></p>
+          <div id="dia-vendedores" class="mt-3 border-t border-slate-200 pt-3 space-y-1"></div>
         </div>
       </div>
     </section>
@@ -337,34 +339,49 @@
       document.getElementById("geracao-legenda").innerHTML =
         `<p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Legenda · o que conta em cada etapa</p>`+
         legenda.map(([k,v])=>`<p class="text-[11px] leading-snug text-slate-500"><span class="font-semibold text-slate-600">${k}</span> — ${v}</p>`).join("");
-      // (A) Meta diária FIXA = meta ÷ dias úteis totais (base do mês). Não re-divide o saldo
-      // pelos dias restantes → o gap só cai pelo progresso real, e um dia bom fica visível.
-      const baseDiaFix = d.metaDiariaFixa || 0;
-      document.getElementById("fech-dia").textContent = brl(baseDiaFix);
-      document.getElementById("fech-sub").textContent =
-        `Meta diária fixa (meta ÷ ${d.diasUteisTotais} dias úteis) · ainda falta captar ${brl(Math.max(0, d.gapMeta))} no mês`;
+      // ── Bloco 2 · Necessário por dia útil (RITMO) ──
+      // Headline = gap ÷ dias úteis restantes → o valor real de hoje, já contando o atraso.
+      // Não é a base "achatada desde o dia 1"; se estamos atrás, o número sobe acima da base.
+      const baseDia = d.metaDiariaFixa || 0;                 // meta ÷ dias úteis totais (referência)
+      const necDia  = d.fechamentoDiarioNecessario || 0;     // gap ÷ dias úteis restantes (ritmo real)
+      const catchUp = necDia - baseDia;                      // quanto o atraso apertou o ritmo
+      document.getElementById("nec-dia").textContent = brl(necDia);
+      const rowVar = (label, val, cor) =>
+        `<div class="flex items-center justify-between gap-2"><span class="text-slate-500">${label}</span>`+
+        `<span class="whitespace-nowrap font-semibold"${cor?` style="color:${cor}"`:""}>${val}</span></div>`;
+      document.getElementById("nec-vars").innerHTML =
+        rowVar(`Base do funil (meta ÷ ${d.diasUteisTotais} d. úteis)`, brl(baseDia)) +
+        rowVar(catchUp >= 0 ? "Ritmo apertou (atrás da trilha)" : "Ritmo folgou (à frente)",
+               (catchUp >= 0 ? "+" : "−") + brl(Math.abs(catchUp)), catchUp >= 0 ? "#e11d48" : "#059669") +
+        rowVar(`Falta captar no mês · ${d.diasUteisRestantes} d. úteis`, brl(Math.max(0, d.gapMeta)));
 
-      // (B) Meta de HOJE = base − vendas registradas hoje. Cada venda do dia abate direto,
-      // dando feedback imediato do sucesso do dia. Escondida em meses fechados.
-      const hojeWrap = document.getElementById("fech-hoje-wrap");
+      // ── Bloco 3 · Receita do dia (decomposta pelo que EFETIVAMENTE foi vendido hoje) ──
+      // Meta do dia = necessário/ritmo; abatida só pelas vendas de hoje; detalhe por vendedor.
+      const blocoDia = document.getElementById("bloco-dia");
       if (d.historico) {
-        hojeWrap.style.display = "none";
+        blocoDia.style.display = "none";
       } else {
-        hojeWrap.style.display = "";
+        blocoDia.style.display = "";
         const vHoje = d.vendasHoje || 0;
-        const faltaHoje = Math.max(0, baseDiaFix - vHoje);
-        const pctHoje = baseDiaFix > 0 ? Math.min(100, (vHoje / baseDiaFix) * 100) : 0;
-        const bateu = baseDiaFix > 0 && vHoje >= baseDiaFix;
-        const cor = bateu ? "#059669" : (pctHoje >= 50 ? "#d97706" : "#e11d48");
-        const bar = document.getElementById("fech-hoje-bar");
-        bar.style.width = pctHoje + "%";
-        bar.style.background = cor;
-        const st = document.getElementById("fech-hoje-status");
-        st.textContent = Math.round(pctHoje) + "%";
-        st.style.color = cor;
-        document.getElementById("fech-hoje-sub").textContent = bateu
-          ? `🎉 Meta do dia batida — vendeu ${brl(vHoje)} hoje (+${brl(vHoje - baseDiaFix)} acima da base)`
-          : `Vendeu ${brl(vHoje)} hoje · faltam ${brl(faltaHoje)} p/ a meta do dia`;
+        const faltaDia = Math.max(0, necDia - vHoje);
+        const pctDia = necDia > 0 ? Math.min(100, (vHoje / necDia) * 100) : 0;
+        const bateu = necDia > 0 && vHoje >= necDia;
+        const cor = bateu ? "#059669" : (pctDia >= 50 ? "#d97706" : "#e11d48");
+        const elVend = document.getElementById("dia-vendido");
+        elVend.textContent = brl(vHoje); elVend.style.color = cor;
+        const elFalta = document.getElementById("dia-falta");
+        elFalta.textContent = bateu ? "meta batida 🎉" : brl(faltaDia); elFalta.style.color = cor;
+        const bar = document.getElementById("dia-bar");
+        bar.style.width = pctDia + "%"; bar.style.background = cor;
+        document.getElementById("dia-meta-sub").textContent =
+          `Meta do dia (ritmo) ${brl(necDia)} · ${Math.round(pctDia)}% concluído` + (bateu ? ` (+${brl(vHoje - necDia)})` : "");
+        const vs = d.vendasHojePorVendedor || [];
+        document.getElementById("dia-vendedores").innerHTML = vs.length
+          ? `<p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Receita por vendedor · hoje</p>`+
+            vs.map(v => `<div class="flex items-center justify-between text-xs"><span class="text-slate-600">${v.vendedor}`+
+              `${v.count>1?` <span class="text-slate-400">(${v.count})</span>`:""}</span>`+
+              `<span class="font-semibold text-slate-700">${brl(v.valor)}</span></div>`).join("")
+          : `<p class="text-[11px] text-slate-400">Nenhuma venda registrada hoje ainda.</p>`;
       }
 
       document.getElementById("footer").textContent =
