@@ -110,7 +110,10 @@ function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, m
   const runRate = (faturamentoAtual / diasUteisDecorridos) * diasUteisTotais;
   const gapMeta = metaMensal - faturamentoAtual;
   const fechamentoDiarioNecessario = diasUteisRestantes > 0 ? gapMeta / diasUteisRestantes : Math.max(0, gapMeta);
-  return { diasUteisTotais, diasUteisDecorridos, diasUteisRestantes, ticketMedio, runRate, gapMeta, fechamentoDiarioNecessario };
+  // Meta diária FIXA = meta ÷ dias úteis totais (base do mês). NÃO re-divide o saldo pelos
+  // dias restantes — assim o gap só cai pelo progresso real e um dia bom fica visível.
+  const metaDiariaFixa = diasUteisTotais > 0 ? metaMensal / diasUteisTotais : 0;
+  return { diasUteisTotais, diasUteisDecorridos, diasUteisRestantes, ticketMedio, runRate, gapMeta, fechamentoDiarioNecessario, metaDiariaFixa };
 }
 
 function nomeMes(ano, mes) {
@@ -136,6 +139,18 @@ async function fetchWinsToday(TK) {
     };
   });
   return { data: hojeSP, total: wins.length, wins, atualizadoEm: new Date().toISOString() };
+}
+
+// Vendas ganhas HOJE no funil (e vendedor, se filtrado) — alimenta a "meta do dia"
+// do card Fechamento/dia, que é abatida pelo progresso real do dia.
+async function fetchWonToday(pipelineId, userId, TK) {
+  const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+  let url = `${V1}/deals/timeline?start_date=${hojeSP}&interval=day&amount=1&field_key=won_time&status=won&pipeline_id=${pipelineId}`;
+  if (userId) url += `&user_id=${userId}`;
+  const r = await pd(url, TK);
+  const deals = (r.data && r.data[0] && r.data[0].deals) || [];
+  const sum = deals.reduce((acc, d) => acc + (Number(d.value) || 0), 0);
+  return { count: deals.length, sum };
 }
 
 async function fetchWonMonth(pipelineId, userId, monthStart, TK) {
@@ -393,6 +408,13 @@ module.exports = async function handler(req, res) {
         : META_POR_FUNIL[pipelineId] || META_PADRAO;
     const d = deriveMetrics({ ano, mes, diaAtual, faturamentoAtual: won.sum, negociosGanhos: won.count, metaMensal });
 
+    // Vendas de HOJE (só faz sentido no mês corrente) — abatem a meta do dia no card.
+    let vendasHoje = 0, vendasHojeCount = 0;
+    if (ehMesAtual) {
+      try { const wt = await fetchWonToday(pipelineId, userId, TK); vendasHoje = wt.sum; vendasHojeCount = wt.count; }
+      catch (_) { /* mantém 0 se a chamada falhar */ }
+    }
+
     const stages = (stagesRaw.data || []).sort((a, b) => a.order_nr - b.order_nr);
     const porStage = new Map();
     for (const o of open) porStage.set(o.stageId, (porStage.get(o.stageId) || 0) + 1);
@@ -415,6 +437,8 @@ module.exports = async function handler(req, res) {
       funil,
       geracao,
       novosDeals,
+      vendasHoje,
+      vendasHojeCount,
       forecastSemanal: buildForecast(open),
       historico,
       fonte: fonteHist,

@@ -117,6 +117,17 @@
           <p class="text-sm font-medium text-slate-700">Fechamento / dia necessário</p>
           <p id="fech-dia" class="mt-3 text-2xl font-bold"></p>
           <p id="fech-sub" class="mt-2 text-xs text-slate-500"></p>
+          <!-- Meta de hoje: base fixa abatida pelas vendas registradas hoje -->
+          <div id="fech-hoje-wrap" class="mt-4 border-t border-slate-200 pt-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-medium text-slate-600">Meta de hoje</span>
+              <span id="fech-hoje-status" class="font-semibold"></span>
+            </div>
+            <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+              <div id="fech-hoje-bar" class="h-full rounded-full transition-all" style="width:0%"></div>
+            </div>
+            <p id="fech-hoje-sub" class="mt-1.5 text-[11px] text-slate-500"></p>
+          </div>
         </div>
       </div>
     </section>
@@ -326,9 +337,35 @@
       document.getElementById("geracao-legenda").innerHTML =
         `<p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Legenda · o que conta em cada etapa</p>`+
         legenda.map(([k,v])=>`<p class="text-[11px] leading-snug text-slate-500"><span class="font-semibold text-slate-600">${k}</span> — ${v}</p>`).join("");
-      document.getElementById("fech-dia").textContent = brl(d.fechamentoDiarioNecessario);
+      // (A) Meta diária FIXA = meta ÷ dias úteis totais (base do mês). Não re-divide o saldo
+      // pelos dias restantes → o gap só cai pelo progresso real, e um dia bom fica visível.
+      const baseDiaFix = d.metaDiariaFixa || 0;
+      document.getElementById("fech-dia").textContent = brl(baseDiaFix);
       document.getElementById("fech-sub").textContent =
-        `Para zerar o gap de ${brl(d.gapMeta)} nos ${d.diasUteisRestantes} dias úteis restantes.`;
+        `Meta diária fixa (meta ÷ ${d.diasUteisTotais} dias úteis) · ainda falta captar ${brl(Math.max(0, d.gapMeta))} no mês`;
+
+      // (B) Meta de HOJE = base − vendas registradas hoje. Cada venda do dia abate direto,
+      // dando feedback imediato do sucesso do dia. Escondida em meses fechados.
+      const hojeWrap = document.getElementById("fech-hoje-wrap");
+      if (d.historico) {
+        hojeWrap.style.display = "none";
+      } else {
+        hojeWrap.style.display = "";
+        const vHoje = d.vendasHoje || 0;
+        const faltaHoje = Math.max(0, baseDiaFix - vHoje);
+        const pctHoje = baseDiaFix > 0 ? Math.min(100, (vHoje / baseDiaFix) * 100) : 0;
+        const bateu = baseDiaFix > 0 && vHoje >= baseDiaFix;
+        const cor = bateu ? "#059669" : (pctHoje >= 50 ? "#d97706" : "#e11d48");
+        const bar = document.getElementById("fech-hoje-bar");
+        bar.style.width = pctHoje + "%";
+        bar.style.background = cor;
+        const st = document.getElementById("fech-hoje-status");
+        st.textContent = Math.round(pctHoje) + "%";
+        st.style.color = cor;
+        document.getElementById("fech-hoje-sub").textContent = bateu
+          ? `🎉 Meta do dia batida — vendeu ${brl(vHoje)} hoje (+${brl(vHoje - baseDiaFix)} acima da base)`
+          : `Vendeu ${brl(vHoje)} hoje · faltam ${brl(faltaHoje)} p/ a meta do dia`;
+      }
 
       document.getElementById("footer").textContent =
         "Dados ao vivo do Pipedrive · atualizado " +
