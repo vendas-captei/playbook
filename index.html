@@ -6120,46 +6120,64 @@ function fdRender(j){
 
  <style>
  .cad-wrap{--cad-bd:var(--n-200);}
- .cad-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px;}
- .cad-btn{font:inherit;font-weight:700;font-size:13px;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--accent);color:#fff;}
+ .cad-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0 10px;}
+ .cad-btn{font:inherit;font-weight:700;font-size:13px;border:none;border-radius:8px;padding:9px 15px;cursor:pointer;background:var(--accent);color:#fff;}
  .cad-btn.ghost{background:transparent;color:var(--n-700);border:1px solid var(--cad-bd);}
+ .cad-btn.sm{padding:6px 11px;font-size:12px;}
  .cad-btn:disabled{opacity:.45;cursor:default;}
- .cad-meta{font-size:12px;color:var(--n-600);}
- .cad-track{border:1px solid var(--cad-bd);border-radius:14px;padding:16px;margin-bottom:18px;background:#fff;}
- .cad-track-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;}
- .cad-chip{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent);}
- .cad-inp{font:inherit;padding:7px 9px;border:1px solid var(--cad-bd);border-radius:7px;background:#fff;color:var(--n-800,#111);}
- .cad-name{font-weight:700;font-size:15px;flex:1;min-width:160px;}
- .cad-txt{width:100%;min-height:66px;resize:vertical;font:inherit;font-size:13px;padding:9px;border:1px solid var(--cad-bd);border-radius:8px;background:#fff;box-sizing:border-box;line-height:1.5;}
- .cad-step{border:1px solid var(--cad-bd);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--n-50);}
- .cad-step-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;}
- .cad-day{width:64px;text-align:center;font-weight:700;}
- .cad-title-inp{flex:1;min-width:140px;}
- .cad-mini{border:1px solid var(--cad-bd);background:#fff;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:13px;line-height:1;color:var(--n-700);}
- .cad-mini:hover{background:var(--n-50);}
- .cad-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--n-600);margin:2px 0 3px;}
+ .cad-meta{font-size:12px;color:var(--n-600);margin-bottom:14px;}
  .cad-status{font-size:12.5px;font-weight:600;}
+ .cad-inp{font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--cad-bd);border-radius:7px;background:#fff;color:var(--n-800,#111);}
+ .cad-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--n-600);margin:10px 0 3px;}
+ .cad-txt{width:100%;min-height:78px;resize:vertical;font:inherit;font-size:13px;padding:9px;border:1px solid var(--cad-bd);border-radius:8px;background:#fff;box-sizing:border-box;line-height:1.55;}
+ .cad-ro-note{font-size:12.5px;color:var(--n-600);background:var(--n-50);border:1px solid var(--cad-bd);border-radius:9px;padding:10px 13px;margin-bottom:14px;}
+ .cad-track{border:1px solid var(--cad-bd);border-radius:14px;padding:16px;margin-bottom:16px;background:#fff;}
+ .cad-track-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+ .cad-track-name{font-weight:800;font-size:16px;color:var(--n-900,#111);}
+ .cad-count{font-size:11px;font-weight:700;color:var(--n-600);background:var(--n-100,#f0f0f0);border-radius:20px;padding:2px 10px;}
+ .cad-track-when{font-size:12.5px;color:var(--n-600);margin:6px 0 12px;}
+ .cad-track-when b{color:var(--n-800,#111);font-weight:600;}
+ .cad-step{border:1px solid var(--cad-bd);border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden;}
+ .cad-step-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;}
+ .cad-step-head:hover{background:var(--n-50);}
+ .cad-day{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;color:var(--n-700);min-width:30px;}
+ .cad-pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap;}
+ .cad-wa{background:#dcfce7;color:#15803d;} .cad-call{background:#dbeafe;color:#1d4ed8;} .cad-mail{background:#fef3c7;color:#b45309;}
+ .cad-step-title{flex:1;font-weight:600;font-size:13.5px;color:var(--n-800,#111);min-width:80px;}
+ .cad-caret{color:var(--n-500,#9a9a9a);font-size:10px;transition:transform .15s;}
+ .cad-step.open .cad-caret{transform:rotate(180deg);}
+ .cad-step-body{display:none;padding:2px 12px 14px;border-top:1px solid var(--n-100,#eee);}
+ .cad-step.open .cad-step-body{display:block;}
+ .cad-msg{white-space:pre-wrap;font-size:13px;line-height:1.6;color:var(--n-700);background:var(--n-50);border-radius:8px;padding:11px 13px;margin-top:10px;}
+ .cad-subj{font-size:12.5px;color:var(--n-600);margin-top:10px;}
+ .cad-subj b{color:var(--n-800,#111);}
+ .cad-edit-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+ .cad-step-actions{display:flex;gap:6px;margin-top:12px;}
+ .cad-mini{border:1px solid var(--cad-bd);background:#fff;border-radius:6px;height:30px;padding:0 10px;cursor:pointer;font-size:12px;color:var(--n-700);}
+ .cad-mini:hover{background:var(--n-50);}
  </style>
 
  <div class="cad-wrap">
 
- <!-- ================= EDITOR NO-CODE ================= -->
- <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:24px 0 4px;">
-   <h3 style="font-size:17px;font-weight:700;">✏️ Editor de Cadências <span style="font-weight:600;color:var(--n-600);font-size:13px;">— edite dias, canais e textos direto aqui</span></h3>
- </div>
- <p style="color:var(--n-600);margin-bottom:12px;font-size:13.5px;">Use <code>${name}</code>, <code>${imobiliaria}</code> e <code>${cidade}</code> nos textos — são substituídos automaticamente no envio. Ao salvar, a versão vale para <b>todo o time</b>.</p>
+ <!-- ================= EDITOR / VISUALIZADOR ================= -->
+ <h3 id="cad-title" style="font-size:17px;font-weight:700;margin:24px 0 4px;">Cadências do time</h3>
+ <p id="cad-sub" style="color:var(--n-600);margin-bottom:12px;font-size:13.5px;">Sequência de toques usada pelo time.</p>
 
- <div class="cad-toolbar">
-   <button class="cad-btn" id="cad-save" onclick="cadSave()" disabled>💾 Salvar para o time</button>
-   <button class="cad-btn ghost" onclick="cadLoad(true)">↻ Recarregar</button>
-   <input class="cad-inp" id="cad-por" placeholder="Seu nome (opcional)" style="width:170px;">
-   <span class="cad-status" id="cad-status"></span>
+ <div id="cad-ro-note" class="cad-ro-note" style="display:none;">🔒 A edição das cadências é exclusiva da <b>gestão</b>. Você pode consultar os toques (clique para abrir) e usar o <b>Redator IA</b> logo abaixo.</div>
+
+ <div id="cad-mgr" style="display:none;">
+   <div class="cad-toolbar">
+     <button class="cad-btn" id="cad-save" onclick="cadSave()" disabled>💾 Salvar para o time</button>
+     <button class="cad-btn ghost" onclick="cadLoad(true)">↻ Recarregar</button>
+     <input class="cad-inp" id="cad-por" placeholder="Seu nome (opcional)" style="width:170px;">
+     <span class="cad-status" id="cad-status"></span>
+   </div>
  </div>
- <div class="cad-meta" id="cad-meta" style="margin-bottom:14px;"></div>
+ <div class="cad-meta" id="cad-meta"></div>
 
  <div id="cad-tracks"><p style="color:var(--n-600);">Carregando cadências…</p></div>
 
- <div style="margin:4px 0 8px;"><button class="cad-btn ghost" onclick="cadAddTrack()">+ Nova trilha</button></div>
+ <div id="cad-addtrack" style="display:none;margin:4px 0 8px;"><button class="cad-btn ghost sm" onclick="cadAddTrack()">+ Nova trilha</button></div>
 
  <!-- ================= REDATOR IA ================= -->
  <div class="card" style="margin-top:28px;border:1px solid var(--n-200);border-radius:14px;padding:18px;background:#fff;">
@@ -6203,11 +6221,32 @@ function fdRender(j){
  <script>
  (function(){
    var CHANNELS = ["WhatsApp","Ligação","E-mail"];
+   var MGR = false; // usuário é gestão? (edição liberada)
    window.CAD = { loaded:false, dirty:false, data:{tracks:[]} };
    function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
    function escAttr(s){ return esc(s).replace(/"/g,"&quot;"); }
    function setStatus(t,ok){ var e=document.getElementById("cad-status"); if(e){ e.textContent=t||""; e.style.color=ok===false?"#DC2626":(ok?"#059669":"var(--n-600)"); } }
    function markDirty(){ CAD.dirty=true; var b=document.getElementById("cad-save"); if(b) b.disabled=false; setStatus("Alterações não salvas."); }
+   function chMeta(c){ return c==="Ligação"?{cls:"cad-call",ic:"📞"}:c==="E-mail"?{cls:"cad-mail",ic:"✉️"}:{cls:"cad-wa",ic:"💬"}; }
+
+   // Gestão = admin OU team "Gestão" (mesma regra do isAdminUser do Playbook)
+   function cadIsManager(){
+     try{
+       var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");
+       if(!s.name) return false;
+       var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];
+       var u=all.find(function(x){ return x.name===s.name; });
+       return !!(u&&(u.admin||u.team==="Gestão"));
+     }catch(e){ return false; }
+   }
+   function cadApplyRole(){
+     MGR = cadIsManager();
+     var mgr=document.getElementById("cad-mgr"); if(mgr) mgr.style.display=MGR?"":"none";
+     var at=document.getElementById("cad-addtrack"); if(at) at.style.display=MGR?"":"none";
+     var ro=document.getElementById("cad-ro-note"); if(ro) ro.style.display=MGR?"none":"";
+     var ti=document.getElementById("cad-title"); if(ti) ti.textContent=MGR?"✏️ Editor de Cadências":"📋 Cadências do time";
+     var sub=document.getElementById("cad-sub"); if(sub) sub.innerHTML=MGR?"Edite dias, canais e textos. Use <code>${name}</code>, <code>${imobiliaria}</code> e <code>${cidade}</code> — são substituídos no envio. Ao salvar, vale para <b>todo o time</b>.":"Sequência de toques usada pelo time. Clique num toque para ver a mensagem.";
+   }
 
    window.cadLoad = async function(force){
      if(CAD.loaded && !force) return;
@@ -6221,58 +6260,83 @@ function fdRender(j){
      var m=document.getElementById("cad-meta");
      if(m) m.textContent = data.updatedAt ? ("Última edição: "+new Date(data.updatedAt).toLocaleString("pt-BR")+(data.updatedBy&&data.updatedBy!=="seed"?(" por "+data.updatedBy):"")) : "";
      setStatus(force?"Recarregado.":"", force?true:undefined);
+     cadApplyRole();
      cadRender();
    };
+
+   // corpo de um toque: leitura (todos) ou edição (gestão)
+   function stepBody(t,ti,s,si,isEmail){
+     if(!MGR){
+       return (isEmail&&s.subject?('<div class="cad-subj"><b>Assunto:</b> '+esc(s.subject)+'</div>'):'')+
+              '<div class="cad-msg">'+esc(s.text||"—")+'</div>';
+     }
+     var opts=CHANNELS.map(function(c){return '<option'+(c===s.channel?' selected':'')+'>'+c+'</option>';}).join("");
+     return '<div class="cad-edit-grid">'+
+         '<select class="cad-inp" onchange="cadEdit('+ti+','+si+',\'channel\',this.value);cadRender()" title="Canal">'+opts+'</select>'+
+         '<input class="cad-inp" style="width:84px;" value="'+escAttr(s.day)+'" oninput="cadEdit('+ti+','+si+',\'day\',this.value);cadSyncHead('+ti+','+si+')" title="Dia">'+
+       '</div>'+
+       '<div class="cad-lbl">Título</div>'+
+       '<input class="cad-inp" style="width:100%;box-sizing:border-box;" value="'+escAttr(s.title)+'" oninput="cadEdit('+ti+','+si+',\'title\',this.value);cadSyncHead('+ti+','+si+')">'+
+       (isEmail?('<div class="cad-lbl">Assunto</div><input class="cad-inp" style="width:100%;box-sizing:border-box;" value="'+escAttr(s.subject)+'" oninput="cadEdit('+ti+','+si+',\'subject\',this.value)" placeholder="Assunto do e-mail">'):'')+
+       '<div class="cad-lbl">'+(s.channel==="Ligação"?"Roteiro":"Mensagem")+'</div>'+
+       '<textarea class="cad-txt" oninput="cadEdit('+ti+','+si+',\'text\',this.value)" placeholder="Texto do toque">'+esc(s.text)+'</textarea>'+
+       '<div class="cad-step-actions">'+
+         '<button class="cad-mini" onclick="cadMove('+ti+','+si+',-1)">↑ Subir</button>'+
+         '<button class="cad-mini" onclick="cadMove('+ti+','+si+',1)">↓ Descer</button>'+
+         '<button class="cad-mini" style="color:#DC2626;margin-left:auto;" onclick="cadDelStep('+ti+','+si+')">🗑 Remover</button>'+
+       '</div>';
+   }
 
    window.cadRender = function(){
      var wrap=document.getElementById("cad-tracks"); if(!wrap) return;
      var tr=CAD.data.tracks||[];
-     if(!tr.length){ wrap.innerHTML='<p style="color:var(--n-600);">Nenhuma trilha ainda. Clique em “+ Nova trilha”.</p>'; return; }
+     if(!tr.length){ wrap.innerHTML='<p style="color:var(--n-600);">'+(MGR?'Nenhuma trilha ainda. Clique em “+ Nova trilha”.':'Nenhuma cadência cadastrada.')+'</p>'; return; }
      wrap.innerHTML = tr.map(function(t,ti){
        var steps=(t.steps||[]).map(function(s,si){
-         var isEmail=(s.channel==="E-mail");
-         var opts=CHANNELS.map(function(c){return '<option'+(c===s.channel?' selected':'')+'>'+c+'</option>';}).join("");
+         var isEmail=(s.channel==="E-mail"); var m=chMeta(s.channel);
          return '<div class="cad-step">'+
-           '<div class="cad-step-row">'+
-             '<input class="cad-inp cad-day" value="'+escAttr(s.day)+'" oninput="cadEdit('+ti+','+si+',\'day\',this.value)" title="Dia">'+
-             '<select class="cad-inp" onchange="cadEdit('+ti+','+si+',\'channel\',this.value);cadRender()" title="Canal">'+opts+'</select>'+
-             '<input class="cad-inp cad-title-inp" value="'+escAttr(s.title)+'" oninput="cadEdit('+ti+','+si+',\'title\',this.value)" placeholder="Título do toque">'+
-             '<button class="cad-mini" onclick="cadMove('+ti+','+si+',-1)" title="Subir">↑</button>'+
-             '<button class="cad-mini" onclick="cadMove('+ti+','+si+',1)" title="Descer">↓</button>'+
-             '<button class="cad-mini" onclick="cadDelStep('+ti+','+si+')" title="Remover" style="color:#DC2626;">✕</button>'+
+           '<div class="cad-step-head" onclick="cadToggle(this)">'+
+             '<span class="cad-day" id="cd-'+ti+'-'+si+'">'+esc(s.day)+'</span>'+
+             '<span class="cad-pill '+m.cls+'">'+m.ic+' '+esc(s.channel)+'</span>'+
+             '<span class="cad-step-title" id="ct-'+ti+'-'+si+'">'+esc(s.title)+'</span>'+
+             '<span class="cad-caret">▼</span>'+
            '</div>'+
-           (isEmail?('<div class="cad-lbl">Assunto</div><input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:8px;" value="'+escAttr(s.subject)+'" oninput="cadEdit('+ti+','+si+',\'subject\',this.value)" placeholder="Assunto do e-mail">'):'')+
-           '<div class="cad-lbl">'+(s.channel==="Ligação"?"Roteiro":"Mensagem")+'</div>'+
-           '<textarea class="cad-txt" oninput="cadEdit('+ti+','+si+',\'text\',this.value)" placeholder="Texto do toque">'+esc(s.text)+'</textarea>'+
+           '<div class="cad-step-body">'+stepBody(t,ti,s,si,isEmail)+'</div>'+
          '</div>';
        }).join("");
-       return '<div class="cad-track">'+
-         '<div class="cad-track-top">'+
-           '<span class="cad-chip">Trilha</span>'+
-           '<input class="cad-inp cad-name" value="'+escAttr(t.name)+'" oninput="cadEdit('+ti+',null,\'name\',this.value)">'+
-           '<button class="cad-mini" onclick="cadDelTrack('+ti+')" title="Remover trilha" style="color:#DC2626;">✕</button>'+
-         '</div>'+
-         '<div class="cad-lbl">Quando esta trilha roda (origem do lead)</div>'+
-         '<input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:8px;" value="'+escAttr(t.origin)+'" oninput="cadEdit('+ti+',null,\'origin\',this.value)">'+
-         '<div class="cad-lbl">Descrição</div>'+
-         '<input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:14px;" value="'+escAttr(t.desc)+'" oninput="cadEdit('+ti+',null,\'desc\',this.value)">'+
-         steps+
-         '<button class="cad-btn ghost" onclick="cadAddStep('+ti+')" style="margin-top:4px;">+ Adicionar toque</button>'+
+       var head = MGR
+         ? '<div class="cad-track-head">'+
+             '<input class="cad-inp cad-track-name" style="flex:1;min-width:160px;" value="'+escAttr(t.name)+'" oninput="cadEdit('+ti+',null,\'name\',this.value)">'+
+             '<button class="cad-mini" style="color:#DC2626;" onclick="cadDelTrack('+ti+')" title="Remover trilha">🗑</button>'+
+           '</div>'+
+           '<div class="cad-lbl">Quando roda (origem do lead)</div>'+
+           '<input class="cad-inp" style="width:100%;box-sizing:border-box;" value="'+escAttr(t.origin)+'" oninput="cadEdit('+ti+',null,\'origin\',this.value)">'+
+           '<div class="cad-lbl">Descrição</div>'+
+           '<input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:12px;" value="'+escAttr(t.desc)+'" oninput="cadEdit('+ti+',null,\'desc\',this.value)">'
+         : '<div class="cad-track-head"><span class="cad-track-name">'+esc(t.name)+'</span><span class="cad-count">'+(t.steps||[]).length+' toques</span></div>'+
+           '<div class="cad-track-when">▶ Roda quando: <b>'+esc(t.origin||"—")+'</b>'+(t.desc?(' · '+esc(t.desc)):'')+'</div>';
+       return '<div class="cad-track">'+head+steps+
+         (MGR?'<button class="cad-btn ghost sm" onclick="cadAddStep('+ti+')" style="margin-top:6px;">+ Adicionar toque</button>':'')+
        '</div>';
      }).join("");
    };
 
+   window.cadToggle = function(head){ head.parentElement.classList.toggle("open"); };
+   window.cadSyncHead = function(ti,si){ var s=CAD.data.tracks[ti].steps[si]; var d=document.getElementById("cd-"+ti+"-"+si); if(d)d.textContent=s.day; var t=document.getElementById("ct-"+ti+"-"+si); if(t)t.textContent=s.title; };
+
    window.cadEdit = function(ti,si,field,val){
+     if(!MGR) return;
      if(si===null){ CAD.data.tracks[ti][field]=val; } else { CAD.data.tracks[ti].steps[si][field]=val; }
      markDirty();
    };
-   window.cadAddStep = function(ti){ CAD.data.tracks[ti].steps.push({day:"D?",channel:"WhatsApp",title:"Novo toque",subject:"",text:""}); markDirty(); cadRender(); };
-   window.cadDelStep = function(ti,si){ CAD.data.tracks[ti].steps.splice(si,1); markDirty(); cadRender(); };
-   window.cadMove = function(ti,si,dir){ var a=CAD.data.tracks[ti].steps, j=si+dir; if(j<0||j>=a.length) return; var t=a[si];a[si]=a[j];a[j]=t; markDirty(); cadRender(); };
-   window.cadAddTrack = function(){ CAD.data.tracks.push({id:"trilha"+Date.now(),name:"Nova trilha",origin:"",desc:"",steps:[]}); markDirty(); cadRender(); };
-   window.cadDelTrack = function(ti){ if(!confirm("Remover a trilha inteira?")) return; CAD.data.tracks.splice(ti,1); markDirty(); cadRender(); };
+   window.cadAddStep = function(ti){ if(!MGR)return; CAD.data.tracks[ti].steps.push({day:"D?",channel:"WhatsApp",title:"Novo toque",subject:"",text:""}); markDirty(); cadRender(); };
+   window.cadDelStep = function(ti,si){ if(!MGR)return; CAD.data.tracks[ti].steps.splice(si,1); markDirty(); cadRender(); };
+   window.cadMove = function(ti,si,dir){ if(!MGR)return; var a=CAD.data.tracks[ti].steps, j=si+dir; if(j<0||j>=a.length) return; var t=a[si];a[si]=a[j];a[j]=t; markDirty(); cadRender(); };
+   window.cadAddTrack = function(){ if(!MGR)return; CAD.data.tracks.push({id:"trilha"+Date.now(),name:"Nova trilha",origin:"",desc:"",steps:[]}); markDirty(); cadRender(); };
+   window.cadDelTrack = function(ti){ if(!MGR)return; if(!confirm("Remover a trilha inteira?")) return; CAD.data.tracks.splice(ti,1); markDirty(); cadRender(); };
 
    window.cadSave = async function(){
+     if(!MGR){ setStatus("Sem permissão para salvar.",false); return; }
      var b=document.getElementById("cad-save"); if(b) b.disabled=true; setStatus("Salvando…");
      var por=(document.getElementById("cad-por")||{}).value||"";
      try{
