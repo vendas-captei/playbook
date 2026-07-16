@@ -2658,6 +2658,7 @@ function clearSettingsModal() {
           <div class="s-sub" onclick="showSection('inbound', this)">Inbound (Lead Inscrito)</div>
           <div class="s-sub" onclick="showSection('whatsapp', this)">WhatsApp <span class="s-cnt">7</span></div>
           <div class="s-sub" onclick="showSection('emails', this)">Cadência de E-mails <span class="s-cnt">4</span></div>
+          <div class="s-sub" onclick="showSection('cadencias', this)">Cadências <span class="s-cnt">2</span></div>
           <div class="s-sub" onclick="showSection('objections', this)">Objeções <span class="s-cnt">8</span></div>
           <div class="s-sub" onclick="showSection('rapport', this)">Banco de Rapports</div>
 
@@ -6079,6 +6080,249 @@ function fdRender(j){
  </div>
  </div>
 
+
+ <div class="section" id="sec-cadencias">
+ <div class="page-header">
+   <div class="crumb"><b>Captação Ativa</b> / Prospecção</div>
+   <h2>Cadências</h2>
+   <p>Quando um card entra na etapa <strong>"Tentei Contato"</strong> do funil Captação Ativa, uma cadência de follow-up é <strong>criada automaticamente</strong> (via n8n) e as tarefas aparecem sozinhas no seu Pipedrive. Você não precisa montar sequência: só <strong>executar e concluir</strong> cada tarefa no dia. A origem do lead define qual das duas trilhas roda.</p>
+ </div>
+
+ <div class="golden-rule">
+ <h3>Como funciona na prática</h3>
+ <p>Assim que o lead cai em <strong>"Tentei Contato"</strong>, o robô cria os toques (WhatsApp, Ligação e E-mail) com data e roteiro no <code>public_description</code>. <strong>Concluir</strong> a tarefa do dia libera o próximo bloco (gate por conclusão). Se você <strong>tirar o card da etapa</strong>, os toques pendentes são cancelados. O campo <strong>"Fase"</strong> do card mostra em qual bloco a cadência está.</p>
+ </div>
+
+ <div class="overview-grid">
+ <div class="stat-card">
+ <div class="stat-value">2</div>
+ <div class="stat-label">Trilhas: Inbound e Outbound</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-value">7 dias</div>
+ <div class="stat-label">Janela da cadência (D1 → D7)</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-value">Auto</div>
+ <div class="stat-label">Criada ao entrar em "Tentei Contato"</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-value">07–21h</div>
+ <div class="stat-label">Janela em que os toques são gerados</div>
+ </div>
+ </div>
+
+ <div class="alert-box" style="background:var(--accent-soft); border-color:var(--accent-border); margin-bottom:20px;">
+   <strong>Qual trilha roda?</strong> É a <b>origem do lead</b> que decide, automaticamente:<br>
+   • <b>Inbound</b> — lead veio do Marketplace / cadastro (título "(Inbound) - …").<br>
+   • <b>Outbound</b> — card criado manualmente, via API ou importação de lista.
+ </div>
+
+ <style>
+ .cad-wrap{--cad-bd:var(--n-200);}
+ .cad-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px;}
+ .cad-btn{font:inherit;font-weight:700;font-size:13px;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--accent);color:#fff;}
+ .cad-btn.ghost{background:transparent;color:var(--n-700);border:1px solid var(--cad-bd);}
+ .cad-btn:disabled{opacity:.45;cursor:default;}
+ .cad-meta{font-size:12px;color:var(--n-600);}
+ .cad-track{border:1px solid var(--cad-bd);border-radius:14px;padding:16px;margin-bottom:18px;background:#fff;}
+ .cad-track-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;}
+ .cad-chip{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent);}
+ .cad-inp{font:inherit;padding:7px 9px;border:1px solid var(--cad-bd);border-radius:7px;background:#fff;color:var(--n-800,#111);}
+ .cad-name{font-weight:700;font-size:15px;flex:1;min-width:160px;}
+ .cad-txt{width:100%;min-height:66px;resize:vertical;font:inherit;font-size:13px;padding:9px;border:1px solid var(--cad-bd);border-radius:8px;background:#fff;box-sizing:border-box;line-height:1.5;}
+ .cad-step{border:1px solid var(--cad-bd);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--n-50);}
+ .cad-step-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;}
+ .cad-day{width:64px;text-align:center;font-weight:700;}
+ .cad-title-inp{flex:1;min-width:140px;}
+ .cad-mini{border:1px solid var(--cad-bd);background:#fff;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:13px;line-height:1;color:var(--n-700);}
+ .cad-mini:hover{background:var(--n-50);}
+ .cad-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--n-600);margin:2px 0 3px;}
+ .cad-status{font-size:12.5px;font-weight:600;}
+ </style>
+
+ <div class="cad-wrap">
+
+ <!-- ================= EDITOR NO-CODE ================= -->
+ <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:24px 0 4px;">
+   <h3 style="font-size:17px;font-weight:700;">✏️ Editor de Cadências <span style="font-weight:600;color:var(--n-600);font-size:13px;">— edite dias, canais e textos direto aqui</span></h3>
+ </div>
+ <p style="color:var(--n-600);margin-bottom:12px;font-size:13.5px;">Use <code>${name}</code>, <code>${imobiliaria}</code> e <code>${cidade}</code> nos textos — são substituídos automaticamente no envio. Ao salvar, a versão vale para <b>todo o time</b>.</p>
+
+ <div class="cad-toolbar">
+   <button class="cad-btn" id="cad-save" onclick="cadSave()" disabled>💾 Salvar para o time</button>
+   <button class="cad-btn ghost" onclick="cadLoad(true)">↻ Recarregar</button>
+   <input class="cad-inp" id="cad-por" placeholder="Seu nome (opcional)" style="width:170px;">
+   <span class="cad-status" id="cad-status"></span>
+ </div>
+ <div class="cad-meta" id="cad-meta" style="margin-bottom:14px;"></div>
+
+ <div id="cad-tracks"><p style="color:var(--n-600);">Carregando cadências…</p></div>
+
+ <div style="margin:4px 0 8px;"><button class="cad-btn ghost" onclick="cadAddTrack()">+ Nova trilha</button></div>
+
+ <!-- ================= REDATOR IA ================= -->
+ <div class="card" style="margin-top:28px;border:1px solid var(--n-200);border-radius:14px;padding:18px;background:#fff;">
+   <h3 style="font-size:16px;font-weight:700;margin:0 0 4px;">🤖 Redator IA de Mensagens</h3>
+   <p style="color:var(--n-600);font-size:13px;margin:0 0 14px;">Diga o que você quer dizer e a IA redige a mensagem ou e-mail pronto — já com as variáveis. Copie e cole no toque desejado.</p>
+   <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+     <div>
+       <div class="cad-lbl">Canal</div>
+       <select class="cad-inp" id="cad-r-channel" style="min-width:150px;">
+         <option value="whatsapp">WhatsApp</option>
+         <option value="email">E-mail</option>
+         <option value="ligacao">Roteiro de ligação</option>
+       </select>
+     </div>
+     <div>
+       <div class="cad-lbl">Tom</div>
+       <select class="cad-inp" id="cad-r-tone" style="min-width:150px;">
+         <option value="consultivo">Consultivo</option>
+         <option value="caloroso e próximo">Caloroso</option>
+         <option value="direto e objetivo">Direto</option>
+         <option value="curioso / provocativo">Provocativo</option>
+       </select>
+     </div>
+   </div>
+   <div class="cad-lbl">O que você quer dizer?</div>
+   <textarea class="cad-txt" id="cad-r-brief" placeholder="Ex.: follow-up leve para quem não respondeu, oferecendo um horário rápido esta semana"></textarea>
+   <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+     <button class="cad-btn" id="cad-r-go" onclick="cadDraft()">✨ Gerar</button>
+     <span class="cad-status" id="cad-r-status"></span>
+   </div>
+   <div id="cad-r-out" style="display:none;margin-top:14px;">
+     <div class="cad-lbl" id="cad-r-subwrap" style="display:none;">Assunto</div>
+     <input class="cad-inp" id="cad-r-subject" style="width:100%;box-sizing:border-box;display:none;margin-bottom:8px;">
+     <div class="cad-lbl">Mensagem</div>
+     <textarea class="cad-txt" id="cad-r-result" style="min-height:120px;"></textarea>
+     <div style="margin-top:10px;"><button class="cad-btn ghost" onclick="cadCopyDraft()">📋 Copiar</button></div>
+   </div>
+ </div>
+ </div>
+
+ <script>
+ (function(){
+   var CHANNELS = ["WhatsApp","Ligação","E-mail"];
+   window.CAD = { loaded:false, dirty:false, data:{tracks:[]} };
+   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+   function escAttr(s){ return esc(s).replace(/"/g,"&quot;"); }
+   function setStatus(t,ok){ var e=document.getElementById("cad-status"); if(e){ e.textContent=t||""; e.style.color=ok===false?"#DC2626":(ok?"#059669":"var(--n-600)"); } }
+   function markDirty(){ CAD.dirty=true; var b=document.getElementById("cad-save"); if(b) b.disabled=false; setStatus("Alterações não salvas."); }
+
+   window.cadLoad = async function(force){
+     if(CAD.loaded && !force) return;
+     var el=document.getElementById("cad-tracks"); if(el && force) el.innerHTML='<p style="color:var(--n-600);">Recarregando…</p>';
+     var data=null;
+     try{ var r=await fetch("/api/fccommit?kind=cadencias",{cache:"no-store"}); if(r.ok){ var j=await r.json(); if(j&&Array.isArray(j.tracks)&&j.tracks.length){ data=j; } } }catch(e){}
+     if(!data){ try{ var r2=await fetch("/data/cadencias.json",{cache:"no-store"}); if(r2.ok){ data=await r2.json(); } }catch(e){} }
+     if(!data) data={tracks:[]};
+     CAD.data=data; CAD.loaded=true; CAD.dirty=false;
+     var b=document.getElementById("cad-save"); if(b) b.disabled=true;
+     var m=document.getElementById("cad-meta");
+     if(m) m.textContent = data.updatedAt ? ("Última edição: "+new Date(data.updatedAt).toLocaleString("pt-BR")+(data.updatedBy&&data.updatedBy!=="seed"?(" por "+data.updatedBy):"")) : "";
+     setStatus(force?"Recarregado.":"", force?true:undefined);
+     cadRender();
+   };
+
+   window.cadRender = function(){
+     var wrap=document.getElementById("cad-tracks"); if(!wrap) return;
+     var tr=CAD.data.tracks||[];
+     if(!tr.length){ wrap.innerHTML='<p style="color:var(--n-600);">Nenhuma trilha ainda. Clique em “+ Nova trilha”.</p>'; return; }
+     wrap.innerHTML = tr.map(function(t,ti){
+       var steps=(t.steps||[]).map(function(s,si){
+         var isEmail=(s.channel==="E-mail");
+         var opts=CHANNELS.map(function(c){return '<option'+(c===s.channel?' selected':'')+'>'+c+'</option>';}).join("");
+         return '<div class="cad-step">'+
+           '<div class="cad-step-row">'+
+             '<input class="cad-inp cad-day" value="'+escAttr(s.day)+'" oninput="cadEdit('+ti+','+si+',\'day\',this.value)" title="Dia">'+
+             '<select class="cad-inp" onchange="cadEdit('+ti+','+si+',\'channel\',this.value);cadRender()" title="Canal">'+opts+'</select>'+
+             '<input class="cad-inp cad-title-inp" value="'+escAttr(s.title)+'" oninput="cadEdit('+ti+','+si+',\'title\',this.value)" placeholder="Título do toque">'+
+             '<button class="cad-mini" onclick="cadMove('+ti+','+si+',-1)" title="Subir">↑</button>'+
+             '<button class="cad-mini" onclick="cadMove('+ti+','+si+',1)" title="Descer">↓</button>'+
+             '<button class="cad-mini" onclick="cadDelStep('+ti+','+si+')" title="Remover" style="color:#DC2626;">✕</button>'+
+           '</div>'+
+           (isEmail?('<div class="cad-lbl">Assunto</div><input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:8px;" value="'+escAttr(s.subject)+'" oninput="cadEdit('+ti+','+si+',\'subject\',this.value)" placeholder="Assunto do e-mail">'):'')+
+           '<div class="cad-lbl">'+(s.channel==="Ligação"?"Roteiro":"Mensagem")+'</div>'+
+           '<textarea class="cad-txt" oninput="cadEdit('+ti+','+si+',\'text\',this.value)" placeholder="Texto do toque">'+esc(s.text)+'</textarea>'+
+         '</div>';
+       }).join("");
+       return '<div class="cad-track">'+
+         '<div class="cad-track-top">'+
+           '<span class="cad-chip">Trilha</span>'+
+           '<input class="cad-inp cad-name" value="'+escAttr(t.name)+'" oninput="cadEdit('+ti+',null,\'name\',this.value)">'+
+           '<button class="cad-mini" onclick="cadDelTrack('+ti+')" title="Remover trilha" style="color:#DC2626;">✕</button>'+
+         '</div>'+
+         '<div class="cad-lbl">Quando esta trilha roda (origem do lead)</div>'+
+         '<input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:8px;" value="'+escAttr(t.origin)+'" oninput="cadEdit('+ti+',null,\'origin\',this.value)">'+
+         '<div class="cad-lbl">Descrição</div>'+
+         '<input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:14px;" value="'+escAttr(t.desc)+'" oninput="cadEdit('+ti+',null,\'desc\',this.value)">'+
+         steps+
+         '<button class="cad-btn ghost" onclick="cadAddStep('+ti+')" style="margin-top:4px;">+ Adicionar toque</button>'+
+       '</div>';
+     }).join("");
+   };
+
+   window.cadEdit = function(ti,si,field,val){
+     if(si===null){ CAD.data.tracks[ti][field]=val; } else { CAD.data.tracks[ti].steps[si][field]=val; }
+     markDirty();
+   };
+   window.cadAddStep = function(ti){ CAD.data.tracks[ti].steps.push({day:"D?",channel:"WhatsApp",title:"Novo toque",subject:"",text:""}); markDirty(); cadRender(); };
+   window.cadDelStep = function(ti,si){ CAD.data.tracks[ti].steps.splice(si,1); markDirty(); cadRender(); };
+   window.cadMove = function(ti,si,dir){ var a=CAD.data.tracks[ti].steps, j=si+dir; if(j<0||j>=a.length) return; var t=a[si];a[si]=a[j];a[j]=t; markDirty(); cadRender(); };
+   window.cadAddTrack = function(){ CAD.data.tracks.push({id:"trilha"+Date.now(),name:"Nova trilha",origin:"",desc:"",steps:[]}); markDirty(); cadRender(); };
+   window.cadDelTrack = function(ti){ if(!confirm("Remover a trilha inteira?")) return; CAD.data.tracks.splice(ti,1); markDirty(); cadRender(); };
+
+   window.cadSave = async function(){
+     var b=document.getElementById("cad-save"); if(b) b.disabled=true; setStatus("Salvando…");
+     var por=(document.getElementById("cad-por")||{}).value||"";
+     try{
+       var r=await fetch("/api/fccommit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"cadencias",por:por,data:{tracks:CAD.data.tracks}})});
+       var j=await r.json();
+       if(!r.ok||!j.ok) throw new Error(j.error||("HTTP "+r.status));
+       CAD.dirty=false; setStatus("Salvo para o time! Publica em ~1 min.",true);
+       var m=document.getElementById("cad-meta"); if(m&&j.updatedAt) m.textContent="Última edição: "+new Date(j.updatedAt).toLocaleString("pt-BR")+(por?(" por "+por):"");
+     }catch(e){ setStatus("Erro ao salvar: "+e.message,false); if(b) b.disabled=false; }
+   };
+
+   window.cadDraft = async function(){
+     var brief=(document.getElementById("cad-r-brief")||{}).value||"";
+     var st=document.getElementById("cad-r-status");
+     if(!brief.trim()){ if(st){st.textContent="Escreva o que você quer dizer.";st.style.color="#DC2626";} return; }
+     var go=document.getElementById("cad-r-go"); if(go) go.disabled=true; if(st){st.textContent="Gerando…";st.style.color="var(--n-600)";}
+     try{
+       var r=await fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"draft",channel:document.getElementById("cad-r-channel").value,tone:document.getElementById("cad-r-tone").value,brief:brief})});
+       var j=await r.json();
+       if(!r.ok) throw new Error(j.error||("HTTP "+r.status));
+       var out=document.getElementById("cad-r-out"); out.style.display="";
+       var isEmail=(document.getElementById("cad-r-channel").value==="email");
+       document.getElementById("cad-r-subwrap").style.display=isEmail?"":"none";
+       var subj=document.getElementById("cad-r-subject"); subj.style.display=isEmail?"":"none"; subj.value=j.assunto||"";
+       document.getElementById("cad-r-result").value=j.mensagem||"";
+       if(st){st.textContent="Pronto!";st.style.color="#059669";}
+     }catch(e){ if(st){st.textContent="Erro: "+e.message;st.style.color="#DC2626";} }
+     finally{ if(go) go.disabled=false; }
+   };
+   window.cadCopyDraft = function(){
+     var isEmail=(document.getElementById("cad-r-channel").value==="email");
+     var txt=(isEmail&&document.getElementById("cad-r-subject").value?("Assunto: "+document.getElementById("cad-r-subject").value+"\n\n"):"")+document.getElementById("cad-r-result").value;
+     navigator.clipboard.writeText(txt).then(function(){ var st=document.getElementById("cad-r-status"); if(st){st.textContent="Copiado!";st.style.color="#059669";} });
+   };
+
+   document.addEventListener("DOMContentLoaded", function(){
+     var orig=window.showSection;
+     if(typeof orig==="function"){
+       window.showSection=function(id,el){ orig(id,el); if(id==="cadencias") cadLoad(); };
+     }
+     var s=document.getElementById("sec-cadencias");
+     if(s && s.classList.contains("active")) cadLoad();
+   });
+ })();
+ </script>
+
+ <div class="alert-box" style="background:var(--n-50); border-color:var(--n-200); margin-top:16px; font-size:12.5px; color:var(--n-600);">
+   <strong>Nota técnica (SalesOps):</strong> automações n8n em produção desde 24/06/2026 — Inbound <code>M31r5xilevih3Qxq</code> (origem Marketplace), Outbound <code>rCkuM0kGwE4rEBkQ</code> (origem Manual/API/Import). Gatilho: entrada no stage 38 "Tentei Contato" do funil 7. Cron a cada 30min, 07–21h. Só inicia para cards que entraram na etapa a partir de 24/06 (baseline só-novos).
+ </div>
+ </div>
 
  <div class="section" id="sec-outbound">
  <div class="page-header">
@@ -23247,7 +23491,7 @@ var PB_CATEGORIES = [
   { key:'ca', label:'Captação Ativa', items:[
     ['platform','Sobre a Plataforma'],['base-atuacao','Base de Atuação'],['concorrentes','Concorrentes'],
     ['outbound','Outbound (Scripts)'],['inbound','Inbound (Lead Inscrito)'],['whatsapp','WhatsApp'],
-    ['emails','Cadência de E-mails'],['objections','Objeções'],['rapport','Banco de Rapports'],
+    ['emails','Cadência de E-mails'],['cadencias','Cadências'],['objections','Objeções'],['rapport','Banco de Rapports'],
     ['valores','Valores & Apresentação'],['pre-reuniao','Pré-Reunião'],['guia-reuniao','Guia da Reunião'],
     ['exemplo-real','Situações da Reunião'],['fechamento','Fechamento'],['negociacao','Negociação Avançada'],
     ['cs','Passagem de Bastão CS'] ]},

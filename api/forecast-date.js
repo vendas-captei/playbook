@@ -55,6 +55,36 @@ module.exports = async function handler(req, res) {
   try {
     let body = ""; await new Promise((r) => { req.on("data", (c) => (body += c)); req.on("end", r); });
     const b = JSON.parse(body || "{}");
+
+    // ── Redator IA de mensagens/e-mails das Cadências (No-Code). Não precisa de deal_id. ──
+    if (b.action === "draft") {
+      const canal = String(b.channel || "whatsapp").toLowerCase(); // whatsapp | email | ligacao
+      const brief = String(b.brief || "").slice(0, 1200);
+      const tom = String(b.tone || "consultivo").slice(0, 60);
+      if (!brief) { res.status(400).json({ error: "brief (o que você quer dizer) obrigatório" }); return; }
+      const canalTxt = canal === "email" ? "E-MAIL" : canal === "ligacao" ? "ROTEIRO DE LIGAÇÃO" : "MENSAGEM DE WHATSAPP";
+      const regras = canal === "email"
+        ? "E-mail curto (assunto + corpo de 3-6 linhas), profissional e escaneável. Preencha \"assunto\"."
+        : canal === "ligacao"
+        ? "Roteiro de ligação em tópicos curtos (abertura, contexto, pergunta de dor, proposta de reunião). \"assunto\" vazio."
+        : "Mensagem de WhatsApp curta (2-4 linhas), calorosa e direta, no máximo 1 emoji. \"assunto\" vazio.";
+      const prompt = `Você redige mensagens de prospecção para o time comercial da Captei (plataforma que ajuda imobiliárias a captar imóveis com proprietários). Produto: Captação Ativa.
+
+Escreva UM(A) ${canalTxt} em português do Brasil, tom ${tom}.
+Pedido do vendedor: "${brief}"
+
+Regras:
+- ${regras}
+- Use as variáveis \${name}, \${imobiliaria} e \${cidade} quando fizer sentido (serão substituídas automaticamente). Mantenha exatamente esse formato \${...}.
+- Sem promessas de preço ou desconto. Objetivo final: agendar uma reunião/demonstração.
+- Nada de placeholders entre colchetes; texto pronto pra enviar.
+
+Responda APENAS com JSON válido, sem markdown: {"assunto":"<vazio se não for e-mail>","mensagem":"<texto pronto, use \\n para quebras de linha>"}`;
+      const out = await callClaude(KEY, prompt);
+      res.status(200).json({ canal, assunto: out.assunto || "", mensagem: out.mensagem || "" });
+      return;
+    }
+
     const dealId = Number(b.deal_id);
     if (!dealId) { res.status(400).json({ error: "deal_id obrigatório" }); return; }
 
