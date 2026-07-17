@@ -417,7 +417,11 @@
       const fV = Math.max(0, vN-feitas);
       // "faltam" = necessário − JÁ GERADO no mês (base consistente). Antes vinha das vendas
       // que faltam (fV/clv), o que ignorava os leads já gerados e inflava o número.
-      const gerados = (d.novosDeals!=null) ? d.novosDeals : ((d.geracao && d.geracao.mql) || 0);
+      // "gerados" reutiliza a MESMA métrica da Geração do mês (d.geracao.mql), que respeita a
+      // definição de negócio (produto CA/Indica+) e bate com o Pipedrive. Antes usava novosDeals
+      // (todo deal novo cross-funil, sem filtro) → nº maior e inconsistente com o Ritmo Diário.
+      // Fallback p/ novosDeals só quando geracao.mql não veio (ex.: mês fechado sem congelamento).
+      const gerados = (d.geracao && d.geracao.mql!=null) ? d.geracao.mql : (d.novosDeals || 0);
       const fL = Math.max(0, lN - gerados);
       const diasRest = d.diasUteisRestantes || 0;
       const leadsDia = diasRest>0 ? Math.ceil(fL/diasRest) : fL;
