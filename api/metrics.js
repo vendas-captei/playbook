@@ -129,15 +129,15 @@ function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, m
   const runRate = (faturamentoAtual / diasUteisDecorridos) * diasUteisTotais;
   const gapMeta = metaMensal - faturamentoAtual;
   // Meta do dia CONGELADA: gap do INICIO do dia (realizado ate ontem = faturamento - vendas de hoje)
-  // dividido pelos dias uteis restantes INCLUINDO hoje. O alvo do dia nao se move conforme as vendas
-  // de hoje entram (cada venda sobe faturamentoAtual e vendasHoje juntos -> numerador constante); so
-  // recalcula quando vira o dia. Ver project_dashboard_meta_dia_congelada_2026-07-20.
+  // dividido pelos dias uteis restantes (SEM hoje, mesma regua antiga). O alvo do dia nao se move
+  // conforme as vendas de hoje entram (cada venda sobe faturamentoAtual e vendasHoje juntos -> o
+  // numerador fica constante) e trava no valor que o card mostrava no comeco do dia; so recalcula
+  // quando vira o dia. Denominador SEM hoje por decisao do Natan (20/07). Ver
+  // project_dashboard_meta_dia_congelada_2026-07-20.
   const realizadoAteOntem = faturamentoAtual - (vendasHoje || 0);
   const gapInicioDia = metaMensal - realizadoAteOntem;
-  const diaHoje = Math.min(diaAtual, ultimoDia);
-  const diasUteisRestantesComHoje = contarDiasUteis(ano, mes, diaHoje, ultimoDia);
-  const fechamentoDiarioNecessario = diasUteisRestantesComHoje > 0
-    ? gapInicioDia / diasUteisRestantesComHoje
+  const fechamentoDiarioNecessario = diasUteisRestantes > 0
+    ? gapInicioDia / diasUteisRestantes
     : Math.max(0, gapInicioDia);
   // Meta diária FIXA = meta ÷ dias úteis totais (base do mês). NÃO re-divide o saldo pelos
   // dias restantes — assim o gap só cai pelo progresso real e um dia bom fica visível.
