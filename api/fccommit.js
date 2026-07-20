@@ -4,9 +4,10 @@
 // POST /api/fccommit { pipelineId, month, userId?, valor, por } -> grava
 const OWNER = "vendas-captei", REPO = "playbook", FILE = "fccommit.json";
 const GH = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
-// Cadências (editor No-Code compartilhado) vivem em data/cadencias.json — mesmo endpoint p/ ficar no limite de 12 funções.
-const CAD_PATH = "data/cadencias.json";
-const CAD_GH = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CAD_PATH}`;
+// Cadências (editores No-Code compartilhados) — cada "kind" mapeia um arquivo em data/. Mesmo endpoint p/ ficar no limite de 12 funções.
+const CAD_FILES = { "cadencias": "data/cadencias.json", "cadencias-copiloto": "data/cadencias-copiloto.json" };
+const CAD_LABELS = { "cadencias": "Captação Ativa", "cadencias-copiloto": "Copiloto" };
+const cadGh = (kind) => `https://api.github.com/repos/${OWNER}/${REPO}/contents/${CAD_FILES[kind]}`;
 
 async function ghReadRaw(url, tok, label) {
   const r = await fetch(url, { headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" }, cache: "no-store" });
@@ -26,22 +27,25 @@ module.exports = async function handler(req, res) {
   const tok = process.env.GITHUB_TOKEN;
   if (!tok) { res.status(500).json({ error: "GITHUB_TOKEN não configurado na Vercel" }); return; }
   try {
-    // ── Cadências (No-Code editável e compartilhado) ──
-    const isCadGet = req.method === "GET" && new URL(req.url, "http://localhost").searchParams.get("kind") === "cadencias";
-    if (isCadGet) {
-      const { data } = await ghReadRaw(CAD_GH, tok, "cadencias.json");
+    // ── Cadências (No-Code editável e compartilhado) — GET por kind ──
+    const cadKind = req.method === "GET" ? new URL(req.url, "http://localhost").searchParams.get("kind") : null;
+    if (cadKind && CAD_FILES[cadKind]) {
+      const { data } = await ghReadRaw(cadGh(cadKind), tok, CAD_FILES[cadKind]);
       res.status(200).json(data || { tracks: [] });
       return;
     }
     if (req.method === "POST") {
       let peek = ""; await new Promise((r) => { req.on("data", (c) => (peek += c)); req.on("end", r); });
       const pb = JSON.parse(peek || "{}");
-      if (pb.kind === "cadencias") {
+      // ── Cadências — POST por kind ──
+      if (pb.kind && CAD_FILES[pb.kind]) {
         if (!pb.data || !Array.isArray(pb.data.tracks)) { res.status(400).json({ error: "data.tracks (array) obrigatório" }); return; }
-        const { sha } = await ghReadRaw(CAD_GH, tok, "cadencias.json");
+        const url = cadGh(pb.kind);
+        const { sha } = await ghReadRaw(url, tok, CAD_FILES[pb.kind]);
         const payload = { updatedAt: new Date().toISOString(), updatedBy: pb.por || "", tracks: pb.data.tracks };
         const content = Buffer.from(JSON.stringify(payload, null, 2)).toString("base64");
-        const pr = await fetch(CAD_GH, { method: "PUT", headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "PlaybookApp" }, body: JSON.stringify({ message: `chore: editar cadências (Captação Ativa)${pb.por ? " — " + pb.por : ""}`, content, ...(sha ? { sha } : {}) }) });
+        const label = CAD_LABELS[pb.kind] || pb.kind;
+        const pr = await fetch(url, { method: "PUT", headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "PlaybookApp" }, body: JSON.stringify({ message: `chore: editar cadências (${label})${pb.por ? " — " + pb.por : ""}`, content, ...(sha ? { sha } : {}) }) });
         if (!pr.ok) { res.status(500).json({ error: `GitHub PUT ${pr.status}`, detail: await pr.text() }); return; }
         res.status(200).json({ ok: true, updatedAt: payload.updatedAt });
         return;

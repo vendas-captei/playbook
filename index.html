@@ -2716,7 +2716,7 @@ function clearSettingsModal() {
           <div class="s-sub" onclick="showSection('copiloto-concorrentes', this)">Concorrentes</div>
 
           <div class="s-section-label">Prospecção</div>
-          <div class="s-sub" onclick="showSection('copiloto-outbound', this)">Outbound (Scripts)</div>
+          <div class="s-sub" onclick="showSection('copiloto-outbound', this)">Outbound</div>
           <div class="s-sub" onclick="showSection('copiloto-inbound', this)">Inbound</div>
           <div class="s-sub" onclick="showSection('copiloto-whatsapp', this)" style="display:none">WhatsApp <span class="s-cnt">5</span></div>
           <div class="s-sub" onclick="showSection('copiloto-objecoes', this)">Objeções <span class="s-cnt">10</span></div>
@@ -11014,8 +11014,201 @@ function fdRender(j){
  <div class="page-header">
    <div class="crumb"><b>Copiloto</b> / Prospecção</div>
    <h2>Prospecção Outbound — Copiloto</h2>
-   <p>Scripts de ligação focados em fazer o lead enxergar quanto dinheiro perde com atendimento lento e processos manuais.</p>
+   <p>Cadência de toques (WhatsApp diário + ligações e e-mails) e os scripts de ligação. A cadência é editável pela gestão e roda automaticamente via n8n no funil IA Copiloto.</p>
  </div>
+
+ <!-- inner-tabs: Cadência (editável) + Scripts de Ligação -->
+ <div class="inner-tabs">
+   <button class="inner-tab active" onclick="switchTab(this,'cop-out-tab')">🗓️ Cadência (toques)</button>
+   <button class="inner-tab" onclick="switchTab(this,'cop-out-tab')">📞 Scripts de Ligação</button>
+ </div>
+
+ <!-- ===== TAB 1: CADÊNCIA (editor No-Code, kind=cadencias-copiloto; reaproveita classes .cad-*) ===== -->
+ <div class="inner-content cop-out-tab active">
+ <div class="cad-wrap">
+
+   <div class="alert-box" style="background:var(--accent-soft);border-color:var(--accent-border);margin-bottom:16px;">
+     <strong>Como funciona:</strong> quando o card entra na etapa-gatilho do funil <b>IA Copiloto</b>, o n8n cria os toques (WhatsApp, Ligação e E-mail) com data e roteiro no card. <b>WhatsApp todos os dias (D1→D7)</b> + ligações em D1/D3/D5 + e-mails em D1/D7. Concluir a tarefa do dia libera o próximo bloco.
+   </div>
+
+   <h3 id="cc-title" style="font-size:17px;font-weight:700;margin:18px 0 4px;">Cadência do time</h3>
+   <p id="cc-sub" style="color:var(--n-600);margin-bottom:12px;font-size:13.5px;">Sequência de toques usada pelo time.</p>
+
+   <div id="cc-ro-note" class="cad-ro-note" style="display:none;">🔒 A edição da cadência é exclusiva da <b>gestão</b>. Você pode consultar os toques (clique para abrir) e usar o <b>Redator IA</b> logo abaixo.</div>
+
+   <div id="cc-mgr" style="display:none;">
+     <div class="cad-toolbar">
+       <button class="cad-btn" id="cc-save" onclick="ccSave()" disabled>💾 Salvar para o time</button>
+       <button class="cad-btn ghost" onclick="ccLoad(true)">↻ Recarregar</button>
+       <input class="cad-inp" id="cc-por" placeholder="Seu nome (opcional)" style="width:170px;">
+       <span class="cad-status" id="cc-status"></span>
+     </div>
+   </div>
+   <div class="cad-meta" id="cc-meta"></div>
+
+   <div id="cc-tracks"><p style="color:var(--n-600);">Carregando cadência…</p></div>
+
+   <div id="cc-addtrack" style="display:none;margin:4px 0 8px;"><button class="cad-btn ghost sm" onclick="ccAddTrack()">+ Nova trilha</button></div>
+
+   <!-- REDATOR IA -->
+   <div class="card" style="margin-top:28px;border:1px solid var(--n-200);border-radius:14px;padding:18px;background:#fff;">
+     <h3 style="font-size:16px;font-weight:700;margin:0 0 4px;">🤖 Redator IA de Mensagens</h3>
+     <p style="color:var(--n-600);font-size:13px;margin:0 0 14px;">Diga o que você quer dizer e a IA redige a mensagem ou e-mail pronto — já com as variáveis. Copie e cole no toque desejado.</p>
+     <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+       <div>
+         <div class="cad-lbl">Canal</div>
+         <select class="cad-inp" id="cc-r-channel" style="min-width:150px;">
+           <option value="whatsapp">WhatsApp</option>
+           <option value="email">E-mail</option>
+           <option value="ligacao">Roteiro de ligação</option>
+         </select>
+       </div>
+       <div>
+         <div class="cad-lbl">Tom</div>
+         <select class="cad-inp" id="cc-r-tone" style="min-width:150px;">
+           <option value="consultivo">Consultivo</option>
+           <option value="caloroso e próximo">Caloroso</option>
+           <option value="direto e objetivo">Direto</option>
+           <option value="curioso / provocativo">Provocativo</option>
+         </select>
+       </div>
+     </div>
+     <div class="cad-lbl">O que você quer dizer?</div>
+     <textarea class="cad-txt" id="cc-r-brief" placeholder="Ex.: follow-up leve para quem não respondeu, oferecendo um horário rápido esta semana"></textarea>
+     <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+       <button class="cad-btn" id="cc-r-go" onclick="ccDraft()">✨ Gerar</button>
+       <span class="cad-status" id="cc-r-status"></span>
+     </div>
+     <div id="cc-r-out" style="display:none;margin-top:14px;">
+       <div class="cad-lbl" id="cc-r-subwrap" style="display:none;">Assunto</div>
+       <input class="cad-inp" id="cc-r-subject" style="width:100%;box-sizing:border-box;display:none;margin-bottom:8px;">
+       <div class="cad-lbl">Mensagem</div>
+       <textarea class="cad-txt" id="cc-r-result" style="min-height:120px;"></textarea>
+       <div style="margin-top:10px;"><button class="cad-btn ghost" onclick="ccCopyDraft()">📋 Copiar</button></div>
+     </div>
+   </div>
+
+ </div>
+ <script>
+ (function(){
+   var CHANNELS=["WhatsApp","Ligação","E-mail"]; var MGR=false;
+   window.CC={loaded:false,dirty:false,data:{tracks:[]}};
+   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+   function escAttr(s){return esc(s).replace(/"/g,"&quot;");}
+   function setStatus(t,ok){var e=document.getElementById("cc-status");if(e){e.textContent=t||"";e.style.color=ok===false?"#DC2626":(ok?"#059669":"var(--n-600)");}}
+   function markDirty(){CC.dirty=true;var b=document.getElementById("cc-save");if(b)b.disabled=false;setStatus("Alterações não salvas.");}
+   function chMeta(c){return c==="Ligação"?{cls:"cad-call",ic:"📞"}:c==="E-mail"?{cls:"cad-mail",ic:"✉️"}:{cls:"cad-wa",ic:"💬"};}
+   function ccIsManager(){try{var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");if(!s.name)return false;var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];var u=all.find(function(x){return x.name===s.name;});return !!(u&&(u.admin||u.team==="Gestão"));}catch(e){return false;}}
+   function ccApplyRole(){
+     MGR=ccIsManager();
+     var mgr=document.getElementById("cc-mgr");if(mgr)mgr.style.display=MGR?"":"none";
+     var at=document.getElementById("cc-addtrack");if(at)at.style.display=MGR?"":"none";
+     var ro=document.getElementById("cc-ro-note");if(ro)ro.style.display=MGR?"none":"";
+     var ti=document.getElementById("cc-title");if(ti)ti.textContent=MGR?"✏️ Editor da Cadência — Copiloto":"📋 Cadência do time — Copiloto";
+     var sub=document.getElementById("cc-sub");if(sub)sub.innerHTML=MGR?"Edite dias, canais e textos. Use <code>${name}</code>, <code>${imobiliaria}</code> e <code>${cidade}</code> — são substituídos no envio. Ao salvar, vale para <b>todo o time</b>.":"Sequência de toques usada pelo time. Clique num toque para ver a mensagem.";
+   }
+   window.ccLoad=async function(force){
+     if(CC.loaded&&!force)return;
+     var el=document.getElementById("cc-tracks");if(el&&force)el.innerHTML='<p style="color:var(--n-600);">Recarregando…</p>';
+     var data=null;
+     try{var r=await fetch("/api/fccommit?kind=cadencias-copiloto",{cache:"no-store"});if(r.ok){var j=await r.json();if(j&&Array.isArray(j.tracks)&&j.tracks.length){data=j;}}}catch(e){}
+     if(!data){try{var r2=await fetch("/data/cadencias-copiloto.json",{cache:"no-store"});if(r2.ok){data=await r2.json();}}catch(e){}}
+     if(!data)data={tracks:[]};
+     CC.data=data;CC.loaded=true;CC.dirty=false;
+     var b=document.getElementById("cc-save");if(b)b.disabled=true;
+     var m=document.getElementById("cc-meta");
+     if(m)m.textContent=data.updatedAt?("Última edição: "+new Date(data.updatedAt).toLocaleString("pt-BR")+(data.updatedBy&&data.updatedBy!=="seed"?(" por "+data.updatedBy):"")):"";
+     setStatus(force?"Recarregado.":"",force?true:undefined);
+     ccApplyRole();ccRender();
+   };
+   function stepBody(t,ti,s,si,isEmail){
+     if(!MGR){return (isEmail&&s.subject?('<div class="cad-subj"><b>Assunto:</b> '+esc(s.subject)+'</div>'):'')+'<div class="cad-msg">'+esc(s.text||"—")+'</div>';}
+     var opts=CHANNELS.map(function(c){return '<option'+(c===s.channel?' selected':'')+'>'+c+'</option>';}).join("");
+     return '<div class="cad-edit-grid">'+
+         '<select class="cad-inp" onchange="ccEdit('+ti+','+si+',\'channel\',this.value);ccRender()" title="Canal">'+opts+'</select>'+
+         '<input class="cad-inp" style="width:84px;" value="'+escAttr(s.day)+'" oninput="ccEdit('+ti+','+si+',\'day\',this.value);ccSyncHead('+ti+','+si+')" title="Dia">'+
+       '</div>'+
+       '<div class="cad-lbl">Título</div>'+
+       '<input class="cad-inp" style="width:100%;box-sizing:border-box;" value="'+escAttr(s.title)+'" oninput="ccEdit('+ti+','+si+',\'title\',this.value);ccSyncHead('+ti+','+si+')">'+
+       (isEmail?('<div class="cad-lbl">Assunto</div><input class="cad-inp" style="width:100%;box-sizing:border-box;" value="'+escAttr(s.subject)+'" oninput="ccEdit('+ti+','+si+',\'subject\',this.value)" placeholder="Assunto do e-mail">'):'')+
+       '<div class="cad-lbl">'+(s.channel==="Ligação"?"Roteiro":"Mensagem")+'</div>'+
+       '<textarea class="cad-txt" oninput="ccEdit('+ti+','+si+',\'text\',this.value)" placeholder="Texto do toque">'+esc(s.text)+'</textarea>'+
+       '<div class="cad-step-actions">'+
+         '<button class="cad-mini" onclick="ccMove('+ti+','+si+',-1)">↑ Subir</button>'+
+         '<button class="cad-mini" onclick="ccMove('+ti+','+si+',1)">↓ Descer</button>'+
+         '<button class="cad-mini" style="color:#DC2626;margin-left:auto;" onclick="ccDelStep('+ti+','+si+')">🗑 Remover</button>'+
+       '</div>';
+   }
+   window.ccRender=function(){
+     var wrap=document.getElementById("cc-tracks");if(!wrap)return;
+     var tr=CC.data.tracks||[];
+     if(!tr.length){wrap.innerHTML='<p style="color:var(--n-600);">'+(MGR?'Nenhuma trilha ainda. Clique em “+ Nova trilha”.':'Nenhuma cadência cadastrada.')+'</p>';return;}
+     wrap.innerHTML=tr.map(function(t,ti){
+       var steps=(t.steps||[]).map(function(s,si){
+         var isEmail=(s.channel==="E-mail");var m=chMeta(s.channel);
+         return '<div class="cad-step"><div class="cad-step-head" onclick="ccToggle(this)"><span class="cad-day" id="ccd-'+ti+'-'+si+'">'+esc(s.day)+'</span><span class="cad-pill '+m.cls+'">'+m.ic+' '+esc(s.channel)+'</span><span class="cad-step-title" id="cct-'+ti+'-'+si+'">'+esc(s.title)+'</span><span class="cad-caret">▼</span></div><div class="cad-step-body">'+stepBody(t,ti,s,si,isEmail)+'</div></div>';
+       }).join("");
+       var head=MGR
+         ? '<div class="cad-track-head"><input class="cad-inp cad-track-name" style="flex:1;min-width:160px;" value="'+escAttr(t.name)+'" oninput="ccEdit('+ti+',null,\'name\',this.value)"><button class="cad-mini" style="color:#DC2626;" onclick="ccDelTrack('+ti+')" title="Remover trilha">🗑</button></div><div class="cad-lbl">Quando roda (origem do lead)</div><input class="cad-inp" style="width:100%;box-sizing:border-box;" value="'+escAttr(t.origin)+'" oninput="ccEdit('+ti+',null,\'origin\',this.value)"><div class="cad-lbl">Descrição</div><input class="cad-inp" style="width:100%;box-sizing:border-box;margin-bottom:12px;" value="'+escAttr(t.desc)+'" oninput="ccEdit('+ti+',null,\'desc\',this.value)">'
+         : '<div class="cad-track-head"><span class="cad-track-name">'+esc(t.name)+'</span><span class="cad-count">'+(t.steps||[]).length+' toques</span></div><div class="cad-track-when">▶ Roda quando: <b>'+esc(t.origin||"—")+'</b>'+(t.desc?(' · '+esc(t.desc)):'')+'</div>';
+       return '<div class="cad-track">'+head+steps+(MGR?'<button class="cad-btn ghost sm" onclick="ccAddStep('+ti+')" style="margin-top:6px;">+ Adicionar toque</button>':'')+'</div>';
+     }).join("");
+   };
+   window.ccToggle=function(head){head.parentElement.classList.toggle("open");};
+   window.ccSyncHead=function(ti,si){var s=CC.data.tracks[ti].steps[si];var d=document.getElementById("ccd-"+ti+"-"+si);if(d)d.textContent=s.day;var t=document.getElementById("cct-"+ti+"-"+si);if(t)t.textContent=s.title;};
+   window.ccEdit=function(ti,si,field,val){if(!MGR)return;if(si===null){CC.data.tracks[ti][field]=val;}else{CC.data.tracks[ti].steps[si][field]=val;}markDirty();};
+   window.ccAddStep=function(ti){if(!MGR)return;CC.data.tracks[ti].steps.push({day:"D?",channel:"WhatsApp",title:"Novo toque",subject:"",text:""});markDirty();ccRender();};
+   window.ccDelStep=function(ti,si){if(!MGR)return;CC.data.tracks[ti].steps.splice(si,1);markDirty();ccRender();};
+   window.ccMove=function(ti,si,dir){if(!MGR)return;var a=CC.data.tracks[ti].steps,j=si+dir;if(j<0||j>=a.length)return;var t=a[si];a[si]=a[j];a[j]=t;markDirty();ccRender();};
+   window.ccAddTrack=function(){if(!MGR)return;CC.data.tracks.push({id:"trilha"+Date.now(),name:"Nova trilha",origin:"",desc:"",steps:[]});markDirty();ccRender();};
+   window.ccDelTrack=function(ti){if(!MGR)return;if(!confirm("Remover a trilha inteira?"))return;CC.data.tracks.splice(ti,1);markDirty();ccRender();};
+   window.ccSave=async function(){
+     if(!MGR){setStatus("Sem permissão para salvar.",false);return;}
+     var b=document.getElementById("cc-save");if(b)b.disabled=true;setStatus("Salvando…");
+     var por=(document.getElementById("cc-por")||{}).value||"";
+     try{
+       var r=await fetch("/api/fccommit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"cadencias-copiloto",por:por,data:{tracks:CC.data.tracks}})});
+       var j=await r.json();
+       if(!r.ok||!j.ok)throw new Error(j.error||("HTTP "+r.status));
+       CC.dirty=false;setStatus("Salvo para o time! Publica em ~1 min.",true);
+       var m=document.getElementById("cc-meta");if(m&&j.updatedAt)m.textContent="Última edição: "+new Date(j.updatedAt).toLocaleString("pt-BR")+(por?(" por "+por):"");
+     }catch(e){setStatus("Erro ao salvar: "+e.message,false);if(b)b.disabled=false;}
+   };
+   window.ccDraft=async function(){
+     var brief=(document.getElementById("cc-r-brief")||{}).value||"";
+     var st=document.getElementById("cc-r-status");
+     if(!brief.trim()){if(st){st.textContent="Escreva o que você quer dizer.";st.style.color="#DC2626";}return;}
+     var go=document.getElementById("cc-r-go");if(go)go.disabled=true;if(st){st.textContent="Gerando…";st.style.color="var(--n-600)";}
+     try{
+       var r=await fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"draft",channel:document.getElementById("cc-r-channel").value,tone:document.getElementById("cc-r-tone").value,brief:brief})});
+       var j=await r.json();
+       if(!r.ok)throw new Error(j.error||("HTTP "+r.status));
+       var out=document.getElementById("cc-r-out");out.style.display="";
+       var isEmail=(document.getElementById("cc-r-channel").value==="email");
+       document.getElementById("cc-r-subwrap").style.display=isEmail?"":"none";
+       var subj=document.getElementById("cc-r-subject");subj.style.display=isEmail?"":"none";subj.value=j.assunto||"";
+       document.getElementById("cc-r-result").value=j.mensagem||"";
+       if(st){st.textContent="Pronto!";st.style.color="#059669";}
+     }catch(e){if(st){st.textContent="Erro: "+e.message;st.style.color="#DC2626";}}
+     finally{if(go)go.disabled=false;}
+   };
+   window.ccCopyDraft=function(){
+     var isEmail=(document.getElementById("cc-r-channel").value==="email");
+     var txt=(isEmail&&document.getElementById("cc-r-subject").value?("Assunto: "+document.getElementById("cc-r-subject").value+"\n\n"):"")+document.getElementById("cc-r-result").value;
+     navigator.clipboard.writeText(txt).then(function(){var st=document.getElementById("cc-r-status");if(st){st.textContent="Copiado!";st.style.color="#059669";}});
+   };
+   document.addEventListener("DOMContentLoaded",function(){
+     var orig=window.showSection;
+     if(typeof orig==="function"){window.showSection=function(id,el){orig(id,el);if(id==="copiloto-outbound")ccLoad();};}
+     var s=document.getElementById("sec-copiloto-outbound");
+     if(s&&s.classList.contains("active"))ccLoad();
+   });
+ })();
+ </script>
+ </div>
+
+ <!-- ===== TAB 2: SCRIPTS DE LIGAÇÃO (conteúdo original) ===== -->
+ <div class="inner-content cop-out-tab">
 
  <div class="golden-rule">
    <h3>O lead perde lead toda noite. Ele só não sabe quanto.</h3>
@@ -11112,6 +11305,7 @@ function fdRender(j){
    </div>
  </div>
 
+ </div>
  </div>
 
  <!-- ============================================================ -->
@@ -23637,7 +23831,7 @@ var PB_CATEGORIES = [
     ['indica-platform','Sobre o Indica+'],['indica-outbound','Outbound (Scripts)'],['indica-whatsapp','WhatsApp'],
     ['indica-objecoes','Objeções'],['indica-guia-reuniao','Guia da Reunião'],['indica-fechamento','Fechamento'] ]},
   { key:'copiloto', label:'Copiloto', items:[
-    ['copiloto-platform','Sobre o Copiloto'],['copiloto-concorrentes','Concorrentes'],['copiloto-outbound','Outbound (Scripts)'],
+    ['copiloto-platform','Sobre o Copiloto'],['copiloto-concorrentes','Concorrentes'],['copiloto-outbound','Outbound'],
     ['copiloto-inbound','Inbound'],['copiloto-objecoes','Objeções'],['copiloto-valores','Valores & Apresentação'],
     ['copiloto-pre-reuniao','Pré-Reunião'],['copiloto-guia-reuniao','Guia da Demo'],['copiloto-objecoes-reuniao','Objeções na Reunião'],
     ['copiloto-situacoes','Situações da Reunião'],['copiloto-fechamento','Fechamento'] ]},
