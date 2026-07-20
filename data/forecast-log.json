@@ -1,7 +1,36 @@
 {
   "_meta": {
     "desc": "Log da Calculadora de Data de Fechamento (IA): previsto x realizado para medir acuracia ao longo do tempo. Gravado a cada calculo em POST /api/forecast-date; reconciliado (ganho/perdido) via action:reconcile.",
-    "updatedAt": "2026-07-20T12:57:22.283Z"
+    "updatedAt": "2026-07-20T13:06:08.409Z"
   },
-  "registros": []
+  "registros": [
+    {
+      "id": "1184-1784552768409",
+      "dealId": 1184,
+      "titulo": "[RDStation] Pedro Luiz Tegon - [Form] Captação Ativa v2 negócio",
+      "pipelineId": 2,
+      "etapa": "Entrada",
+      "diasNoFunil": 877,
+      "diasNaEtapaAtual": 152,
+      "expectedCloseDateNaPrevisao": null,
+      "previstoEm": "2026-07-20T13:06:08.409Z",
+      "dataPrevista": "2027-06-30",
+      "diasEstimados": 345,
+      "confianca": "baixa",
+      "resumo": "Card com 877 dias no funil, parado há 152 dias na etapa inicial e valor zerado; a velocidade histórica é extremamente lenta e os gaps em Urgência e Decisão indicam deal sem tração real, exigindo projeção conservadora de ~11 meses para percorrer as 9 etapas restantes.",
+      "respostas": {
+        "q1": "parcial",
+        "q2": "nao",
+        "q3": "parcial",
+        "q4": "sim",
+        "obs": "teste E2E do log"
+      },
+      "por": "teste-natan",
+      "status": "aberto",
+      "dataReal": null,
+      "deltaDias": null,
+      "lostReason": null,
+      "reconciliadoEm": null
+    }
+  ]
 }
