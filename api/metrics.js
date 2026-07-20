@@ -120,7 +120,7 @@ function contarDiasUteis(ano, mes, de, ate) {
   return c;
 }
 
-function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, metaMensal }) {
+function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, metaMensal, vendasHoje = 0 }) {
   const ultimoDia = new Date(ano, mes + 1, 0).getDate();
   const diasUteisTotais = contarDiasUteis(ano, mes, 1, ultimoDia);
   const diasUteisDecorridos = Math.max(1, contarDiasUteis(ano, mes, 1, Math.min(diaAtual, ultimoDia)));
@@ -128,7 +128,17 @@ function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, m
   const ticketMedio = negociosGanhos > 0 ? faturamentoAtual / negociosGanhos : 0;
   const runRate = (faturamentoAtual / diasUteisDecorridos) * diasUteisTotais;
   const gapMeta = metaMensal - faturamentoAtual;
-  const fechamentoDiarioNecessario = diasUteisRestantes > 0 ? gapMeta / diasUteisRestantes : Math.max(0, gapMeta);
+  // Meta do dia CONGELADA: gap do INICIO do dia (realizado ate ontem = faturamento - vendas de hoje)
+  // dividido pelos dias uteis restantes INCLUINDO hoje. O alvo do dia nao se move conforme as vendas
+  // de hoje entram (cada venda sobe faturamentoAtual e vendasHoje juntos -> numerador constante); so
+  // recalcula quando vira o dia. Ver project_dashboard_meta_dia_congelada_2026-07-20.
+  const realizadoAteOntem = faturamentoAtual - (vendasHoje || 0);
+  const gapInicioDia = metaMensal - realizadoAteOntem;
+  const diaHoje = Math.min(diaAtual, ultimoDia);
+  const diasUteisRestantesComHoje = contarDiasUteis(ano, mes, diaHoje, ultimoDia);
+  const fechamentoDiarioNecessario = diasUteisRestantesComHoje > 0
+    ? gapInicioDia / diasUteisRestantesComHoje
+    : Math.max(0, gapInicioDia);
   // Meta diária FIXA = meta ÷ dias úteis totais (base do mês). NÃO re-divide o saldo pelos
   // dias restantes — assim o gap só cai pelo progresso real e um dia bom fica visível.
   const metaDiariaFixa = diasUteisTotais > 0 ? metaMensal / diasUteisTotais : 0;
@@ -434,14 +444,15 @@ module.exports = async function handler(req, res) {
       metaParam && !isNaN(Number(metaParam)) && Number(metaParam) > 0
         ? Number(metaParam)
         : META_POR_FUNIL[pipelineId] || META_PADRAO;
-    const d = deriveMetrics({ ano, mes, diaAtual, faturamentoAtual: won.sum, negociosGanhos: won.count, metaMensal });
-
-    // Vendas de HOJE (só faz sentido no mês corrente) — abatem a meta do dia no card.
+    // Vendas de HOJE (só faz sentido no mês corrente) — abatem a meta do dia no card e
+    // congelam o alvo do dia (entram no deriveMetrics para fixar o numerador).
     let vendasHoje = 0, vendasHojeCount = 0, vendasHojePorVendedor = [];
     if (ehMesAtual) {
       try { const wt = await fetchWonToday(pipelineId, userId, TK); vendasHoje = wt.sum; vendasHojeCount = wt.count; vendasHojePorVendedor = wt.porVendedor; }
       catch (_) { /* mantém 0 se a chamada falhar */ }
     }
+
+    const d = deriveMetrics({ ano, mes, diaAtual, faturamentoAtual: won.sum, negociosGanhos: won.count, metaMensal, vendasHoje });
 
     const stages = (stagesRaw.data || []).sort((a, b) => a.order_nr - b.order_nr);
     const porStage = new Map();
