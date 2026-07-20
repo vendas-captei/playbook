@@ -37,14 +37,20 @@ async function cacheWrite(pid, value) {
 }
 // Registro diário (decomposição do dia) no Edge Config, chave daily<pid> = { "YYYY-MM-DD": {...} }.
 // Upsert por data → acumula o mês ao vivo, sem redeploy. O snapshot.js flusha p/ data/daily.json (repo).
-async function dailyUpsert(pid, rec) {
+async function dailyReadMap(pid) {
+  if (!EC_ID) return {};
+  try {
+    const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
+    return r.ok ? ((await r.json()) || {}) : {};
+  } catch (_) { return {}; }
+}
+async function dailyUpsert(pid, rec, mapaPre) {
   if (!EC_ID || !EC_WRITE) return false;
   try {
-    let mapa = {};
-    try {
-      const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
-      if (r.ok) mapa = (await r.json()) || {};
-    } catch (_) { mapa = {}; }
+    const mapa = mapaPre || (await dailyReadMap(pid));
+    // write-once: a meta do dia FIXA (valor do início do dia) grava UMA vez e nunca sobrescreve.
+    const prev = mapa[rec.data];
+    if (prev && prev.metaDiaInicio != null && rec.metaDiaInicio == null) rec.metaDiaInicio = prev.metaDiaInicio;
     mapa[rec.data] = rec;
     const r2 = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
       method: "PATCH",
@@ -443,6 +449,17 @@ module.exports = async function handler(req, res) {
       catch (_) { /* mantém 0 se a chamada falhar */ }
     }
 
+    // Meta do dia FIXA ("valor do início do dia"): gap do COMEÇO do dia (meta − realizado até
+    // ontem = faturamento − vendas de hoje) ÷ dias úteis restantes. Invariante durante o dia; no
+    // card (bloco 3) é abatida SÓ pelas vendas de hoje. Distinta do "Necessário por dia útil"
+    // (bloco 2 = gap ao vivo ÷ dias restantes), que se move com o mês.
+    const realizadoAteOntem = won.sum - (vendasHoje || 0);
+    const metaDiaInicioCalc = ehMesAtual
+      ? (d.diasUteisRestantes > 0
+          ? (metaMensal - realizadoAteOntem) / d.diasUteisRestantes
+          : Math.max(0, metaMensal - realizadoAteOntem))
+      : null;
+
     const stages = (stagesRaw.data || []).sort((a, b) => a.order_nr - b.order_nr);
     const porStage = new Map();
     for (const o of open) porStage.set(o.stageId, (porStage.get(o.stageId) || 0) + 1);
@@ -468,6 +485,7 @@ module.exports = async function handler(req, res) {
       vendasHoje,
       vendasHojeCount,
       vendasHojePorVendedor,
+      metaDiaInicio: metaDiaInicioCalc,
       forecastSemanal: buildForecast(open),
       historico,
       fonte: fonteHist,
@@ -481,18 +499,25 @@ module.exports = async function handler(req, res) {
     // incidentais. É o único momento em que o cache do dashboard/TV é renovado.
     const cacheavel = ehMesAtual && !userId && (pipelineId === 7 || pipelineId === 2);
     if (cacheavel && u.searchParams.get("refreshCache") === "1") {
+      // Resolve a meta do dia FIXA (write-once): se já foi gravada hoje, reusa; senão usa o cálculo
+      // do início do dia. Assim o gap do mês encolhendo NÃO mexe nesse número — só a venda de hoje.
+      const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+      const mapaDaily = await dailyReadMap(pipelineId);
+      const prevHoje = mapaDaily[hojeSP];
+      const metaDiaInicioFinal = (prevHoje && prevHoje.metaDiaInicio != null) ? prevHoje.metaDiaInicio : metaDiaInicioCalc;
+      payload.metaDiaInicio = metaDiaInicioFinal;
       payload._cache = { updatedAt: payload.atualizadoEm, updatedBy: u.searchParams.get("by") || null };
       await cacheWrite(pipelineId, payload);
       // Registra a foto diária (decomposição do dia) no Edge Config p/ controle macro no detalhe.
-      const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
       await dailyUpsert(pipelineId, {
         data: hojeSP, funil: pipelineId,
         metaMensal, faturamentoAtual: won.sum, gapMeta: d.gapMeta,
         baseDia: d.metaDiariaFixa, necessarioHoje: d.fechamentoDiarioNecessario,
+        metaDiaInicio: metaDiaInicioFinal,
         vendidoHoje: vendasHoje, vendasCount: vendasHojeCount, porVendedor: vendasHojePorVendedor,
         diasUteisDecorridos: d.diasUteisDecorridos, diasUteisRestantes: d.diasUteisRestantes,
         atualizadoEm: payload.atualizadoEm,
-      });
+      }, mapaDaily);
     }
 
     res.setHeader("Cache-Control", "no-store");
