@@ -1,7 +1,7 @@
 {
   "_meta": {
     "desc": "Log da Calculadora de Data de Fechamento (IA): previsto x realizado para medir acuracia ao longo do tempo. Gravado a cada calculo em POST /api/forecast-date; reconciliado (ganho/perdido) via action:reconcile.",
-    "updatedAt": null
+    "updatedAt": "2026-07-20T12:57:22.283Z"
   },
   "registros": []
 }
