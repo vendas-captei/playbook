@@ -4943,6 +4943,11 @@ function clearSettingsModal() {
        <input id="fd-deal" type="number" min="1" placeholder="ex: 2049" style="width:100%;padding:9px 12px;border:1px solid var(--n-100);border-radius:8px;font-size:13px;color:var(--n-900);font-family:inherit;background:white;box-sizing:border-box;">
      </div>
 
+     <div style="max-width:320px;margin-bottom:16px;">
+       <label style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--n-600);display:block;margin-bottom:6px;">Seu nome (fica no registro)</label>
+       <input id="fd-por" type="text" placeholder="ex: Ana Luiza" style="width:100%;padding:9px 12px;border:1px solid var(--n-100);border-radius:8px;font-size:13px;color:var(--n-900);font-family:inherit;background:white;box-sizing:border-box;">
+     </div>
+
      <div id="fd-perguntas" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px;"></div>
 
      <div style="margin-bottom:16px;">
@@ -4957,6 +4962,22 @@ function clearSettingsModal() {
      </div>
 
      <div id="fd-resultado" style="display:none;margin-top:18px;"></div>
+
+     <div style="margin-top:26px;border-top:1px solid var(--n-100);padding-top:18px;">
+       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;">
+         <div>
+           <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;color:var(--n-900);">&#128202; Registro &amp; Acur&#225;cia da Calculadora</div>
+           <div style="font-size:12px;color:var(--n-400);margin-top:2px;">Toda previs&#227;o fica gravada. &#8220;Atualizar status&#8221; consulta o Pipedrive e marca ganho/perdido p/ comparar previsto &#215; realizado.</div>
+         </div>
+         <div style="display:flex;gap:8px;">
+           <button type="button" id="fd-log-load" onclick="fdLoadLog()" style="background:var(--n-75);color:var(--n-700);border:1px solid var(--n-100);padding:9px 14px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Carregar registros</button>
+           <button type="button" id="fd-log-rec" onclick="fdReconciliar()" style="background:#0f766e;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">&#8635; Atualizar status</button>
+         </div>
+       </div>
+       <div id="fd-log-msg" style="font-size:12px;color:var(--n-400);margin-top:10px;"></div>
+       <div id="fd-log-stats" style="display:none;gap:10px;flex-wrap:wrap;margin-top:12px;"></div>
+       <div id="fd-log-tabela" style="margin-top:12px;overflow-x:auto;"></div>
+     </div>
    </div>
  </div>
 
@@ -4984,9 +5005,11 @@ function clearSettingsModal() {
    if(!deal){ msg.textContent="informe o ID do card"; return; }
    var answers={ obs: document.getElementById("fd-obs").value };
    FD_PERGUNTAS.forEach(function(p){ answers[p[0]]=document.getElementById("fd-"+p[0]).value; });
+   var por=((document.getElementById("fd-por")||{}).value||"").trim();
+   try{ if(por) localStorage.setItem("fd_por",por); }catch(e){}
    msg.textContent="calculando\u2026 (a IA est\u00e1 lendo o hist\u00f3rico do card)"; out.style.display="none";
    document.getElementById("fd-run").disabled=true;
-   fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deal_id:deal,answers:answers})})
+   fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deal_id:deal,answers:answers,por:por})})
     .then(function(r){return r.json();}).then(function(j){ if(j.error)throw new Error(j.error); msg.textContent=""; fdRender(j); })
     .catch(function(e){ msg.textContent="erro: "+e.message; })
     .finally(function(){ document.getElementById("fd-run").disabled=false; });
@@ -5024,7 +5047,58 @@ function fdRender(j){
     .then(function(r){return r.json();}).then(function(j){ if(j.error)throw new Error(j.error); m.innerHTML='<span style="color:#059669;">\u2713 gravado no card '+dealId+': '+j.expected_close_date+'</span>'; })
     .catch(function(e){ m.textContent="erro ao gravar: "+e.message; });
  }
+ function fdStatChip(label,val,cor){ return '<div style="border:1px solid var(--n-100);border-radius:10px;padding:10px 14px;min-width:110px;"><div style="font-family:\'IBM Plex Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);">'+label+'</div><div style="font-family:\'Cabinet Grotesk\',sans-serif;font-weight:800;font-size:20px;color:'+(cor||'var(--n-900)')+';">'+val+'</div></div>'; }
+ function fdBadge(s){ var m={aberto:['#6B7280','aberto'],ganho:['#059669','ganho'],perdido:['#DC2626','perdido']}; var x=m[s]||m.aberto; return '<span style="border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;background:'+x[0]+'1a;color:'+x[0]+';">'+x[1]+'</span>'; }
+ function fdRenderLog(reg){
+   var stats=document.getElementById("fd-log-stats"), tab=document.getElementById("fd-log-tabela");
+   if(!reg||!reg.length){ stats.style.display="none"; tab.innerHTML='<p style="font-size:12px;color:var(--n-400);">Nenhum registro ainda. Calcule uma data que ela aparece aqui.</p>'; return; }
+   var g=reg.filter(function(r){return r.status==="ganho";}), p=reg.filter(function(r){return r.status==="perdido";}), ab=reg.filter(function(r){return r.status==="aberto";});
+   var conc=reg.filter(function(r){return r.deltaDias!=null;});
+   var mae=conc.length? Math.round(conc.reduce(function(a,r){return a+Math.abs(r.deltaDias);},0)/conc.length):null;
+   var vies=conc.length? Math.round(conc.reduce(function(a,r){return a+r.deltaDias;},0)/conc.length):null;
+   var dentro=conc.length? Math.round(100*conc.filter(function(r){return Math.abs(r.deltaDias)<=7;}).length/conc.length):null;
+   stats.style.display="flex"; stats.style.flexWrap="wrap";
+   stats.innerHTML=fdStatChip("Registros",reg.length)
+     +fdStatChip("Aberto",ab.length,'#6B7280')+fdStatChip("Ganho",g.length,'#059669')+fdStatChip("Perdido",p.length,'#DC2626')
+     +fdStatChip("Erro m&#233;dio",mae==null?'—':mae+'d','#B45309')
+     +fdStatChip("Vi&#233;s",vies==null?'—':(vies>0?'+':'')+vies+'d',(vies>0?'#DC2626':'#059669'))
+     +fdStatChip("Dentro ±7d",dentro==null?'—':dentro+'%','#0f766e');
+   var rows=reg.slice().sort(function(a,b){return (b.previstoEm||'').localeCompare(a.previstoEm||'');}).slice(0,40).map(function(r){
+     var d=r.deltaDias; var dtxt=d==null?'—':((d>0?'+':'')+d+'d');
+     var dcor=d==null?'var(--n-400)':(Math.abs(d)<=7?'#059669':(Math.abs(d)<=21?'#B45309':'#DC2626'));
+     var vie=d==null?'':(d>0?' (atrasou)':(d<0?' (adiantou)':''));
+     return '<tr style="border-bottom:1px solid var(--n-75);">'
+       +'<td style="padding:7px 10px;font-family:\'IBM Plex Mono\',monospace;font-size:11px;">'+r.dealId+'</td>'
+       +'<td style="padding:7px 10px;font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.titulo||'')+'</td>'
+       +'<td style="padding:7px 10px;font-size:11px;color:var(--n-500);">'+(r.previstoEm||'').slice(0,10)+'</td>'
+       +'<td style="padding:7px 10px;font-size:12px;">'+(r.dataPrevista||'—')+'</td>'
+       +'<td style="padding:7px 10px;">'+fdBadge(r.status)+'</td>'
+       +'<td style="padding:7px 10px;font-size:12px;color:var(--n-500);">'+(r.dataReal||'—')+'</td>'
+       +'<td style="padding:7px 10px;font-size:12px;font-weight:700;color:'+dcor+';">'+dtxt+vie+'</td>'
+       +'</tr>';
+   }).join("");
+   tab.innerHTML='<table style="width:100%;border-collapse:collapse;min-width:640px;">'
+     +'<thead><tr style="text-align:left;">'
+     +['Card','T&#237;tulo','Previsto em','Data prevista','Status','Data real','Δ (real−prev)'].map(function(h){return '<th style="padding:7px 10px;font-family:\'IBM Plex Mono\',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--n-400);font-weight:600;">'+h+'</th>';}).join("")
+     +'</tr></thead><tbody>'+rows+'</tbody></table>'
+     +'<p style="font-size:10px;color:var(--n-400);margin-top:8px;">Δ positivo = fechou/encerrou DEPOIS do previsto (IA otimista); negativo = antes. Erro m&#233;dio e vi&#233;s s&#243; contam registros j&#225; reconciliados (ganho/perdido).</p>';
+ }
+ function fdLoadLog(){
+   var m=document.getElementById("fd-log-msg"); m.textContent="carregando registros…";
+   fetch("/api/fc-history?dataset=forecast-log").then(function(r){return r.json();}).then(function(j){
+     m.textContent=""; fdRenderLog((j&&j.registros)||[]);
+   }).catch(function(e){ m.textContent="erro: "+e.message; });
+ }
+ function fdReconciliar(){
+   var m=document.getElementById("fd-log-msg"), b=document.getElementById("fd-log-rec"); b.disabled=true; m.textContent="consultando o Pipedrive e atualizando status…";
+   fetch("/api/forecast-date",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"reconcile"})})
+    .then(function(r){return r.json();}).then(function(j){ if(j.error)throw new Error(j.error);
+      m.innerHTML='<span style="color:#0f766e;">✓ '+j.verificados+' aberto(s) verificado(s) · '+j.ganhos+' ganho(s) · '+j.perdidos+' perdido(s)</span>'; fdLoadLog();
+    }).catch(function(e){ m.textContent="erro: "+e.message; })
+    .finally(function(){ b.disabled=false; });
+ }
  fdRenderPerguntas();
+ try{ var _pv=localStorage.getItem("fd_por"); if(_pv&&document.getElementById("fd-por")) document.getElementById("fd-por").value=_pv; }catch(e){}
  </script>
 
  </div>

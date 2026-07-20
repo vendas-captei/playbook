@@ -1,9 +1,44 @@
 // Calculadora de Data de Fechamento (IA). Junta o histórico REAL do card (Pipedrive) com as
 // 4 respostas qualitativas do vendedor (Compelling Event, Decisão, Burocracia, Cronograma Inverso)
 // e pede ao Claude uma data prevista + confiança + riscos.
-// POST /api/forecast-date { deal_id, answers: {q1,q2,q3,q4, obs} }  (q* ∈ 'sim'|'parcial'|'nao')
+// POST /api/forecast-date { deal_id, answers: {q1,q2,q3,q4, obs}, por? }  (q* ∈ 'sim'|'parcial'|'nao')
+//   -> calcula E grava a previsão em data/forecast-log.json (previsto x realizado; ver action:reconcile).
+// POST /api/forecast-date { action:"set", deal_id, date }        -> grava expected_close_date no card.
+// POST /api/forecast-date { action:"draft", channel, brief, tone } -> redator IA das cadências.
+// POST /api/forecast-date { action:"reconcile" }                 -> varre registros 'aberto' do log,
+//   consulta o status atual no Pipedrive e carimba ganho/perdido + dataReal + deltaDias.
 const V1 = "https://api.pipedrive.com/v1";
 const MODEL = "claude-sonnet-4-6"; // validado nesta conta; aceita params padrão
+
+// ── Repo (GitHub) como store do log da calculadora — padrão de api/fccommit.js ──
+const OWNER = "vendas-captei", REPO = "playbook", LOG_PATH = "data/forecast-log.json";
+const LOG_GH = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${LOG_PATH}`;
+const ghHeaders = (tok) => ({ Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" });
+
+async function logRead(tok) {
+  const r = await fetch(LOG_GH, { headers: ghHeaders(tok), cache: "no-store" });
+  if (r.status === 404) return { data: { _meta: { desc: "Log Calculadora Data de Fechamento (IA)" }, registros: [] }, sha: null };
+  if (!r.ok) throw new Error(`GitHub ${r.status} ao ler forecast-log`);
+  const j = await r.json();
+  return { data: JSON.parse(Buffer.from(j.content.replace(/\n/g, ""), "base64").toString("utf8") || "{}"), sha: j.sha };
+}
+// Lê → aplica mutate(data) → grava; re-tenta 1x em 409 (conflito de sha por gravação concorrente).
+async function logMutate(tok, mutate, msg) {
+  for (let i = 0; i < 2; i++) {
+    const { data, sha } = await logRead(tok);
+    mutate(data);
+    data._meta = data._meta || {}; data._meta.updatedAt = new Date().toISOString();
+    const content = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
+    const r = await fetch(LOG_GH, {
+      method: "PUT", headers: { ...ghHeaders(tok), "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg, content, ...(sha ? { sha } : {}) }),
+    });
+    if (r.ok) return true;
+    if (r.status === 409) continue;
+    throw new Error(`GitHub PUT ${r.status}: ${(await r.text()).slice(0, 150)}`);
+  }
+  return false;
+}
 
 function pd(url, TK) {
   const sep = url.includes("?") ? "&" : "?";
@@ -50,11 +85,50 @@ async function callClaude(KEY, prompt) {
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") { res.status(405).end(); return; }
-  const TK = process.env.PIPEDRIVE_API_TOKEN, KEY = process.env.ANTHROPIC_API_KEY;
+  const TK = process.env.PIPEDRIVE_API_TOKEN, KEY = process.env.ANTHROPIC_API_KEY, GTOK = process.env.GITHUB_TOKEN;
   if (!TK || !KEY) { res.status(500).json({ error: "PIPEDRIVE_API_TOKEN ou ANTHROPIC_API_KEY ausente na Vercel" }); return; }
   try {
     let body = ""; await new Promise((r) => { req.on("data", (c) => (body += c)); req.on("end", r); });
     const b = JSON.parse(body || "{}");
+
+    // ── Reconciliação: previsto x realizado. Varre 'aberto', consulta Pipedrive, carimba ganho/perdido. ──
+    if (b.action === "reconcile") {
+      if (!GTOK) { res.status(500).json({ error: "GITHUB_TOKEN ausente na Vercel" }); return; }
+      const { data } = await logRead(GTOK);
+      const regs = data.registros || [];
+      const abertos = regs.filter((r) => r.status === "aberto");
+      const ids = [...new Set(abertos.map((r) => r.dealId))];
+      const info = {};
+      for (const id of ids) {
+        try {
+          const dr = await pd(`${V1}/deals/${id}`, TK);
+          const d = dr.data;
+          if (d) info[id] = { status: d.status, won_time: d.won_time, lost_time: d.lost_time, lost_reason: d.lost_reason };
+        } catch (e) { /* deal inacessível: ignora, tenta na próxima */ }
+      }
+      let ganhos = 0, perdidos = 0;
+      for (const r of abertos) {
+        const nfo = info[r.dealId]; if (!nfo) continue;
+        if (nfo.status === "won") ganhos++; else if (nfo.status === "lost") perdidos++;
+      }
+      await logMutate(GTOK, (dd) => {
+        for (const r of (dd.registros || [])) {
+          if (r.status !== "aberto") continue;
+          const nfo = info[r.dealId]; if (!nfo) continue;
+          if (nfo.status === "won") {
+            r.status = "ganho"; r.dataReal = (nfo.won_time || "").slice(0, 10);
+            r.deltaDias = r.dataReal && r.dataPrevista ? dias(r.dataPrevista, r.dataReal) : null;
+            r.reconciliadoEm = new Date().toISOString();
+          } else if (nfo.status === "lost") {
+            r.status = "perdido"; r.dataReal = (nfo.lost_time || "").slice(0, 10);
+            r.deltaDias = r.dataReal && r.dataPrevista ? dias(r.dataPrevista, r.dataReal) : null;
+            r.lostReason = nfo.lost_reason || null; r.reconciliadoEm = new Date().toISOString();
+          }
+        }
+      }, `chore: reconciliar forecast-log (${new Date().toISOString().slice(0, 10)})`);
+      res.status(200).json({ ok: true, verificados: abertos.length, dealsConsultados: ids.length, ganhos, perdidos });
+      return;
+    }
 
     // ── Redator IA de mensagens/e-mails das Cadências (No-Code). Não precisa de deal_id. ──
     if (b.action === "draft") {
@@ -158,6 +232,27 @@ Responda APENAS com JSON válido, sem markdown, neste formato:
       const nd = new Date(); nd.setDate(nd.getDate() + (Number(ia.diasEstimados) || 30));
       data = nd.toISOString().slice(0, 10);
     }
+
+    // ── Grava a previsão no log (previsto x realizado). NUNCA quebra a calculadora se falhar. ──
+    try {
+      if (GTOK) {
+        await logMutate(GTOK, (dd) => {
+          dd.registros = dd.registros || [];
+          dd.registros.push({
+            id: `${dealId}-${Date.now()}`,
+            dealId, titulo: deal.title, pipelineId: deal.pipeline_id,
+            etapa: stageName(deal.stage_id), diasNoFunil: tl.diasTotais, diasNaEtapaAtual: tl.diasNaEtapaAtual,
+            expectedCloseDateNaPrevisao: deal.expected_close_date || null,
+            previstoEm: new Date().toISOString(),
+            dataPrevista: data, diasEstimados: ia.diasEstimados ?? null,
+            confianca: ia.confianca || "media", resumo: ia.resumo || "",
+            respostas: { q1: a.q1 || null, q2: a.q2 || null, q3: a.q3 || null, q4: a.q4 || null, obs: a.obs ? String(a.obs).slice(0, 800) : "" },
+            por: b.por ? String(b.por).slice(0, 80) : "",
+            status: "aberto", dataReal: null, deltaDias: null, lostReason: null, reconciliadoEm: null,
+          });
+        }, `chore: log previsão calc IA deal ${dealId}`);
+      }
+    } catch (e) { /* logging é best-effort; a previsão já está pronta pro vendedor */ }
 
     res.status(200).json({
       dealId, titulo: deal.title, etapaAtual: stageName(deal.stage_id),

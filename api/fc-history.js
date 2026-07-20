@@ -2,8 +2,10 @@
 // GET /api/fc-history[?pipeline_id=7] -> série de meses { forecastInicial, fechamento } por funil.
 // GET /api/fc-history?dataset=accuracy -> Acurácia de Previsão (data/forecast-accuracy.json):
 //   Previsto (expected_close_date, as-of via changelog) x Realizado (won) por dia/vendedor/funil.
+// GET /api/fc-history?dataset=forecast-log -> Log da Calculadora de Data de Fechamento IA
+//   (data/forecast-log.json): previsão da IA x realizado (ganho/perdido) por registro. Ver api/forecast-date.js.
 const REPO = "vendas-captei/playbook";
-const PATHS = { history: "data/forecast-history.json", accuracy: "data/forecast-accuracy.json" };
+const PATHS = { history: "data/forecast-history.json", accuracy: "data/forecast-accuracy.json", "forecast-log": "data/forecast-log.json" };
 
 async function loadJson(path, tok) {
   if (!tok) return {};
@@ -23,6 +25,10 @@ module.exports = async function handler(req, res) {
     const dataset = u.searchParams.get("dataset");
     if (dataset === "accuracy") {
       res.status(200).json(await loadJson(PATHS.accuracy, tok));
+      return;
+    }
+    if (dataset === "forecast-log" || dataset === "fdlog") {
+      res.status(200).json(await loadJson(PATHS["forecast-log"], tok));
       return;
     }
     const hist = await loadJson(PATHS.history, tok);
