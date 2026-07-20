@@ -115,30 +115,6 @@
       </div>
       <div id="historico" class="mt-4 overflow-x-auto text-sm text-slate-400">—</div>
     </section>
-
-    <!-- Previsão × Realizado (diário, via changelog do expected_close_date) -->
-    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-base font-semibold">Previsão × Realizado <span class="text-xs font-normal text-slate-400">· data prevista de fechamento (as-of) × venda</span></h2>
-          <p id="acc-scope" class="text-xs text-slate-500">—</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="inline-flex rounded-lg border border-slate-200 p-0.5 text-xs">
-            <button data-metric="value" class="acc-metric rounded-md px-2.5 py-1 font-medium">R$</button>
-            <button data-metric="count" class="acc-metric rounded-md px-2.5 py-1 font-medium">nº</button>
-          </div>
-          <div class="inline-flex rounded-lg border border-slate-200 p-0.5 text-xs">
-            <button data-mode="cumul" class="acc-mode rounded-md px-2.5 py-1 font-medium">Acumulado</button>
-            <button data-mode="daily" class="acc-mode rounded-md px-2.5 py-1 font-medium">Diário</button>
-          </div>
-        </div>
-      </div>
-      <div id="acc-kpis" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
-      <div id="acc-chart" class="mt-4 w-full overflow-x-auto text-sm text-slate-400">—</div>
-      <div id="acc-meses" class="mt-5 overflow-x-auto text-sm text-slate-400"></div>
-      <p class="mt-3 text-[11px] text-slate-400">Previsto = deals cuja <b>data prevista de fechamento</b> caía no dia (reconstruída do histórico de alterações — commitment que sobreviveu até o próprio dia, com o deal ainda aberto). Realizado = vendas ganhas no dia. Entrega = realizado ÷ previsto no período. Base reconstruível 100% do Pipedrive.</p>
-    </section>
     </div><!-- /view-forecast -->
 
 
@@ -229,7 +205,6 @@
       renderForecastCall(d);
       renderTabela(d);
       renderHistorico();
-      try { renderAccuracy(); } catch(e){ console.error("accuracy:", e); }
       document.getElementById("footer").textContent = "Dados ao vivo do Pipedrive · atualizado " + new Date(d.atualizadoEm).toLocaleString("pt-BR");
     }
 
@@ -267,93 +242,6 @@
       const pid = document.getElementById("f-funil").value;
       fetch(`/api/fc-history?pipeline_id=${pid}`).then(r=>r.json())
         .then(j=>{ fcHist = j.meses||{}; renderHistorico(); }).catch(()=>{ fcHist={}; });
-    }
-
-    // ── Previsão × Realizado (dataset accuracy, via changelog do expected_close_date) ──
-    let accData = null, accMetric = "value", accMode = "cumul";
-    const fmtAcc = (v) => accMetric === "value" ? brl(v) : num(v);
-
-    function accSeriesFor(pid, uid){
-      const p = (accData && accData.series && accData.series[String(pid)]) || {};
-      return p[uid ? String(uid) : "all"] || { previsto:{}, real:{} };
-    }
-    function accMonthCells(mes, s){
-      const [y,m] = mes.split("-").map(Number); const nd = new Date(y, m, 0).getDate();
-      const prev=[], real=[];
-      for (let d=1; d<=nd; d++){ const ds=`${mes}-${String(d).padStart(2,"0")}`;
-        prev.push((s.previsto[ds]&&s.previsto[ds][accMetric])||0);
-        real.push((s.real[ds]&&s.real[ds][accMetric])||0); }
-      return { nd, prev, real };
-    }
-
-    function svgAccChart(prev, real, nd, mes){
-      const W=820, H=300, ml=64, mr=16, mt=16, mb=28, iw=W-ml-mr, ih=H-mt-mb;
-      let A=prev.slice(), B=real.slice();
-      if (accMode==="cumul"){ let a=0,b=0; A=A.map(x=>a+=x); B=B.map(x=>b+=x); }
-      const maxV=Math.max(1, ...A, ...B);
-      const x=(i)=> ml + (nd<=1?0:(i/(nd-1))*iw);
-      const y=(v)=> mt + ih - (v/maxV)*ih;
-      const path=(arr)=> arr.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-      // média de entrega (linha do meio): média diária do realizado no mês
-      const diasReais = real.filter(v=>v>0).length || 1;
-      const mediaReal = real.reduce((s,v)=>s+v,0) / (accMode==="daily"? diasReais : 1);
-      const gy=[0,.25,.5,.75,1].map(f=>{ const v=maxV*(1-f); return `<line x1="${ml}" y1="${(mt+ih*f).toFixed(1)}" x2="${W-mr}" y2="${(mt+ih*f).toFixed(1)}" stroke="#f1f5f9"/><text x="${ml-8}" y="${(mt+ih*f+3).toFixed(1)}" text-anchor="end" font-size="10" fill="#94a3b8">${accMetric==="value"?("R$ "+Math.round(v/1000)+"k"):Math.round(v)}</text>`; }).join("");
-      const step=Math.max(1,Math.ceil(nd/12));
-      const xl=[]; for(let i=0;i<nd;i+=step) xl.push(`<text x="${x(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#94a3b8">${i+1}</text>`);
-      let mediaLine="";
-      if (accMode==="daily"){ const my=y(mediaReal);
-        mediaLine=`<line x1="${ml}" y1="${my.toFixed(1)}" x2="${W-mr}" y2="${my.toFixed(1)}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${W-mr}" y="${(my-5).toFixed(1)}" text-anchor="end" font-size="10" fill="#64748b">média entregue/dia ${fmtAcc(Math.round(mediaReal))}</text>`; }
-      return `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:640px" xmlns="http://www.w3.org/2000/svg">
-        ${gy}${xl}
-        <path d="${path(A)}" fill="none" stroke="#4f46e5" stroke-width="2.5"/>
-        <path d="${path(B)}" fill="none" stroke="#10b981" stroke-width="2.5"/>
-        ${mediaLine}
-      </svg>
-      <div class="mt-2 flex flex-wrap items-center gap-4 text-xs">
-        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-4 rounded" style="background:#4f46e5"></span>Previsto (${accMode==="cumul"?"acum.":"dia"})</span>
-        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-4 rounded" style="background:#10b981"></span>Realizado (${accMode==="cumul"?"acum.":"dia"})</span>
-        ${accMode==="daily"?'<span class="flex items-center gap-1.5"><span class="inline-block h-0 w-4 border-t-2 border-dashed" style="border-color:#94a3b8"></span>média entregue/dia</span>':''}
-      </div>`;
-    }
-
-    function renderAccuracy(){
-      const chart=document.getElementById("acc-chart"); if(!chart) return;
-      document.querySelectorAll(".acc-metric").forEach(b=>b.className="acc-metric rounded-md px-2.5 py-1 font-medium "+(b.dataset.metric===accMetric?"bg-indigo-600 text-white":"text-slate-500"));
-      document.querySelectorAll(".acc-mode").forEach(b=>b.className="acc-mode rounded-md px-2.5 py-1 font-medium "+(b.dataset.mode===accMode?"bg-indigo-600 text-white":"text-slate-500"));
-      if(!accData){ chart.innerHTML='<p class="text-xs text-slate-400">Carregando base de acurácia…</p>'; return; }
-      const pid=document.getElementById("f-funil").value, uid=currentUid(), mes=document.getElementById("f-mes").value;
-      const s=accSeriesFor(pid,uid);
-      const { nd, prev, real }=accMonthCells(mes, s);
-      const prevTot=prev.reduce((a,b)=>a+b,0), realTot=real.reduce((a,b)=>a+b,0);
-      const entrega=prevTot>0? Math.round((realTot/prevTot)*100): null;
-      const entCor=entrega==null?"":(entrega>=90&&entrega<=110?"#10b981":(entrega>=70&&entrega<=130?"#f59e0b":"#f43f5e"));
-      const rotMes=(()=>{ const[y,m]=mes.split("-"); let r=new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}); return r.charAt(0).toUpperCase()+r.slice(1); })();
-      document.getElementById("acc-scope").textContent=`${accData.pipes?accData.pipes[pid]||("Funil "+pid):("Funil "+pid)} · ${uid?(pdUsers.find(u=>String(u.id)===String(uid))||{}).nome||("vendedor "+uid):"Todos os vendedores"} · ${rotMes}`;
-      document.getElementById("acc-kpis").innerHTML=
-        tileBox("Previsto no mês", fmtAcc(prevTot), "data prevista de fechamento")+
-        tileBox("Realizado no mês", fmtAcc(realTot), "vendas ganhas")+
-        tileBox("Entrega", entrega==null?"—":entrega+"%", "realizado ÷ previsto", entCor?`color:${entCor}`:"")+
-        tileBox("Gap", fmtAcc(realTot-prevTot), realTot>=prevTot?"acima do previsto":"abaixo do previsto");
-      chart.innerHTML=svgAccChart(prev, real, nd, mes);
-      renderAccMeses(pid, uid);
-    }
-
-    function renderAccMeses(pid, uid){
-      const el=document.getElementById("acc-meses"); if(!el) return;
-      const m=((accData.meses&&accData.meses[String(pid)])||{})[uid?String(uid):"all"]||{};
-      const meses=Object.keys(m).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
-      if(!meses.length){ el.innerHTML=""; return; }
-      const rot=(k)=>{ const[y,mm]=k.split("-"); return new Date(y,mm-1,1).toLocaleDateString("pt-BR",{month:"short",year:"2-digit"}); };
-      const rows=meses.map(k=>{ const r=m[k]; const pv=r.previsto[accMetric]||0, rv=r.real[accMetric]||0;
-        const ent=pv>0?Math.round((rv/pv)*100):null; const cor=ent==null?"":(ent>=90&&ent<=110?"#10b981":(ent>=70&&ent<=130?"#f59e0b":"#f43f5e"));
-        return `<tr class="border-b border-slate-100"><td class="py-2 pr-3 font-medium capitalize">${rot(k)}</td>
-          <td class="py-2 px-3 text-right">${fmtAcc(pv)}</td><td class="py-2 px-3 text-right">${fmtAcc(rv)}</td>
-          <td class="py-2 pl-3 text-right font-semibold"${cor?` style="color:${cor}"`:""}>${ent==null?"—":ent+"%"}</td></tr>`; }).join("");
-      el.innerHTML=`<p class="mb-1 text-xs font-semibold text-slate-500">Retrospectiva mensal</p><table class="w-full text-sm">
-        <thead><tr class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
-          <th class="py-2 pr-3 text-left">Mês</th><th class="py-2 px-3 text-right">Previsto</th>
-          <th class="py-2 px-3 text-right">Realizado</th><th class="py-2 pl-3 text-right">Entrega</th></tr></thead>
-        <tbody>${rows}</tbody></table>`;
     }
 
     function tileBox(t, v, sub, style){
@@ -535,10 +423,6 @@
       }
       document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregarHistorico(); carregar(); });
       document.getElementById("f-mes").addEventListener("change", carregar);
-      // Toggles da visão Previsão × Realizado
-      document.querySelectorAll(".acc-metric").forEach(b=>b.onclick=()=>{ accMetric=b.dataset.metric; renderAccuracy(); });
-      document.querySelectorAll(".acc-mode").forEach(b=>b.onclick=()=>{ accMode=b.dataset.mode; renderAccuracy(); });
-      fetch("/api/fc-history?dataset=accuracy").then(r=>r.json()).then(j=>{ accData=j; renderAccuracy(); }).catch(()=>{});
       carregarHistorico();
       Promise.all([
         fetch("/api/metas").then(r=>r.json()).then(m=>{ metasMap=m.metas||{}; }).catch(()=>{}),

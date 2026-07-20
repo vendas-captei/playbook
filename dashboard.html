@@ -92,6 +92,29 @@
       <div id="trilha"></div>
     </section>
 
+    <!-- Previsão × Realizado (data prevista de fechamento, as-of via changelog) -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-base font-semibold">Previsão × Realizado <span class="text-xs font-normal text-slate-400">· data prevista de fechamento × venda</span></h2>
+          <p id="acc-scope" class="text-xs text-slate-500">—</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex rounded-lg border border-slate-200 p-0.5 text-xs">
+            <button data-metric="value" class="acc-metric rounded-md px-2.5 py-1 font-medium">R$</button>
+            <button data-metric="count" class="acc-metric rounded-md px-2.5 py-1 font-medium">nº</button>
+          </div>
+          <div class="inline-flex rounded-lg border border-slate-200 p-0.5 text-xs">
+            <button data-mode="cumul" class="acc-mode rounded-md px-2.5 py-1 font-medium">Acum.</button>
+            <button data-mode="daily" class="acc-mode rounded-md px-2.5 py-1 font-medium">Diário</button>
+          </div>
+        </div>
+      </div>
+      <div id="acc-kpis" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4"></div>
+      <div id="acc-chart-wrap" class="relative mt-3"><div id="acc-chart" class="w-full overflow-x-auto text-sm text-slate-400">—</div></div>
+      <div id="acc-meses" class="mt-3 text-[11px]"></div>
+    </section>
+
     <!-- TPC — Tempo de Primeiro Contato -->
     <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -668,6 +691,109 @@
 
     // LEITURA — 0 chamadas ao Pipedrive. Boot e troca de filtros leem a foto congelada
     // (Edge Config). Views não cacheadas pedem clique em Atualizar. (Política 2026-07-15.)
+    // ── Previsão × Realizado (dataset accuracy: expected_close_date as-of via changelog) ──
+    let accData = null, accMetric = "value", accMode = "cumul", accGeo = null;
+    const accFmt = (v) => accMetric === "value" ? brl(v) : num(v);
+    function accSeriesFor(pid, uid){ const p = (accData && accData.series && accData.series[String(pid)]) || {}; return p[uid ? String(uid) : "all"] || { previsto:{}, real:{} }; }
+    function accMonthCells(mes, s){ const [y,m] = mes.split("-").map(Number); const nd = new Date(y, m, 0).getDate(); const prev=[], real=[];
+      for (let d=1; d<=nd; d++){ const ds=`${mes}-${String(d).padStart(2,"0")}`; prev.push((s.previsto[ds]&&s.previsto[ds][accMetric])||0); real.push((s.real[ds]&&s.real[ds][accMetric])||0); } return { nd, prev, real }; }
+    function accTile(t, v, sub, style){ return `<div class="rounded-lg border border-slate-200 p-2.5"><p class="text-[11px] text-slate-500">${t}</p><p class="mt-0.5 text-lg font-bold leading-tight"${style?` style="${style}"`:""}>${v}</p>${sub?`<p class="mt-0.5 text-[10px] text-slate-400">${sub}</p>`:""}</div>`; }
+
+    function accSvg(prev, real, nd){
+      const W=820,H=210,ml=58,mr=46,mt=12,mb=22,iw=W-ml-mr,ih=H-mt-mb;
+      let A=prev.slice(), B=real.slice();
+      if (accMode==="cumul"){ let a=0,b=0; A=A.map(x=>a+=x); B=B.map(x=>b+=x); }
+      const maxV=Math.max(1, ...A, ...B);
+      let cP=0,cR=0; const pct=[]; for (let i=0;i<nd;i++){ cP+=prev[i]; cR+=real[i]; pct.push(cP>0?(cR/cP*100):null); }
+      const maxPct=Math.max(100, ...pct.filter(v=>v!=null));
+      const x=i=> ml + (nd<=1?0:i/(nd-1)*iw);
+      const y=v=> mt + ih - (v/maxV)*ih;
+      const yp=v=> mt + ih - (v/maxPct)*ih;
+      const path=arr=>arr.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+      const pp=pct.map((v,i)=> v==null?null:`${x(i).toFixed(1)},${yp(v).toFixed(1)}`).filter(Boolean);
+      const pctLine=pp.length?`<polyline points="${pp.join(' ')}" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="5 3"/>`:"";
+      const gy=[0,.25,.5,.75,1].map(f=>`<line x1="${ml}" y1="${(mt+ih*f).toFixed(1)}" x2="${W-mr}" y2="${(mt+ih*f).toFixed(1)}" stroke="#f1f5f9"/><text x="${ml-6}" y="${(mt+ih*f+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#94a3b8">${accMetric==="value"?("R$"+Math.round(maxV*(1-f)/1000)+"k"):Math.round(maxV*(1-f))}</text>`).join("");
+      const gyp=[0,.5,1].map(f=>`<text x="${W-mr+6}" y="${(mt+ih*f+3).toFixed(1)}" text-anchor="start" font-size="9" fill="#d97706">${Math.round(maxPct*(1-f))}%</text>`).join("");
+      const step=Math.max(1,Math.ceil(nd/12)); let xl=""; for (let i=0;i<nd;i+=step) xl+=`<text x="${x(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="#94a3b8">${i+1}</text>`;
+      accGeo={ ml, mt, ih, nd, W, H, prev, real, pct, A, B, xs:[] }; for (let i=0;i<nd;i++) accGeo.xs.push(x(i));
+      return `<svg id="acc-svg" viewBox="0 0 ${W} ${H}" class="w-full" style="min-width:600px" xmlns="http://www.w3.org/2000/svg">
+        ${gy}${gyp}${xl}
+        <path d="${path(A)}" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+        <path d="${path(B)}" fill="none" stroke="#10b981" stroke-width="2.2"/>
+        ${pctLine}
+        <line id="acc-cur" x1="0" y1="${mt}" x2="0" y2="${mt+ih}" stroke="#cbd5e1" stroke-width="1" style="display:none"/>
+        <circle id="acc-dp" r="3.5" fill="#4f46e5" style="display:none"/>
+        <circle id="acc-dr" r="3.5" fill="#10b981" style="display:none"/>
+        <rect id="acc-hit" x="${ml}" y="${mt}" width="${iw}" height="${ih}" fill="transparent" style="cursor:crosshair"/>
+      </svg>
+      <div class="mt-1 flex flex-wrap items-center gap-3 text-[11px]">
+        <span class="flex items-center gap-1"><span class="inline-block h-2 w-3.5 rounded" style="background:#4f46e5"></span>Previsto</span>
+        <span class="flex items-center gap-1"><span class="inline-block h-2 w-3.5 rounded" style="background:#10b981"></span>Realizado</span>
+        <span class="flex items-center gap-1"><span class="inline-block h-0 w-3.5 border-t-2 border-dashed" style="border-color:#f59e0b"></span>% entregue (acum.)</span>
+      </div>
+      <div id="acc-tip" class="pointer-events-none absolute z-10 hidden rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] shadow-lg"></div>`;
+    }
+
+    function accBindHover(){
+      const svg=document.getElementById("acc-svg"), hit=document.getElementById("acc-hit"), tip=document.getElementById("acc-tip");
+      const cur=document.getElementById("acc-cur"), dp=document.getElementById("acc-dp"), dr=document.getElementById("acc-dr"), wrap=document.getElementById("acc-chart-wrap");
+      if (!svg||!hit||!accGeo) return;
+      const maxV=Math.max(1, ...accGeo.A, ...accGeo.B); const yy=v=> accGeo.mt + accGeo.ih - (v/maxV)*accGeo.ih;
+      hit.onmousemove=(e)=>{
+        const r=svg.getBoundingClientRect(); const sx=(e.clientX-r.left)/r.width*accGeo.W;
+        let bi=0,bd=1e9; for (let i=0;i<accGeo.nd;i++){ const d=Math.abs(accGeo.xs[i]-sx); if (d<bd){ bd=d; bi=i; } }
+        const px=accGeo.xs[bi], av=accGeo.A[bi], bv=accGeo.B[bi];
+        cur.setAttribute("x1",px); cur.setAttribute("x2",px); cur.style.display="";
+        dp.setAttribute("cx",px); dp.setAttribute("cy",yy(av)); dp.style.display="";
+        dr.setAttribute("cx",px); dr.setAttribute("cy",yy(bv)); dr.style.display="";
+        const pc=accGeo.pct[bi];
+        tip.innerHTML=`<div class="font-semibold text-slate-700">Dia ${bi+1}</div>
+          <div style="color:#4f46e5">Previsto: ${accFmt(accMode==="cumul"?av:accGeo.prev[bi])}</div>
+          <div style="color:#10b981">Realizado: ${accFmt(accMode==="cumul"?bv:accGeo.real[bi])}</div>
+          <div style="color:#d97706">Entrega acum.: ${pc==null?"—":Math.round(pc)+"%"}</div>`;
+        tip.classList.remove("hidden");
+        const wr=wrap.getBoundingClientRect(); let left=e.clientX-wr.left+12; if (left>wr.width-150) left=e.clientX-wr.left-150;
+        tip.style.left=Math.max(0,left)+"px"; tip.style.top="6px";
+      };
+      hit.onmouseleave=()=>{ tip.classList.add("hidden"); cur.style.display="none"; dp.style.display="none"; dr.style.display="none"; };
+    }
+
+    function renderAccMeses(pid, uid){
+      const el=document.getElementById("acc-meses"); if (!el) return;
+      const m=((accData.meses&&accData.meses[String(pid)])||{})[uid?String(uid):"all"]||{};
+      const meses=Object.keys(m).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
+      if (!meses.length){ el.innerHTML=""; return; }
+      const rot=k=>{ const[y,mm]=k.split("-"); return new Date(y,mm-1,1).toLocaleDateString("pt-BR",{month:"short"}).replace(".",""); };
+      const chips=meses.map(k=>{ const r=m[k]; const pv=r.previsto[accMetric]||0, rv=r.real[accMetric]||0; const e=pv>0?Math.round(rv/pv*100):null;
+        const c=e==null?"#94a3b8":(e>=90&&e<=110?"#10b981":(e>=70&&e<=130?"#f59e0b":"#f43f5e"));
+        return `<span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5" style="border-color:${c}55"><span class="capitalize text-slate-500">${rot(k)}</span><b style="color:${c}">${e==null?"—":e+"%"}</b></span>`; }).join(" ");
+      el.innerHTML=`<span class="mr-1 text-slate-400">Entrega mês a mês:</span> ${chips}`;
+    }
+
+    function renderAccuracy(){
+      const chart=document.getElementById("acc-chart"); if (!chart) return;
+      document.querySelectorAll(".acc-metric").forEach(b=>b.className="acc-metric rounded-md px-2.5 py-1 font-medium "+(b.dataset.metric===accMetric?"bg-indigo-600 text-white":"text-slate-500"));
+      document.querySelectorAll(".acc-mode").forEach(b=>b.className="acc-mode rounded-md px-2.5 py-1 font-medium "+(b.dataset.mode===accMode?"bg-indigo-600 text-white":"text-slate-500"));
+      if (!accData){ chart.innerHTML='<p class="text-xs text-slate-400">Carregando base de acurácia…</p>'; return; }
+      const pid=document.getElementById("f-funil").value, uid=currentUid(), mes=document.getElementById("f-mes").value;
+      const s=accSeriesFor(pid,uid); const { nd, prev, real }=accMonthCells(mes, s);
+      const prevTot=prev.reduce((a,b)=>a+b,0), realTot=real.reduce((a,b)=>a+b,0);
+      const entrega=prevTot>0?Math.round(realTot/prevTot*100):null;
+      const entCor=entrega==null?"":(entrega>=90&&entrega<=110?"#10b981":(entrega>=70&&entrega<=130?"#f59e0b":"#f43f5e"));
+      const rotMes=(()=>{ const[y,m]=mes.split("-"); let r=new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"}); return r.charAt(0).toUpperCase()+r.slice(1); })();
+      const nome=uid?((pdUsers.find(u=>String(u.id)===String(uid))||{}).nome||("vendedor "+uid)):"Todos os vendedores";
+      document.getElementById("acc-scope").textContent=`${(accData.pipes&&accData.pipes[pid])||("Funil "+pid)} · ${nome} · ${rotMes}`;
+      const diasComVenda=real.filter(v=>v>0).length||1; const mediaReal=realTot/(accMode==="daily"?diasComVenda:Math.max(1,nd));
+      document.getElementById("acc-kpis").innerHTML=
+        accTile("Previsto no mês", accFmt(prevTot), "data prevista")+
+        accTile("Realizado no mês", accFmt(realTot), "vendas ganhas")+
+        accTile("Entrega (média)", entrega==null?"—":entrega+"%", "% do previsto entregue", entCor?`color:${entCor}`:"")+
+        accTile("Média/dia", accFmt(Math.round(mediaReal)), accMode==="daily"?"dias com venda":"por dia do mês");
+      chart.innerHTML=accSvg(prev, real, nd);
+      accBindHover();
+      renderAccMeses(pid, uid);
+    }
+
     function carregar(){
       const { pid, uid, mes } = viewQS();
       if (!pid) return;
@@ -762,6 +888,11 @@
 
       document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregar(); });
       document.getElementById("f-mes").addEventListener("change", carregar);
+      // Previsão × Realizado: renderiza independente do cache de métricas (funciona geral e por vendedor).
+      document.querySelectorAll(".acc-metric").forEach(b=>b.onclick=()=>{ accMetric=b.dataset.metric; renderAccuracy(); });
+      document.querySelectorAll(".acc-mode").forEach(b=>b.onclick=()=>{ accMode=b.dataset.mode; renderAccuracy(); });
+      ["f-funil","f-user","f-mes"].forEach(id=>{ const el=document.getElementById(id); if (el) el.addEventListener("change", ()=>setTimeout(renderAccuracy,0)); });
+      fetch("/api/fc-history?dataset=accuracy").then(r=>r.json()).then(j=>{ accData=j; renderAccuracy(); }).catch(()=>{});
       document.getElementById("btn-atualizar").addEventListener("click", atualizar);
       document.getElementById("meta-edit").addEventListener("click", abrirMeta);
       document.getElementById("meta-cancel").addEventListener("click", fecharMeta);
