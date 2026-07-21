@@ -1,7 +1,7 @@
 {
   "_meta": {
     "desc": "Log da Calculadora de Data de Fechamento (IA): previsto x realizado para medir acuracia ao longo do tempo. Gravado a cada calculo em POST /api/forecast-date; reconciliado (ganho/perdido) via action:reconcile.",
-    "updatedAt": "2026-07-21T18:16:50.743Z"
+    "updatedAt": "2026-07-21T18:17:30.475Z"
   },
   "registros": [
     {
@@ -80,6 +80,34 @@
         "q3": "sim",
         "q4": "sim",
         "obs": "Cliente gostou da ferramenta, mas precisa avaliar, marcamos retorno na sexta."
+      },
+      "por": "Ana Luiza",
+      "status": "aberto",
+      "dataReal": null,
+      "deltaDias": null,
+      "lostReason": null,
+      "reconciliadoEm": null
+    },
+    {
+      "id": "42609-1784657850475",
+      "dealId": 42609,
+      "titulo": "(Inbound)🟢 Monica",
+      "pipelineId": 7,
+      "etapa": "Proposta Enviada",
+      "diasNoFunil": 4,
+      "diasNaEtapaAtual": 0,
+      "expectedCloseDateNaPrevisao": "2026-08-14",
+      "previstoEm": "2026-07-21T18:17:30.475Z",
+      "dataPrevista": "2026-08-14",
+      "diasEstimados": 24,
+      "confianca": "media",
+      "resumo": "O card avançou rapidamente (4 dias no funil) e o vendedor validou decisor, burocracia e cronograma inverso, mas a urgência é parcial e o retorno marcado para 24/07 é o próximo gatilho crítico. Estimando ~1 semana para Negociação, ~1 semana para Verbalizou que vai Fechar e ~1 semana para Termo na Rua, a data cadastrada de 14/08 é realista se o retorno de sexta for positivo.",
+      "respostas": {
+        "q1": "parcial",
+        "q2": "sim",
+        "q3": "sim",
+        "q4": "sim",
+        "obs": "Cliente gostou da ferramenta, mas precisa avaliar, marcamos retorno na sexta 24/07/2026."
       },
       "por": "Ana Luiza",
       "status": "aberto",
