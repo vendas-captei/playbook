@@ -106,14 +106,19 @@ function monthly(seriesPid) {
 
 // today em America/Sao_Paulo (UTC-3, sem horário de verão) — alinha com o dia de negócio.
 function hojeBR() { return new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10); }
+function ymdMinus(ymd, n) { const d = new Date(ymd + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - n); return d.toISOString().slice(0, 10); }
 
-// Aplica o overlay ao vivo sobre o JSON base: realizado (janela toda) autoritativo do live;
-// previsto = passado (< hoje) do base + hoje/futuro (>= hoje) do live. Recalcula os meses afetados.
+// Aplica o overlay ao vivo sobre o JSON base.
+// PREVISTO write-once: dias JÁ CONGELADOS (<= previstoFrozenThrough) vêm SEMPRE do base e nunca mudam;
+//   só os dias ainda não congelados (> frozenThrough = hoje ainda vivo + futuro) vêm do live (forecast).
+//   O cron avança o congelamento p/ "hoje" no início do dia, fixando o valor daquele dia p/ sempre.
+// REALIZADO: sempre autoritativo do live (é fato de venda, não congela).
 function applyOverlay(base, ov) {
   if (!ov || !ov.pipes) return base;
   const out = JSON.parse(JSON.stringify(base || {}));
   out.series = out.series || {}; out.meses = out.meses || {};
   const today = ov.today || hojeBR();
+  const frozen = (out._meta && out._meta.previstoFrozenThrough) || ymdMinus(today, 1);
   for (const P of Object.keys(ov.pipes)) {
     const sp = (out.series[P] = out.series[P] || {});
     const { real = {}, prevFut = {} } = ov.pipes[P];
@@ -122,13 +127,13 @@ function applyOverlay(base, ov) {
       const node = (sp[ow] = sp[ow] || { previsto: {}, real: {} });
       node.real = real[ow] || {};                       // realizado: live é autoritativo na janela
       const np = {};
-      for (const [d, c] of Object.entries(node.previsto || {})) if (d < today) np[d] = c;  // passado do base
-      for (const [d, c] of Object.entries(prevFut[ow] || {})) np[d] = c;                    // hoje+futuro do live
+      for (const [d, c] of Object.entries(node.previsto || {})) if (d <= frozen) np[d] = c;  // congelado (write-once)
+      for (const [d, c] of Object.entries(prevFut[ow] || {})) if (d > frozen) np[d] = c;      // ainda vivo/forecast
       node.previsto = np;
     }
     out.meses[P] = monthly(sp);
   }
-  out._meta = Object.assign({}, out._meta, { refreshed_em: ov.refreshed_em, refresh_mode: "incremental (realizado live + previsto hoje/futuro)", refresh_truncated: !!ov.truncated });
+  out._meta = Object.assign({}, out._meta, { refreshed_em: ov.refreshed_em, refresh_mode: "incremental (realizado live + previsto forecast; congelado até " + frozen + ")", refresh_truncated: !!ov.truncated });
   return out;
 }
 
@@ -181,7 +186,8 @@ module.exports = async function handler(req, res) {
         const authed = req.headers["x-vercel-cron"] || (process.env.SNAPSHOT_KEY && u.searchParams.get("key") === process.env.SNAPSHOT_KEY);
         if (wantPersist && authed) {
           const commitObj = JSON.parse(JSON.stringify(merged));
-          commitObj._meta = Object.assign({}, commitObj._meta, { gerado_em: new Date().toISOString(), refresh_via: "cron-incremental" });
+          // Avança o congelamento p/ HOJE: fixa o previsto de hoje (capturado no início do dia) p/ sempre.
+          commitObj._meta = Object.assign({}, commitObj._meta, { gerado_em: new Date().toISOString(), refresh_via: "cron-incremental", previstoFrozenThrough: hojeBR() });
           delete commitObj._meta.refreshed_em; delete commitObj._meta.refresh_mode; delete commitObj._meta.refresh_persisted;
           merged._meta.committed = await ghPut(PATHS.accuracy, commitObj, tok, "chore(accuracy): rebuild diario incremental (cron)");
         }

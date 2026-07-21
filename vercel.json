@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/fc-history?dataset=accuracy&refresh=1&persist=1",
-      "schedule": "0 11 * * *"
+      "schedule": "5 3 * * *"
     }
   ]
 }
