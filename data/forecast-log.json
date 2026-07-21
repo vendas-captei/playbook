@@ -1,7 +1,36 @@
 {
   "_meta": {
     "desc": "Log da Calculadora de Data de Fechamento (IA): previsto x realizado para medir acuracia ao longo do tempo. Gravado a cada calculo em POST /api/forecast-date; reconciliado (ganho/perdido) via action:reconcile.",
-    "updatedAt": null
+    "updatedAt": "2026-07-21T18:11:49.544Z"
   },
-  "registros": []
+  "registros": [
+    {
+      "id": "42609-1784657509544",
+      "dealId": 42609,
+      "titulo": "(Inbound)🟢 Monica",
+      "pipelineId": 7,
+      "etapa": "Proposta Enviada",
+      "diasNoFunil": 4,
+      "diasNaEtapaAtual": 0,
+      "expectedCloseDateNaPrevisao": null,
+      "previstoEm": "2026-07-21T18:11:49.544Z",
+      "dataPrevista": "2026-08-18",
+      "diasEstimados": 28,
+      "confianca": "media",
+      "resumo": "O card avançou rapidamente (4 dias no total), mas urgência e processo decisório apenas parcialmente validados aumentam risco de escorregamento nas etapas de Negociação e Verbalizou que vai Fechar. Burocracia mapeada e cronograma inverso confirmado sustentam uma estimativa de fechamento em cerca de 4 semanas.",
+      "respostas": {
+        "q1": "parcial",
+        "q2": "parcial",
+        "q3": "sim",
+        "q4": "sim",
+        "obs": ""
+      },
+      "por": "Ana Luiza",
+      "status": "aberto",
+      "dataReal": null,
+      "deltaDias": null,
+      "lostReason": null,
+      "reconciliadoEm": null
+    }
+  ]
 }
