@@ -425,6 +425,33 @@
     "seniority": "pleno1",
     "dataInicio": "2026-07-22",
     "hasComissao": false,
-    "tipoVendas": null
+    "tipoVendas": null,
+    "perms": [
+      "home",
+      "cargos",
+      "metas",
+      "tracking",
+      "processos",
+      "treinamentos",
+      "indica-platform",
+      "indica-outbound",
+      "indica-whatsapp",
+      "indica-objecoes",
+      "indica-guia-reuniao",
+      "indica-fechamento",
+      "copiloto-platform",
+      "copiloto-concorrentes",
+      "copiloto-outbound",
+      "copiloto-inbound",
+      "copiloto-objecoes",
+      "copiloto-valores",
+      "copiloto-pre-reuniao",
+      "copiloto-guia-reuniao",
+      "copiloto-objecoes-reuniao",
+      "copiloto-situacoes",
+      "copiloto-fechamento",
+      "tabuleiro-comercial",
+      "comissao"
+    ]
   }
 ]
