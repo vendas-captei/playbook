@@ -43,6 +43,23 @@ async function ecWrite(key, value) {
   } catch (_) { return false; }
 }
 
+// Commit de um objeto JSON num arquivo do repo via GitHub API (reflete na hora no loadJson).
+async function ghPut(path, obj, tok, msg) {
+  if (!tok) return false;
+  try {
+    const cur = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+      headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" }, cache: "no-store",
+    });
+    const sha = cur.ok ? (await cur.json()).sha : undefined;
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp", "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg, content: Buffer.from(JSON.stringify(obj)).toString("base64"), sha }),
+    });
+    return r.ok;
+  } catch (_) { return false; }
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // GET no Pipedrive com backoff em 429/5xx (Cloudflare de borda devolve 429 sob rajada).
 async function pdGet(url, tok, tries = 4) {
@@ -155,9 +172,19 @@ module.exports = async function handler(req, res) {
         const pdtok = process.env.PIPEDRIVE_API_TOKEN;
         if (!pdtok) { res.status(500).json({ error: "PIPEDRIVE_API_TOKEN não configurado" }); return; }
         const ov = await buildOverlay(pdtok);
-        const persisted = await ecWrite("accLive", ov);
+        const persisted = await ecWrite("accLive", ov);            // best-effort (Edge Config Hobby = 250/mês)
         const merged = applyOverlay(base, ov);
         merged._meta = Object.assign({}, merged._meta, { refresh_persisted: persisted });
+        // Persistência DURÁVEL (rebuild diário do base): commita o mesclado no JSON do repo.
+        // Autorizado só p/ o Vercel Cron (header x-vercel-cron) ou chamada c/ key=SNAPSHOT_KEY.
+        const wantPersist = u.searchParams.get("persist") === "1";
+        const authed = req.headers["x-vercel-cron"] || (process.env.SNAPSHOT_KEY && u.searchParams.get("key") === process.env.SNAPSHOT_KEY);
+        if (wantPersist && authed) {
+          const commitObj = JSON.parse(JSON.stringify(merged));
+          commitObj._meta = Object.assign({}, commitObj._meta, { gerado_em: new Date().toISOString(), refresh_via: "cron-incremental" });
+          delete commitObj._meta.refreshed_em; delete commitObj._meta.refresh_mode; delete commitObj._meta.refresh_persisted;
+          merged._meta.committed = await ghPut(PATHS.accuracy, commitObj, tok, "chore(accuracy): rebuild diario incremental (cron)");
+        }
         res.status(200).json(merged);
         return;
       }
