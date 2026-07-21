@@ -1,7 +1,7 @@
 {
   "_meta": {
     "desc": "Log da Calculadora de Data de Fechamento (IA): previsto x realizado para medir acuracia ao longo do tempo. Gravado a cada calculo em POST /api/forecast-date; reconciliado (ganho/perdido) via action:reconcile.",
-    "updatedAt": "2026-07-21T18:13:14.829Z"
+    "updatedAt": "2026-07-21T18:16:50.743Z"
   },
   "registros": [
     {
@@ -52,6 +52,34 @@
         "q3": "sim",
         "q4": "sim",
         "obs": ""
+      },
+      "por": "Ana Luiza",
+      "status": "aberto",
+      "dataReal": null,
+      "deltaDias": null,
+      "lostReason": null,
+      "reconciliadoEm": null
+    },
+    {
+      "id": "42609-1784657810743",
+      "dealId": 42609,
+      "titulo": "(Inbound)🟢 Monica",
+      "pipelineId": 7,
+      "etapa": "Proposta Enviada",
+      "diasNoFunil": 4,
+      "diasNaEtapaAtual": 0,
+      "expectedCloseDateNaPrevisao": "2026-08-14",
+      "previstoEm": "2026-07-21T18:16:50.743Z",
+      "dataPrevista": "2026-08-14",
+      "diasEstimados": 24,
+      "confianca": "media",
+      "resumo": "O card avançou rapidamente (4 dias no funil) e os critérios de Decisão, Burocracia e Cronograma estão validados, sustentando a data já cadastrada de 14/08. O único freio é a urgência parcial — o cliente precisa avaliar e o retorno está marcado para sexta, o que pode adicionar 1-2 ciclos de follow-up antes de avançar para Negociação.",
+      "respostas": {
+        "q1": "parcial",
+        "q2": "sim",
+        "q3": "sim",
+        "q4": "sim",
+        "obs": "Cliente gostou da ferramenta, mas precisa avaliar, marcamos retorno na sexta."
       },
       "por": "Ana Luiza",
       "status": "aberto",
