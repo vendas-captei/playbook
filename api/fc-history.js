@@ -2,10 +2,20 @@
 // GET /api/fc-history[?pipeline_id=7] -> série de meses { forecastInicial, fechamento } por funil.
 // GET /api/fc-history?dataset=accuracy -> Acurácia de Previsão (data/forecast-accuracy.json):
 //   Previsto (expected_close_date, as-of via changelog) x Realizado (won) por dia/vendedor/funil.
-// GET /api/fc-history?dataset=forecast-log -> Log da Calculadora de Data de Fechamento IA
-//   (data/forecast-log.json): previsão da IA x realizado (ganho/perdido) por registro. Ver api/forecast-date.js.
+//   Merge automático com o overlay ao vivo do Edge Config (chave accLive), se existir.
+// GET /api/fc-history?dataset=accuracy&refresh=1 -> ATUALIZA do Pipedrive (incremental, cabe em 10s):
+//   realizado (ganhos) ao vivo + previsto de hoje/futuro (abertos c/ ECD); passado vem do JSON base.
+//   Grava overlay compacto no Edge Config e devolve o resultado mesclado. ÚNICA porta ao Pipedrive aqui.
+// GET /api/fc-history?dataset=forecast-log -> Log da Calculadora de Data de Fechamento IA.
 const REPO = "vendas-captei/playbook";
 const PATHS = { history: "data/forecast-history.json", accuracy: "data/forecast-accuracy.json", "forecast-log": "data/forecast-log.json" };
+const V2 = "https://api.pipedrive.com/api/v2";
+const WINDOW = "2026-05-01";        // início da janela (igual ao script de backfill)
+const PIPES = [7, 2];               // Captação Ativa (7) + IA Copiloto (2)
+
+// Edge Config (mesmo padrão do metrics.js) — overlay ao vivo da acurácia.
+const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
+const EC_TEAM = process.env.EDGE_CONFIG_TEAM, EC_WRITE = process.env.VERCEL_WRITE_TOKEN;
 
 async function loadJson(path, tok) {
   if (!tok) return {};
@@ -17,6 +27,121 @@ async function loadJson(path, tok) {
   throw new Error(`GitHub ${r.status}`);
 }
 
+async function ecRead(key) {
+  if (!EC_ID || !EC_READ) return null;
+  try { const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/${key}?token=${EC_READ}`, { cache: "no-store" }); return r.ok ? await r.json() : null; }
+  catch (_) { return null; }
+}
+async function ecWrite(key, value) {
+  if (!EC_ID || !EC_WRITE) return false;
+  try {
+    const r = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
+      method: "PATCH", headers: { Authorization: `Bearer ${EC_WRITE}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ operation: "upsert", key, value }] }),
+    });
+    return r.ok;
+  } catch (_) { return false; }
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// GET no Pipedrive com backoff em 429/5xx (Cloudflare de borda devolve 429 sob rajada).
+async function pdGet(url, tok, tries = 4) {
+  const sep = url.includes("?") ? "&" : "?";
+  for (let i = 0; i < tries; i++) {
+    const r = await fetch(`${url}${sep}api_token=${tok}`, { headers: { "User-Agent": "PlaybookApp" }, cache: "no-store" });
+    if (r.ok) return r.json();
+    if ((r.status === 429 || r.status >= 500) && i < tries - 1) { await sleep(400 * (i + 1)); continue; }
+    throw new Error(`Pipedrive ${r.status} em ${url.split("?")[0]}`);
+  }
+}
+async function listDeals(qs, tok, maxPages = 40) {
+  const out = []; let cursor = null, pages = 0;
+  do {
+    const u = `${V2}/deals?${qs}&limit=500` + (cursor ? `&cursor=${cursor}` : "");
+    const j = await pdGet(u, tok);
+    out.push(...(j.data || []));
+    cursor = (j.additional_data || {}).next_cursor; pages++;
+  } while (cursor && pages < maxPages);
+  return { deals: out, truncated: !!cursor };
+}
+
+function addCell(buckets, owner, day, value) {
+  const o = (buckets[owner] = buckets[owner] || {});
+  const c = (o[day] = o[day] || { value: 0, count: 0 });
+  c.value += (+value || 0); c.count += 1;
+}
+// Rollup mensal a partir da série diária: meses[owner][YYYY-MM] = {previsto,real}{value,count}.
+function monthly(seriesPid) {
+  const out = {};
+  for (const [owner, kinds] of Object.entries(seriesPid)) {
+    const m = {};
+    for (const kind of ["previsto", "real"]) {
+      for (const [day, cell] of Object.entries(kinds[kind] || {})) {
+        const mo = day.slice(0, 7);
+        const rec = (m[mo] = m[mo] || { previsto: { value: 0, count: 0 }, real: { value: 0, count: 0 } });
+        rec[kind].value += cell.value; rec[kind].count += cell.count;
+      }
+    }
+    out[owner] = m;
+  }
+  return out;
+}
+
+// today em America/Sao_Paulo (UTC-3, sem horário de verão) — alinha com o dia de negócio.
+function hojeBR() { return new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10); }
+
+// Aplica o overlay ao vivo sobre o JSON base: realizado (janela toda) autoritativo do live;
+// previsto = passado (< hoje) do base + hoje/futuro (>= hoje) do live. Recalcula os meses afetados.
+function applyOverlay(base, ov) {
+  if (!ov || !ov.pipes) return base;
+  const out = JSON.parse(JSON.stringify(base || {}));
+  out.series = out.series || {}; out.meses = out.meses || {};
+  const today = ov.today || hojeBR();
+  for (const P of Object.keys(ov.pipes)) {
+    const sp = (out.series[P] = out.series[P] || {});
+    const { real = {}, prevFut = {} } = ov.pipes[P];
+    const owners = new Set([...Object.keys(sp), ...Object.keys(real), ...Object.keys(prevFut)]);
+    for (const ow of owners) {
+      const node = (sp[ow] = sp[ow] || { previsto: {}, real: {} });
+      node.real = real[ow] || {};                       // realizado: live é autoritativo na janela
+      const np = {};
+      for (const [d, c] of Object.entries(node.previsto || {})) if (d < today) np[d] = c;  // passado do base
+      for (const [d, c] of Object.entries(prevFut[ow] || {})) np[d] = c;                    // hoje+futuro do live
+      node.previsto = np;
+    }
+    out.meses[P] = monthly(sp);
+  }
+  out._meta = Object.assign({}, out._meta, { refreshed_em: ov.refreshed_em, refresh_mode: "incremental (realizado live + previsto hoje/futuro)", refresh_truncated: !!ov.truncated });
+  return out;
+}
+
+// Monta o overlay ao vivo do Pipedrive (incremental, barato: ganhos + abertos c/ ECD).
+// As 4 varreduras (won/open × F7/F2) rodam em PARALELO p/ caber folgado nos 10s da Vercel Hobby.
+async function buildOverlay(pdtok) {
+  const today = hojeBR();
+  const results = await Promise.all(PIPES.map(async (pid) => {
+    const [w, o] = await Promise.all([
+      listDeals(`status=won&pipeline_id=${pid}`, pdtok),      // ganhos (janela)
+      listDeals(`status=open&pipeline_id=${pid}`, pdtok, 12), // abertos: filtra os c/ ECD >= hoje
+    ]);
+    const real = {}, prevFut = {};
+    for (const d of w.deals) {
+      const wt = (d.won_time || "").slice(0, 10);
+      if (!wt || wt < WINDOW) continue;
+      addCell(real, "all", wt, d.value); addCell(real, String(d.owner_id), wt, d.value);
+    }
+    for (const d of o.deals) {
+      const ecd = (d.expected_close_date || "").slice(0, 10);
+      if (!ecd || ecd < today) continue;
+      addCell(prevFut, "all", ecd, d.value); addCell(prevFut, String(d.owner_id), ecd, d.value);
+    }
+    return { P: String(pid), real, prevFut, truncated: o.truncated };
+  }));
+  const pipes = {}; let truncatedAny = false;
+  for (const r of results) { pipes[r.P] = { real: r.real, prevFut: r.prevFut }; truncatedAny = truncatedAny || r.truncated; }
+  return { refreshed_em: new Date().toISOString(), today, window: WINDOW, pipes, truncated: truncatedAny };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const tok = process.env.GITHUB_TOKEN;
@@ -24,7 +149,20 @@ module.exports = async function handler(req, res) {
     const u = new URL(req.url, "http://localhost");
     const dataset = u.searchParams.get("dataset");
     if (dataset === "accuracy") {
-      res.status(200).json(await loadJson(PATHS.accuracy, tok));
+      const base = await loadJson(PATHS.accuracy, tok);
+      if (u.searchParams.get("refresh") === "1") {
+        // ÚNICA porta ao Pipedrive: atualiza ao vivo, persiste overlay no Edge Config, devolve mesclado.
+        const pdtok = process.env.PIPEDRIVE_API_TOKEN;
+        if (!pdtok) { res.status(500).json({ error: "PIPEDRIVE_API_TOKEN não configurado" }); return; }
+        const ov = await buildOverlay(pdtok);
+        const persisted = await ecWrite("accLive", ov);
+        const merged = applyOverlay(base, ov);
+        merged._meta = Object.assign({}, merged._meta, { refresh_persisted: persisted });
+        res.status(200).json(merged);
+        return;
+      }
+      // Leitura normal: base (repo) + overlay ao vivo (Edge Config), SEM tocar no Pipedrive.
+      res.status(200).json(applyOverlay(base, await ecRead("accLive")));
       return;
     }
     if (dataset === "forecast-log" || dataset === "fdlog") {
