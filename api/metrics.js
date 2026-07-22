@@ -612,12 +612,12 @@ module.exports = async function handler(req, res) {
     // incidentais. É o único momento em que o cache do dashboard/TV é renovado.
     const cacheavel = ehMesAtual && periodoEhMesInteiro && !userId && (pipelineId === 7 || pipelineId === 2);
     if (cacheavel && u.searchParams.get("refreshCache") === "1") {
-      // Resolve a meta do dia FIXA (write-once): se já foi gravada hoje, reusa; senão usa o cálculo
-      // do início do dia. Assim o gap do mês encolhendo NÃO mexe nesse número — só a venda de hoje.
-      const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+      // Meta do dia = metaDiaInicioCalc, que JÁ é estável intra-dia (numerador = realizado ATÉ ONTEM,
+      // que não muda durante o dia). NÃO reusar mais o valor congelado do registro diário: o daily7
+      // de hoje foi gravado pelo código ANTIGO (metaDiaInicio bugado = 9.060) e não pode ser regravado
+      // enquanto a cota de escrita do Edge Config não resetar — reusá-lo servia o valor errado no refresh.
       const mapaDaily = await dailyReadMap(pipelineId);
-      const prevHoje = mapaDaily[hojeSP];
-      const metaDiaInicioFinal = (prevHoje && prevHoje.metaDiaInicio != null) ? prevHoje.metaDiaInicio : metaDiaInicioCalc;
+      const metaDiaInicioFinal = metaDiaInicioCalc;
       payload.metaDiaInicio = metaDiaInicioFinal;
       payload._cache = { updatedAt: payload.atualizadoEm, updatedBy: u.searchParams.get("by") || null };
       await cacheWrite(pipelineId, payload);
