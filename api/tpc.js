@@ -88,11 +88,105 @@ function mediana(arr) {
 }
 const r1 = (x) => Math.round(x * 10) / 10;
 
+// ── Monitor de Perdidos Pós-Reunião (?view=perdidos) ────────────────────────
+// Lead perdido que ENTROU em "Reunião Agendada" (stage 9 no F2 / 41 no F7).
+// Data da reunião = última entrada nesse stage <= data da perda (via /deals/{id}/flow).
+// dias = perda − reunião (calendário). Mede o descarte precoce (pedido Luiz 22/07).
+const REUNIAO_STAGE = { 7: 41, 2: 9 };
+const POST_REUNIAO = { 7: new Set([41, 144, 42, 43, 79, 80]), 2: new Set([9, 10, 138, 100, 101, 102, 150]) };
+const PRECOCE_DIAS = 4;       // <= isso após a reunião = descarte precoce
+const CAP_PERDIDOS = 350;
+
+function isoDate(ms) { return new Date(ms).toISOString().slice(0, 10); }
+function diffDias(aMs, bMs) {
+  const a = new Date(aMs), b = new Date(bMs);
+  const da = Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate());
+  const db = Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate());
+  return Math.round((db - da) / 86400000);
+}
+
+async function handlePerdidos(req, res, TK) {
+  const u = new URL(req.url, "http://localhost");
+  const days = Math.min(Math.max(Number(u.searchParams.get("days")) || 30, 1), 120);
+  const onlyPipe = u.searchParams.get("pipeline_id") ? Number(u.searchParams.get("pipeline_id")) : null;
+  const onlyUser = u.searchParams.get("user_id") ? Number(u.searchParams.get("user_id")) : null;
+  const cutoffMs = Date.now() - days * 86400000;
+
+  let start = 0, lost = [], capped = false;
+  for (let guard = 0; guard < 40; guard++) {
+    const r = await pd(`${V1}/deals?status=lost&start=${start}&limit=500&sort=lost_time%20DESC`, TK);
+    const data = r.data || [];
+    if (!data.length) break;
+    let stop = false;
+    for (const d of data) {
+      const lt = parseData(d.lost_time);
+      if (lt == null) continue;
+      if (lt < cutoffMs) { stop = true; continue; }
+      const pid = d.pipeline_id;
+      if ((pid === 2 || pid === 7)
+        && (!onlyPipe || pid === onlyPipe)
+        && POST_REUNIAO[pid].has(d.stage_id)
+        && (!onlyUser || (d.user_id && d.user_id.id === onlyUser))) lost.push(d);
+    }
+    const pg = (r.additional_data && r.additional_data.pagination) || {};
+    if (lost.length >= CAP_PERDIDOS) { capped = true; break; }
+    if (stop || !pg.more_items_in_collection) break;
+    start = pg.next_start;
+  }
+  lost = lost.slice(0, CAP_PERDIDOS);
+
+  const anchored = await poolMap(lost, async (d) => {
+    const pid = d.pipeline_id, target = REUNIAO_STAGE[pid], lt = parseData(d.lost_time);
+    let best = null;
+    try {
+      const fl = await pd(`${V1}/deals/${d.id}/flow`, TK);
+      for (const e of (fl.data || [])) {
+        if (e.object !== "dealChange") continue;
+        const dd = e.data || {};
+        if (dd.field_key !== "stage_id") continue;
+        const nv = Number(dd.new_value); if (isNaN(nv) || nv !== target) continue;
+        const ld = parseData(dd.log_time);
+        if (ld != null && ld <= lt && (best == null || ld > best)) best = ld;
+      }
+    } catch (_) {}
+    return best == null ? null : { d, reuniaoMs: best, lostMs: lt };
+  }, 10);
+
+  const rows = anchored.filter(Boolean).map((x) => ({
+    id: x.d.id, title: x.d.title || "—", pipe: x.d.pipeline_id,
+    vendedor: (x.d.user_id && x.d.user_id.name) || "—",
+    user_id: (x.d.user_id && x.d.user_id.id) || null,
+    reuniao: isoDate(x.reuniaoMs), perda: isoDate(x.lostMs),
+    dias: diffDias(x.reuniaoMs, x.lostMs), motivo: x.d.lost_reason || "—",
+  })).sort((a, b) => (a.perda < b.perda ? 1 : -1));
+
+  const funis = {}, vendedores = {};
+  for (const rr of rows) {
+    (funis[rr.pipe] = funis[rr.pipe] || []).push(rr);
+    const k = `${rr.pipe}|${rr.vendedor}`;
+    (vendedores[k] = vendedores[k] || { pipe: rr.pipe, vendedor: rr.vendedor, user_id: rr.user_id, dias: [] }).dias.push(rr.dias);
+  }
+  const resumoFunil = Object.keys(funis).map((p) => {
+    const arr = funis[p].map((r) => r.dias);
+    return { pipe: Number(p), n: arr.length, mediana: mediana(arr), precoce: arr.filter((x) => x <= PRECOCE_DIAS).length };
+  }).sort((a, b) => a.pipe - b.pipe);
+  const resumoVendedor = Object.values(vendedores).map((v) => ({
+    pipe: v.pipe, vendedor: v.vendedor, user_id: v.user_id, n: v.dias.length,
+    mediana: mediana(v.dias), precoce: v.dias.filter((x) => x <= PRECOCE_DIAS).length,
+  })).sort((a, b) => (b.pipe - a.pipe) || (b.n - a.n));
+
+  res.status(200).json({
+    days, precoceDias: PRECOCE_DIAS, capAtingido: capped,
+    total: rows.length, resumoFunil, resumoVendedor, rows, geradoEm: new Date().toISOString(),
+  });
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const TK = process.env.PIPEDRIVE_API_TOKEN;
   if (!TK) { res.status(500).json({ error: "PIPEDRIVE_API_TOKEN não configurado na Vercel" }); return; }
   try {
+    if (new URL(req.url, "http://localhost").searchParams.get("view") === "perdidos") { return await handlePerdidos(req, res, TK); }
     const u = new URL(req.url, "http://localhost");
     const pipelineId = Number(u.searchParams.get("pipeline_id")) || 7;
     const userId = u.searchParams.get("user_id") ? Number(u.searchParams.get("user_id")) : null;
