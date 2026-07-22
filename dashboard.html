@@ -358,9 +358,22 @@
     }
 
     function render(d){
-      // Foto cacheada / Modo TV podem vir do código antigo, SEM o campo `periodo` — nesse caso
-      // é sempre o mês corrente inteiro (único payload cacheável) → tratar como período ABERTO.
-      const per = d.periodo || { contemHoje: true, ehMesInteiro: true };
+      // Foto cacheada / Modo TV podem vir do código ANTIGO (sem `periodo`/`tracking` e com o
+      // `fechamentoDiarioNecessario` bugado do off-by-one). Enquanto o Edge Config não puder ser
+      // regravado (cota de escrita), RECALCULA o necessário correto a partir dos campos da foto:
+      //   necessário/dia = (meta − realizado até ontem) ÷ dias úteis restantes INCLUINDO hoje.
+      if (!d.periodo) {
+        const tot = d.diasUteisTotais || 0, dec = d.diasUteisDecorridos || 0;
+        const meta = d.metaMensal || 0, base = tot > 0 ? meta / tot : 0;
+        const realAteOntem = (d.faturamentoAtual || 0) - (d.vendasHoje || 0);
+        const restComHoje = Math.max(0, tot - Math.max(0, dec - 1)); // dec inclui hoje
+        d.baseDia = base;
+        d.metaPeriodo = meta;
+        d.fechamentoDiarioNecessario = restComHoje > 0 ? Math.max(0, meta - realAteOntem) / restComHoje : Math.max(0, meta - realAteOntem);
+        d.diasUteisRestantes = restComHoje;
+        d.periodo = { contemHoje: true, ehMesInteiro: true, _recalc: true };
+      }
+      const per = d.periodo;
       const metaEfetiva = (d.metaPeriodo != null) ? d.metaPeriodo : d.metaMensal;
       const rotPeriodo = per.label || d.mesReferencia;
       document.getElementById("subtitle").innerHTML =
