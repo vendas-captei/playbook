@@ -26871,12 +26871,16 @@ const RH = (() => {
   <div style="display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0;">
     <button class="trk-tab" data-trk="dash" onclick="trackTab('dash',this)" style="cursor:pointer;border:0;border-bottom:2px solid #2563eb;background:none;padding:8px 14px;font-size:14px;font-weight:700;color:#2563eb;">Dashboard</button>
     <button class="trk-tab" data-trk="fc" onclick="trackTab('fc',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Forecast</button>
+    <button class="trk-tab" data-trk="perdidos" onclick="trackTab('perdidos',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">🩸 Perdidos</button>
   </div>
   <div id="trk-dash-wrap" style="flex:1;">
     <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
   </div>
   <div id="trk-fc-wrap" style="flex:1;display:none;">
     <iframe id="forecast-frame" data-src="/forecast.html" title="Forecast de Vendas" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
+  </div>
+  <div id="trk-perdidos-wrap" style="flex:1;display:none;">
+    <iframe id="perdidos-frame" data-src="/perdidos.html" title="Monitor de Perdidos Pos-Reuniao" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
   </div>
 </div>
 <script>
@@ -26890,7 +26894,9 @@ function trackTab(which, btn){
   });
   document.getElementById('trk-dash-wrap').style.display = which==='dash' ? 'block' : 'none';
   document.getElementById('trk-fc-wrap').style.display   = which==='fc'   ? 'block' : 'none';
+  document.getElementById('trk-perdidos-wrap').style.display = which==='perdidos' ? 'block' : 'none';
   if (which==='fc'){ const f=document.getElementById('forecast-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
+  if (which==='perdidos'){ const f=document.getElementById('perdidos-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
 }
 </script>
 
