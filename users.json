@@ -425,6 +425,28 @@
     "seniority": "pleno1",
     "dataInicio": "2026-07-22",
     "hasComissao": true,
-    "tipoVendas": "vendas"
+    "tipoVendas": "vendas",
+    "perms": [
+      "home",
+      "cargos",
+      "metas",
+      "tracking",
+      "processos",
+      "motivos-perda",
+      "treinamentos",
+      "copiloto-platform",
+      "copiloto-concorrentes",
+      "copiloto-outbound",
+      "copiloto-inbound",
+      "copiloto-objecoes",
+      "copiloto-valores",
+      "copiloto-pre-reuniao",
+      "copiloto-guia-reuniao",
+      "copiloto-objecoes-reuniao",
+      "copiloto-situacoes",
+      "copiloto-fechamento",
+      "tabuleiro-comercial",
+      "comissao"
+    ]
   }
 ]
