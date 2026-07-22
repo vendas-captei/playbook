@@ -358,7 +358,9 @@
     }
 
     function render(d){
-      const per = d.periodo || {};
+      // Foto cacheada / Modo TV podem vir do código antigo, SEM o campo `periodo` — nesse caso
+      // é sempre o mês corrente inteiro (único payload cacheável) → tratar como período ABERTO.
+      const per = d.periodo || { contemHoje: true, ehMesInteiro: true };
       const metaEfetiva = (d.metaPeriodo != null) ? d.metaPeriodo : d.metaMensal;
       const rotPeriodo = per.label || d.mesReferencia;
       document.getElementById("subtitle").innerHTML =
@@ -629,12 +631,15 @@
     // Amortização: "precisa/dia restante" = gap ÷ dias úteis restantes → cai sozinho ao fechar.
     function renderTrilha(d){
       const el = document.getElementById("trilha");
+      // Período-aware: usa a META DO PERÍODO (rateada) — não a mensal crua. Sem isso, períodos
+      // curtos (Hoje/Ontem, tot=1) mostravam base/esperado/falta = 160K. Fechado → tudo decorrido.
+      const contemHoje = !d.periodo || d.periodo.contemHoje !== false;
       const tot  = d.diasUteisTotais || 0;
-      const dec  = d.diasUteisDecorridos || 0;
-      const meta = d.metaMensal || 0;
+      const dec  = contemHoje ? (d.diasUteisDecorridos || 0) : tot;
+      const meta = ((d.metaPeriodo != null) ? d.metaPeriodo : d.metaMensal) || 0;
       const real = d.faturamentoAtual || 0;
-      const baseDia = tot > 0 ? meta / tot : 0;                 // R$ 7.942/dia no funil 7
-      const espHoje = tot > 0 ? meta * (dec / tot) : 0;         // alvo acumulado até hoje
+      const baseDia = tot > 0 ? meta / tot : 0;                 // base = meta do período ÷ dias úteis
+      const espHoje = tot > 0 ? meta * (dec / tot) : 0;         // alvo acumulado até hoje (ou total, se fechado)
       const pct     = espHoje > 0 ? real / espHoje : (real > 0 ? 1 : 0);
       const gapHoje = Math.max(0, espHoje - real);              // total que falta p/ zerar o atraso da trilha
       const cor     = pct >= 1 ? "#10b981" : (pct >= 0.9 ? "#f59e0b" : "#f43f5e");
@@ -643,17 +648,21 @@
       const posHoje = tot > 0 ? (dec / tot) * 100 : 0;
       const posReal = tot > 0 ? Math.max(0, Math.min(100, (meta > 0 ? (real / meta) : 0) * 100)) : 0;
 
-      document.getElementById("trilha-sub").textContent =
-        `${tot} dias úteis no mês · hoje é o dia útil ${dec} · base ${brl(baseDia)}/dia útil`;
+      document.getElementById("trilha-sub").textContent = contemHoje
+        ? `${tot} dias úteis no período · hoje é o dia útil ${dec} · base ${brl(baseDia)}/dia útil`
+        : `${tot} dias úteis no período · fechado · base ${brl(baseDia)}/dia útil`;
 
       // Termômetro do ritmo: quanto o "precisa/dia" (amortizado) subiu/caiu vs a base do funil.
       // Subiu (precisa > base) = ficou atrás, ritmo apertou → vermelho. Caiu = adiantou → verde.
-      const precisaDia  = d.fechamentoDiarioNecessario || 0;
+      const precisaDia  = contemHoje ? (d.fechamentoDiarioNecessario || 0) : baseDia;
       const deltaRitmo  = Math.round(precisaDia - baseDia);
       const corDelta    = deltaRitmo > 0 ? "#f43f5e" : (deltaRitmo < 0 ? "#10b981" : "#64748b");
       const sinalDelta  = deltaRitmo > 0 ? "+" : (deltaRitmo < 0 ? "−" : "");
       const subDelta    = deltaRitmo > 0 ? "ritmo apertou vs base ⚠️"
                         : (deltaRitmo < 0 ? "folgou vs base ✓" : "igual à base");
+      // Período fechado → não há "ritmo p/ hoje"; a 5ª tile vira o SALDO FINAL (realizado − meta).
+      const saldoFim    = Math.round(real - meta);
+      const corSaldo    = saldoFim >= 0 ? "#10b981" : "#f43f5e";
 
       const tile = (t, v, sub, style) =>
         `<div class="rounded-lg border border-slate-200 p-3">
@@ -688,11 +697,13 @@
         </div>
 
         <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          ${tile("Esperado até hoje", brl(espHoje), `${dec}/${tot} dias úteis`)}
+          ${tile(contemHoje?"Esperado até hoje":"Esperado (período)", brl(espHoje), `${dec}/${tot} dias úteis`)}
           ${tile("Realizado", brl(real), `${(pct*100).toFixed(0)}% do esperado`, `color:${cor}`)}
           ${tile("Base do funil", brl(baseDia), "por dia útil (meta ÷ dias úteis)")}
-          ${tile("Falta p/ zerar o gap", brl(gapHoje), "esperado até hoje − realizado", "color:#ea580c")}
-          ${tile("Ritmo vs base", `${sinalDelta}${brl(Math.abs(deltaRitmo))}`, subDelta, `color:${corDelta}`)}
+          ${tile(contemHoje?"Falta p/ zerar o gap":"Gap no fim", brl(gapHoje), contemHoje?"esperado até hoje − realizado":"meta − realizado", "color:#ea580c")}
+          ${contemHoje
+            ? tile("Ritmo vs base", `${sinalDelta}${brl(Math.abs(deltaRitmo))}`, subDelta, `color:${corDelta}`)
+            : tile("Saldo final", `${saldoFim>=0?"+":"−"}${brl(Math.abs(saldoFim))}`, saldoFim>=0?"acima da meta ✓":"abaixo da meta", `color:${corSaldo}`)}
         </div>`;
     }
 
