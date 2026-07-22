@@ -415,5 +415,16 @@
       "tabuleiro-comercial",
       "comissao"
     ]
+  },
+  {
+    "user": "rafael.souza@captei.com",
+    "pass": "12345678",
+    "name": "Rafael Souza",
+    "team": "COP",
+    "meta": "180000",
+    "seniority": "pleno1",
+    "dataInicio": "2026-07-22",
+    "hasComissao": true,
+    "tipoVendas": "vendas"
   }
 ]
