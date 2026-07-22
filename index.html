@@ -26871,7 +26871,7 @@ const RH = (() => {
   <div style="display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0;">
     <button class="trk-tab" data-trk="dash" onclick="trackTab('dash',this)" style="cursor:pointer;border:0;border-bottom:2px solid #2563eb;background:none;padding:8px 14px;font-size:14px;font-weight:700;color:#2563eb;">Dashboard</button>
     <button class="trk-tab" data-trk="fc" onclick="trackTab('fc',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Forecast</button>
-    <button class="trk-tab" data-trk="perdidos" onclick="trackTab('perdidos',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">🩸 Perdidos</button>
+    <button class="trk-tab" id="trk-tab-perdidos" data-trk="perdidos" onclick="trackTab('perdidos',this)" style="display:none;cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">🩸 Perdidos</button>
   </div>
   <div id="trk-dash-wrap" style="flex:1;">
     <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
@@ -26886,6 +26886,7 @@ const RH = (() => {
 <script>
 /* Alterna as sub-abas do Tracking e carrega o iframe da aba na 1ª abertura (evita chamar o Pipedrive à toa). */
 function trackTab(which, btn){
+  if (which==='perdidos' && !pbPerdidosIsManager()) return;
   document.querySelectorAll('.trk-tab').forEach(b=>{
     const on = b.dataset.trk===which;
     b.style.color = on ? '#2563eb' : '#64748b';
@@ -26898,6 +26899,9 @@ function trackTab(which, btn){
   if (which==='fc'){ const f=document.getElementById('forecast-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
   if (which==='perdidos'){ const f=document.getElementById('perdidos-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
 }
+/* Painel Perdidos: acesso restrito a perfil de gestão (mesma regra do isAdminUser/ccIsManager). */
+function pbPerdidosIsManager(){try{var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");if(!s.name)return false;var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];var u=all.find(function(x){return x.name===s.name;});return !!(u&&(u.admin||u.team==="Gestão"));}catch(e){return false;}}
+(function(){var t=0;function g(){var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():null;if((!all||!all.length)&&t++<20){return setTimeout(g,150);}var b=document.getElementById('trk-tab-perdidos');if(b)b.style.display=pbPerdidosIsManager()?'':'none';}if(document.readyState!=='loading')g();else document.addEventListener('DOMContentLoaded',g);})();
 </script>
 
 <script>
