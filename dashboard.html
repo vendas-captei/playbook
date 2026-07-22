@@ -51,8 +51,18 @@
         <div id="user-fixed-label" class="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700"></div>
       </div>
       <div class="w-full sm:w-48">
-        <label class="mb-1 block text-xs font-medium text-slate-500">Mês</label>
-        <select id="f-mes" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
+        <label class="mb-1 block text-xs font-medium text-slate-500">Período</label>
+        <select id="f-periodo" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none"></select>
+      </div>
+      <div id="f-range" class="w-full gap-2 sm:w-auto" style="display:none">
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-500">De</label>
+          <input id="f-de" type="date" class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-500">Até</label>
+          <input id="f-ate" type="date" class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none" />
+        </div>
       </div>
       <button id="btn-atualizar" class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60">
         <span id="btn-atualizar-ico">↻</span> Atualizar
@@ -168,6 +178,29 @@
       </div>
     </section>
 
+    <!-- Tracking diário — receita ganha por dia útil vs alvo, com saldo cumulativo -->
+    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-base font-semibold">Tracking Diário <span class="text-xs font-normal text-slate-400">· realizado por dia útil vs alvo (saldo acumulado)</span></h2>
+        <span id="track-sub" class="text-xs text-slate-500"></span>
+      </div>
+      <div id="track-resumo" class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
+      <div id="track-wrap" class="mt-4 max-h-96 overflow-y-auto rounded-lg border border-slate-100">
+        <table class="w-full text-sm">
+          <thead class="sticky top-0 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
+            <tr>
+              <th class="px-3 py-2 text-left font-semibold">Dia útil</th>
+              <th class="px-3 py-2 text-right font-semibold">Alvo</th>
+              <th class="px-3 py-2 text-right font-semibold">Realizado</th>
+              <th class="px-3 py-2 text-right font-semibold">Saldo acum.</th>
+              <th class="px-3 py-2 text-right font-semibold">Necessário</th>
+            </tr>
+          </thead>
+          <tbody id="track-body"></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- Necessidade do Mês — funil reverso (Receita Previsível) -->
     <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -247,18 +280,52 @@
       });
     })();
 
-    // Popular meses (últimos 6)
+    // ── Filtro de período (estilo Pipedrive, subset) ──────────────────────────
+    const PERIODOS = [
+      ["hoje","Hoje"],["ontem","Ontem"],
+      ["esta-semana","Esta semana"],["semana-passada","Semana passada"],
+      ["este-mes","Este mês"],["mes-passado","Mês passado"],
+      ["este-trimestre","Este trimestre"],["este-ano","Este ano"],
+      ["personalizado","Período personalizado"],
+    ];
     (function(){
-      const sel = document.getElementById("f-mes");
-      const hoje = new Date();
-      for (let i=0;i<6;i++){
-        const d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
-        const valor = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-        let rot = d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
-        rot = rot.charAt(0).toUpperCase()+rot.slice(1);
-        const o = document.createElement("option"); o.value=valor; o.textContent=rot; sel.appendChild(o);
-      }
+      const sel = document.getElementById("f-periodo");
+      PERIODOS.forEach(([v,r])=>{ const o=document.createElement("option"); o.value=v; o.textContent=r; sel.appendChild(o); });
+      sel.value = "este-mes"; // default
     })();
+
+    // Helpers de data em America/Sao_Paulo (evita drift de TZ do navegador).
+    const _hojeSP = () => new Date().toLocaleDateString("en-CA",{timeZone:"America/Sao_Paulo"}); // YYYY-MM-DD
+    const _pUTC = (s)=>{ const [y,m,d]=s.split("-").map(Number); return new Date(Date.UTC(y,m-1,d)); };
+    const _isoU = (d)=> d.toISOString().slice(0,10);
+    const _add = (s,n)=>{ const d=_pUTC(s); d.setUTCDate(d.getUTCDate()+n); return _isoU(d); };
+    const _mBounds = (y,m)=>[`${y}-${String(m+1).padStart(2,"0")}-01`, `${y}-${String(m+1).padStart(2,"0")}-${String(new Date(Date.UTC(y,m+1,0)).getUTCDate()).padStart(2,"0")}`];
+
+    // Resolve o período selecionado → { key, label, from, to, anchorMonth (YYYY-MM p/ TPC/acurácia) }.
+    function resolvePeriodo(){
+      const key = document.getElementById("f-periodo").value || "este-mes";
+      const H = _hojeSP(), hd = _pUTC(H);
+      const Y = hd.getUTCFullYear(), M = hd.getUTCMonth();
+      let from, to, label = (PERIODOS.find(p=>p[0]===key)||[])[1] || "Este mês";
+      if (key==="hoje"){ from=to=H; }
+      else if (key==="ontem"){ from=to=_add(H,-1); }
+      else if (key==="esta-semana"){ const dow=(hd.getUTCDay()+6)%7; from=_add(H,-dow); to=_add(from,6); }
+      else if (key==="semana-passada"){ const dow=(hd.getUTCDay()+6)%7; to=_add(H,-dow-1); from=_add(to,-6); }
+      else if (key==="mes-passado"){ const py=M===0?Y-1:Y, pm=M===0?11:M-1; [from,to]=_mBounds(py,pm); }
+      else if (key==="este-trimestre"){ const q=Math.floor(M/3); [from]=_mBounds(Y,q*3); [,to]=_mBounds(Y,q*3+2); }
+      else if (key==="este-ano"){ from=`${Y}-01-01`; to=`${Y}-12-31`; }
+      else if (key==="personalizado"){
+        const de=document.getElementById("f-de").value, ate=document.getElementById("f-ate").value;
+        [from,to] = _mBounds(Y,M); // fallback = mês atual se vazio
+        if (de) from=de; if (ate) to=ate;
+        if (from>to){ const t=from; from=to; to=t; }
+        label = `${from.split("-").reverse().join("/")} – ${to.split("-").reverse().join("/")}`;
+      } else { [from,to]=_mBounds(Y,M); } // este-mes
+      // Mês-âncora p/ módulos mensais (TPC/acurácia): mês que contém hoje se abranger; senão mês final.
+      const contemHoje = H>=from && H<=to;
+      const anchorMonth = (contemHoje ? H : to).slice(0,7);
+      return { key, label, from, to, anchorMonth };
+    }
 
     function kpiCard(titulo, valor, cor, rodape){
       return `<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm border-t-4 ${cor}">
@@ -291,23 +358,27 @@
     }
 
     function render(d){
+      const per = d.periodo || {};
+      const metaEfetiva = (d.metaPeriodo != null) ? d.metaPeriodo : d.metaMensal;
+      const rotPeriodo = per.label || d.mesReferencia;
       document.getElementById("subtitle").innerHTML =
-        `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${d.mesReferencia}`+
+        `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${rotPeriodo}`+
         (d.historico ? ` · <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500" title="Mês fechado — dados congelados do histórico (${d.fonte||''})">📅 histórico</span>` : "");
 
-      currentMeta = d.metaMensal;
+      currentMeta = d.metaMensal; // a edição de meta continua sendo MENSAL do funil
       document.getElementById("meta-view").textContent = brl(d.metaMensal);
       renderMetaControls();
 
-      const pctMeta = d.metaMensal ? Math.min(100,(d.faturamentoAtual/d.metaMensal)*100) : 0;
-      const pctRun = d.metaMensal ? Math.round((d.runRate/d.metaMensal)*100) : 0;
+      const pctMeta = metaEfetiva ? Math.min(100,(d.faturamentoAtual/metaEfetiva)*100) : 0;
+      const pctRun = metaEfetiva ? Math.round((d.runRate/metaEfetiva)*100) : 0;
       const abertoCor = (d.abertoCount||0) > TETO_ABERTO ? "border-rose-500" : "border-emerald-500";
       const abertoNota = (d.abertoCount||0) > TETO_ABERTO
         ? `acima do teto de ${TETO_ABERTO} — segurar entradas`
         : `de ${TETO_ABERTO} (teto saudável)`;
+      const restLabel = per.contemHoje ? `faltam ${d.diasUteisRestantes} dias úteis (incl. hoje)` : `período fechado`;
       document.getElementById("kpis").innerHTML =
         kpiCard("Gap para a Meta", brl(d.gapMeta), tempBorder(pctRun),
-          `Meta ${brl(d.metaMensal)} · faltam ${d.diasUteisRestantes} dias úteis · ritmo ${pctRun}%`) +
+          `Meta ${brl(metaEfetiva)} · ${restLabel} · ritmo ${pctRun}%`) +
         kpiCard("Tracking / Run Rate", brl(d.runRate), tempBorder(pctRun),
           `Projeção no ritmo atual (${pctRun}% da meta)`) +
         kpiCard("Faturamento Atual", brl(d.faturamentoAtual), "border-blue-500",
@@ -315,11 +386,13 @@
         kpiCard("Leads em aberto", num(d.abertoCount), abertoCor, abertoNota);
 
       renderTrilha(d);
+      renderTracking(d);
       renderNecessidade(d);
 
       // Ritmo diário
-      document.getElementById("ritmo-sub").textContent =
-        `${d.diasUteisRestantes} dias úteis restantes de ${d.diasUteisTotais}`;
+      document.getElementById("ritmo-sub").textContent = per.contemHoje
+        ? `${d.diasUteisRestantes} dias úteis restantes de ${d.diasUteisTotais} · base ${brl(d.baseDia)}/dia`
+        : `período fechado · ${d.diasUteisTotais} dias úteis · base ${brl(d.baseDia)}/dia`;
       const g = d.geracao || {modo:"etapa", mql:0, sql:0, reunioes:0};
       // Meta de 10 entradas/dia útil por vendedor — só medimos no recorte individual.
       const espEntradas = viewIsIndividual ? META_ENTRADAS_DIA * d.diasUteisDecorridos : null;
@@ -374,26 +447,35 @@
         `<p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Legenda · o que conta em cada etapa</p>`+
         legenda.map(([k,v])=>`<p class="text-[11px] leading-snug text-slate-500"><span class="font-semibold text-slate-600">${k}</span> — ${v}</p>`).join("");
       // ── Bloco 2 · Necessário por dia útil (RITMO) ──
-      // Headline = gap ÷ dias úteis restantes → o valor real de hoje, já contando o atraso.
-      // Não é a base "achatada desde o dia 1"; se estamos atrás, o número sobe acima da base.
-      const baseDia = d.metaDiariaFixa || 0;                 // meta ÷ dias úteis totais (referência)
-      const necDia  = d.fechamentoDiarioNecessario || 0;     // gap ÷ dias úteis restantes (ritmo real)
+      // Headline = (meta − realizado ATÉ ONTEM) ÷ dias úteis restantes INCL. hoje → valor real de
+      // hoje, já contando o atraso acumulado. Base = meta ÷ dias úteis totais (referência achatada).
+      const baseDia = d.baseDia || d.metaDiariaFixa || 0;
+      const necDia  = d.fechamentoDiarioNecessario || 0;
       const catchUp = necDia - baseDia;                      // quanto o atraso apertou o ritmo
-      document.getElementById("nec-dia").textContent = brl(necDia);
       const tileVar = (val, label, cor) =>
         `<div><p class="text-sm font-bold leading-tight"${cor?` style="color:${cor}"`:""}>${val}</p>`+
         `<p class="mt-0.5 text-[10px] leading-tight text-slate-400">${label}</p></div>`;
-      document.getElementById("nec-vars").innerHTML =
-        tileVar(brl(baseDia), `base/dia útil (÷${d.diasUteisTotais})`) +
-        tileVar((catchUp >= 0 ? "+" : "−") + brl(Math.abs(catchUp)),
-                catchUp >= 0 ? "atraso no ritmo" : "folga no ritmo", catchUp >= 0 ? "#e11d48" : "#059669") +
-        tileVar(brl(Math.max(0, d.gapMeta)), `falta no mês (${d.diasUteisRestantes}d)`);
+      if (per.contemHoje) {
+        document.getElementById("nec-dia").textContent = brl(necDia);
+        document.getElementById("nec-vars").innerHTML =
+          tileVar(brl(baseDia), `base/dia útil (÷${d.diasUteisTotais})`) +
+          tileVar((catchUp >= 0 ? "+" : "−") + brl(Math.abs(catchUp)),
+                  catchUp >= 0 ? "atraso no ritmo" : "folga no ritmo", catchUp >= 0 ? "#e11d48" : "#059669") +
+          tileVar(brl(Math.max(0, d.gapMeta)), `falta no período (${d.diasUteisRestantes}d)`);
+      } else {
+        // Período fechado → não existe "necessário hoje"; mostra a base e o saldo final.
+        document.getElementById("nec-dia").textContent = brl(baseDia);
+        const saldo = -(d.gapMeta || 0); // realizado − meta
+        document.getElementById("nec-vars").innerHTML =
+          tileVar(brl(baseDia), `base/dia útil (÷${d.diasUteisTotais})`) +
+          tileVar((saldo >= 0 ? "+" : "−") + brl(Math.abs(saldo)), saldo >= 0 ? "acima da meta" : "abaixo da meta", saldo >= 0 ? "#059669" : "#e11d48") +
+          tileVar("período fechado", "sem ritmo p/ hoje");
+      }
 
       // ── Bloco 3 · Receita do dia (decomposta pelo que EFETIVAMENTE foi vendido hoje) ──
-      // Meta do dia = valor FIXO do início do dia (d.metaDiaInicio, gravado write-once no repo);
-      // NÃO se move com o gap do mês — abatida SÓ pelas vendas de hoje. Fallback p/ necDia se ausente.
+      // Só faz sentido quando o período INCLUI hoje. Meta do dia = valor FIXO do início do dia.
       const blocoDia = document.getElementById("bloco-dia");
-      if (d.historico) {
+      if (d.historico || !per.contemHoje) {
         blocoDia.style.display = "none";
       } else {
         blocoDia.style.display = "";
@@ -423,6 +505,51 @@
       document.getElementById("footer").textContent =
         "Dados ao vivo do Pipedrive · atualizado " +
         new Date(d.atualizadoEm).toLocaleString("pt-BR");
+    }
+
+    // ── Tracking diário: tabela dia-a-dia do período (só os dias úteis do filtro) ──
+    // Alvo fixo (base) · realizado (Pipedrive) · saldo que ROLA · necessário recalculado no dia.
+    function renderTracking(d){
+      const rows = d.tracking || [];
+      const per = d.periodo || {};
+      const hoje = (per.contemHoje ? new Date().toLocaleDateString("en-CA",{timeZone:"America/Sao_Paulo"}) : null);
+      document.getElementById("track-sub").textContent =
+        `${per.label||d.mesReferencia} · ${rows.length} dias úteis · base ${brl(d.baseDia)}/dia`;
+      // Saldo de referência = até HOJE (open) ou final (closed). Dias futuros zerados não contam.
+      const rowsAteHoje = hoje ? rows.filter(r=>r.data<=hoje) : rows;
+      const saldoFinal = (rowsAteHoje.length ? rowsAteHoje[rowsAteHoje.length-1] : (rows[rows.length-1]||{saldoAcum:0})).saldoAcum;
+      const tile = (t,v,sub,style)=>
+        `<div class="rounded-lg border border-slate-200 p-3"><p class="text-xs text-slate-500">${t}</p>`+
+        `<p class="mt-1 text-lg font-bold"${style?` style="${style}"`:""}>${v}</p>`+
+        (sub?`<p class="mt-0.5 text-[11px] text-slate-400">${sub}</p>`:"")+`</div>`;
+      document.getElementById("track-resumo").innerHTML =
+        tile("Meta do período", brl(d.metaPeriodo!=null?d.metaPeriodo:d.metaMensal)) +
+        tile("Realizado", brl(d.faturamentoAtual), `${d.negociosGanhos} ganhos`) +
+        tile("Saldo acumulado", (saldoFinal>=0?"+":"−")+brl(Math.abs(saldoFinal)), saldoFinal>=0?"acima do ritmo":"abaixo do ritmo", `color:${saldoFinal>=0?"#059669":"#e11d48"}`) +
+        (per.contemHoje ? tile("Necessário hoje", brl(d.fechamentoDiarioNecessario), `p/ zerar em ${d.diasUteisRestantes}d`) : tile("—","—","período fechado"));
+
+      const body = document.getElementById("track-body");
+      if (!rows.length){
+        body.innerHTML = `<tr><td colspan="5" class="px-3 py-4 text-center text-xs text-slate-400">Sem série diária p/ este período (clique em Atualizar; timeline pode estar indisponível em mês de importação).</td></tr>`;
+        return;
+      }
+      body.innerHTML = rows.map(r=>{
+        const ehHoje = hoje && r.data === hoje;
+        const futuro = hoje && r.data > hoje;
+        const dd = r.data.slice(8,10)+"/"+r.data.slice(5,7);
+        const saldoCor = r.saldoAcum>=0 ? "#059669" : "#e11d48";
+        const realStr = r.realizado>0
+          ? `<span class="font-semibold text-slate-700">${brl(r.realizado)}</span>${r.count>1?` <span class="text-[10px] text-slate-400">(${r.count})</span>`:""}`
+          : `<span class="text-slate-300">—</span>`;
+        const necStr = futuro ? '<span class="text-slate-300">—</span>' : brl(r.necessarioRecalc);
+        return `<tr class="border-t border-slate-100 ${ehHoje?"bg-blue-50":""}">`+
+          `<td class="px-3 py-1.5 text-left"><span class="font-medium text-slate-600">${dd}</span> <span class="text-[10px] text-slate-400">${r.dow}</span>${ehHoje?' <span class="rounded bg-blue-600 px-1 py-0.5 text-[9px] font-bold text-white">HOJE</span>':""}</td>`+
+          `<td class="px-3 py-1.5 text-right text-slate-500">${brl(r.alvo)}</td>`+
+          `<td class="px-3 py-1.5 text-right">${realStr}</td>`+
+          `<td class="px-3 py-1.5 text-right font-semibold" style="color:${saldoCor}">${(r.saldoAcum>=0?"+":"−")+brl(Math.abs(r.saldoAcum))}</td>`+
+          `<td class="px-3 py-1.5 text-right text-slate-500">${necStr}</td>`+
+        `</tr>`;
+      }).join("");
     }
 
     // ── Necessidade do Mês — funil reverso (Receita Previsível) ──
@@ -659,22 +786,24 @@
 
     function mesAtual(){ return new Date().toLocaleDateString("en-CA").slice(0,7); }
 
-    // Params da view atual (funil/vendedor/mês/meta) — compartilhado por carregar/atualizar.
+    // Params da view atual (funil/vendedor/período/meta) — compartilhado por carregar/atualizar.
+    // Envia from/to/label (fonte da verdade do tracking) + month=âncora (compat TPC/acurácia).
     function viewQS(){
       const pid = document.getElementById("f-funil").value;
       const uid = currentUid();
-      const mes = document.getElementById("f-mes").value;
+      const per = resolvePeriodo();
       viewIsIndividual = !!(uid && metaByPdId[uid] != null);
-      const qs = new URLSearchParams({ pipeline_id: pid, month: mes });
+      const qs = new URLSearchParams({ pipeline_id: pid, from: per.from, to: per.to, label: per.label, month: per.anchorMonth });
       if (uid) qs.set("user_id", uid);
       if (viewIsIndividual) qs.set("meta", metaByPdId[uid]);
       else if (metasMap[pid] != null) qs.set("meta", metasMap[pid]);
-      return { pid, uid, mes, qs };
+      return { pid, uid, per, mes: per.anchorMonth, qs };
     }
 
-    // Foto cacheável = mês corrente, sem recorte por vendedor, funil 7/2.
-    function ehCacheavel(pid, uid, mes){
-      return mes === mesAtual() && !uid && (Number(pid)===7 || Number(pid)===2);
+    // Foto cacheável = SÓ o "Este mês" inteiro corrente, sem recorte por vendedor, funil 7/2.
+    // (Períodos custom/fechados/parciais consultam o Pipedrive ao vivo via Atualizar.)
+    function ehCacheavel(pid, uid, per){
+      return per && per.key === "este-mes" && !uid && (Number(pid)===7 || Number(pid)===2);
     }
 
     function tpcPlaceholder(){
@@ -779,7 +908,7 @@
       document.querySelectorAll(".acc-metric").forEach(b=>b.className="acc-metric rounded-md px-2.5 py-1 font-medium "+(b.dataset.metric===accMetric?"bg-indigo-600 text-white":"text-slate-500"));
       document.querySelectorAll(".acc-mode").forEach(b=>b.className="acc-mode rounded-md px-2.5 py-1 font-medium "+(b.dataset.mode===accMode?"bg-indigo-600 text-white":"text-slate-500"));
       if (!accData){ chart.innerHTML='<p class="text-xs text-slate-400">Carregando base de acurácia…</p>'; return; }
-      const pid=document.getElementById("f-funil").value, uid=currentUid(), mes=document.getElementById("f-mes").value;
+      const pid=document.getElementById("f-funil").value, uid=currentUid(), mes=resolvePeriodo().anchorMonth;
       const s=accSeriesFor(pid,uid); const { nd, prev, real }=accMonthCells(mes, s);
       const prevTot=prev.reduce((a,b)=>a+b,0), realTot=real.reduce((a,b)=>a+b,0);
       const entrega=prevTot>0?Math.round(realTot/prevTot*100):null;
@@ -801,12 +930,12 @@
     }
 
     function carregar(){
-      const { pid, uid, mes } = viewQS();
+      const { pid, uid, per } = viewQS();
       if (!pid) return;
       document.getElementById("erro").classList.add("hidden");
       const selo = document.getElementById("cache-selo");
 
-      if (ehCacheavel(pid, uid, mes)){
+      if (ehCacheavel(pid, uid, per)){
         fetch(`/api/metrics?action=cache&pipeline_id=${pid}`)
           .then(r=>r.json())
           .then(d=>{
@@ -823,14 +952,14 @@
     // ESCRITA/AO VIVO — a ÚNICA porta ao Pipedrive. Só o botão "Atualizar" dispara.
     // Na foto cacheável, repovoa o Edge Config (dashboard + Modo TV se beneficiam).
     function atualizar(){
-      const { pid, uid, mes, qs } = viewQS();
+      const { pid, uid, mes, per, qs } = viewQS();
       if (!pid) return;
       const erro = document.getElementById("erro");
       const btn = document.getElementById("btn-atualizar");
       document.getElementById("spinner").classList.remove("hidden");
       btn.disabled = true;
       erro.classList.add("hidden");
-      if (ehCacheavel(pid, uid, mes)){ qs.set("refreshCache","1"); if (myName) qs.set("by", myName.split(" ")[0]); }
+      if (ehCacheavel(pid, uid, per)){ qs.set("refreshCache","1"); if (myName) qs.set("by", myName.split(" ")[0]); }
       fetch(`/api/metrics?${qs.toString()}`)
         .then(r=>r.json())
         .then(d=>{ if(d.error) throw new Error(d.error); render(d); atualizaSelo(d); })
@@ -893,7 +1022,14 @@
       }
 
       document.getElementById("f-funil").addEventListener("change", ()=>{ if(isAdmin) popularVendedores(); carregar(); });
-      document.getElementById("f-mes").addEventListener("change", carregar);
+      // Período: alterna o range personalizado e recarrega.
+      document.getElementById("f-periodo").addEventListener("change", (e)=>{
+        const custom = e.target.value === "personalizado";
+        document.getElementById("f-range").style.display = custom ? "flex" : "none";
+        if (!custom) carregar();
+      });
+      document.getElementById("f-de").addEventListener("change", carregar);
+      document.getElementById("f-ate").addEventListener("change", carregar);
       // Previsão × Realizado: renderiza independente do cache de métricas (funciona geral e por vendedor).
       document.querySelectorAll(".acc-metric").forEach(b=>b.onclick=()=>{ accMetric=b.dataset.metric; renderAccuracy(); });
       document.querySelectorAll(".acc-mode").forEach(b=>b.onclick=()=>{ accMode=b.dataset.mode; renderAccuracy(); });
@@ -904,7 +1040,7 @@
             .then(j=>{ if(j&&j.series){ accData=j; renderAccuracy(); if(j._meta&&j._meta.refresh_truncated) console.warn("acc refresh: varredura de abertos truncada (page cap)"); } else if(j&&j.error){ alert("Erro ao atualizar: "+j.error); } })
             .catch(e=>alert("Erro ao atualizar: "+e.message))
             .finally(()=>{ rb.disabled=false; rb.textContent=old; }); }; })();
-      ["f-funil","f-user","f-mes"].forEach(id=>{ const el=document.getElementById(id); if (el) el.addEventListener("change", ()=>setTimeout(renderAccuracy,0)); });
+      ["f-funil","f-user","f-periodo","f-de","f-ate"].forEach(id=>{ const el=document.getElementById(id); if (el) el.addEventListener("change", ()=>setTimeout(renderAccuracy,0)); });
       fetch("/api/fc-history?dataset=accuracy").then(r=>r.json()).then(j=>{ accData=j; renderAccuracy(); }).catch(()=>{});
       document.getElementById("btn-atualizar").addEventListener("click", atualizar);
       document.getElementById("meta-edit").addEventListener("click", abrirMeta);

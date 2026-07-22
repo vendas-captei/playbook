@@ -126,19 +126,83 @@ function contarDiasUteis(ano, mes, de, ate) {
   return c;
 }
 
-function deriveMetrics({ ano, mes, diaAtual, faturamentoAtual, negociosGanhos, metaMensal }) {
-  const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-  const diasUteisTotais = contarDiasUteis(ano, mes, 1, ultimoDia);
-  const diasUteisDecorridos = Math.max(1, contarDiasUteis(ano, mes, 1, Math.min(diaAtual, ultimoDia)));
-  const diasUteisRestantes = Math.max(0, diasUteisTotais - diasUteisDecorridos);
-  const ticketMedio = negociosGanhos > 0 ? faturamentoAtual / negociosGanhos : 0;
-  const runRate = (faturamentoAtual / diasUteisDecorridos) * diasUteisTotais;
-  const gapMeta = metaMensal - faturamentoAtual;
-  const fechamentoDiarioNecessario = diasUteisRestantes > 0 ? gapMeta / diasUteisRestantes : Math.max(0, gapMeta);
-  // Meta diária FIXA = meta ÷ dias úteis totais (base do mês). NÃO re-divide o saldo pelos
-  // dias restantes — assim o gap só cai pelo progresso real e um dia bom fica visível.
-  const metaDiariaFixa = diasUteisTotais > 0 ? metaMensal / diasUteisTotais : 0;
-  return { diasUteisTotais, diasUteisDecorridos, diasUteisRestantes, ticketMedio, runRate, gapMeta, fechamentoDiarioNecessario, metaDiariaFixa };
+// ── Helpers de intervalo (string YYYY-MM-DD, TZ-safe via UTC) ────────────────
+const _parseD = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+const _isoD = (d) => d.toISOString().slice(0, 10);
+const addDaysStr = (s, n) => { const d = _parseD(s); d.setUTCDate(d.getUTCDate() + n); return _isoD(d); };
+const dowShort = (s) => ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][_parseD(s).getUTCDay()];
+function ehUtilStr(s) { const w = _parseD(s).getUTCDay(); return w !== 0 && w !== 6 && !FERIADOS.has(s); }
+function diasUteisRange(from, to) { let c = 0, x = from; while (x <= to) { if (ehUtilStr(x)) c++; x = addDaysStr(x, 1); } return c; }
+function diasUteisMesStr(ano, mes) {
+  const last = new Date(Date.UTC(ano, mes + 1, 0)).getUTCDate();
+  return diasUteisRange(`${ano}-${String(mes + 1).padStart(2, "0")}-01`, `${ano}-${String(mes + 1).padStart(2, "0")}-${String(last).padStart(2, "0")}`);
+}
+// Meta do período = meta mensal RATEADA por dias úteis (1 mês = meta cheia; N meses = soma proporcional).
+function metaRateadaPeriodo(from, to, metaMensal) {
+  let total = 0, y = _parseD(from).getUTCFullYear(), m = _parseD(from).getUTCMonth();
+  const yEnd = _parseD(to).getUTCFullYear(), mEnd = _parseD(to).getUTCMonth();
+  while (y < yEnd || (y === yEnd && m <= mEnd)) {
+    const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const mFrom = `${y}-${String(m + 1).padStart(2, "0")}-01`;
+    const mTo = `${y}-${String(m + 1).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+    const clipFrom = mFrom < from ? from : mFrom, clipTo = mTo > to ? to : mTo;
+    const duMes = diasUteisMesStr(y, m);
+    total += metaMensal * (duMes > 0 ? diasUteisRange(clipFrom, clipTo) / duMes : 0);
+    m++; if (m > 11) { m = 0; y++; }
+  }
+  return total;
+}
+
+// Modelo NOVO de ritmo — período-aware e SEM off-by-one:
+//  • diasUteisRestantes CONTA o dia de hoje (você ainda pode vender hoje);
+//  • necessário/dia = (meta − realizado ATÉ ONTEM) ÷ dias úteis restantes INCL. hoje.
+// Recebe wonSumByDay = { "YYYY-MM-DD": receita } sobre [from,to] e monta a série cumulativa.
+function deriveMetrics({ from, to, hoje, metaPeriodo, wonSum, wonCount, wonSumByDay, wonCountByDay }) {
+  const diasUteisTotais = diasUteisRange(from, to);
+  const base = diasUteisTotais > 0 ? metaPeriodo / diasUteisTotais : 0;
+  const contemHoje = hoje >= from && hoje <= to;
+  const ontem = addDaysStr(hoje, -1);
+  const diasUteisDecorridos = contemHoje
+    ? Math.max(0, diasUteisRange(from, hoje > to ? to : hoje))          // inclui hoje
+    : diasUteisTotais;                                                   // período fechado → tudo decorrido
+  const diasUteisAteOntem = (from <= ontem) ? diasUteisRange(from, ontem > to ? to : ontem) : 0;
+  const diasUteisRestantes = Math.max(0, diasUteisTotais - diasUteisAteOntem); // INCL. hoje
+
+  const ticketMedio = wonCount > 0 ? wonSum / wonCount : 0;
+  const runRate = diasUteisDecorridos > 0 ? (wonSum / diasUteisDecorridos) * diasUteisTotais : 0;
+  const gapMeta = metaPeriodo - wonSum;
+
+  // Série dia-a-dia: alvo fixo (base), realizado, acumulados, saldo que rola, e necessário recalculado.
+  const tracking = [];
+  let realAcum = 0, i = 0, x = from;
+  while (x <= to) {
+    if (ehUtilStr(x)) {
+      i++;
+      const r = wonSumByDay[x] || 0;
+      realAcum += r;
+      const alvoAcum = base * i;
+      const restDoDia = Math.max(1, diasUteisTotais - (i - 1));               // dias úteis a partir deste (incl.)
+      const necessarioRecalc = Math.max(0, (metaPeriodo - (realAcum - r))) / restDoDia; // sobre saldo do início do dia
+      tracking.push({
+        data: x, dow: dowShort(x), idx: i,
+        alvo: base, realizado: r, count: wonCountByDay[x] || 0,
+        realAcum, alvoAcum, saldoAcum: realAcum - alvoAcum,
+        necessarioRecalc, ehHoje: x === hoje,
+      });
+    }
+    x = addDaysStr(x, 1);
+  }
+
+  const realizadoAteOntem = tracking.filter((t) => t.data < hoje).reduce((a, t) => a + t.realizado, 0);
+  const fechamentoDiarioNecessario = contemHoje
+    ? (diasUteisRestantes > 0 ? Math.max(0, metaPeriodo - realizadoAteOntem) / diasUteisRestantes : Math.max(0, gapMeta))
+    : (diasUteisRestantes > 0 ? Math.max(0, gapMeta) / diasUteisRestantes : Math.max(0, gapMeta));
+  const metaDiariaFixa = base;
+  return {
+    diasUteisTotais, diasUteisDecorridos, diasUteisRestantes, diasUteisAteOntem,
+    ticketMedio, runRate, gapMeta, fechamentoDiarioNecessario, metaDiariaFixa,
+    realizadoAteOntem, contemHoje, tracking, baseDia: base,
+  };
 }
 
 function nomeMes(ano, mes) {
@@ -185,6 +249,25 @@ async function fetchWonToday(pipelineId, userId, TK) {
   }
   const porVendedor = [...byV.values()].sort((a, b) => b.valor - a.valor);
   return { count: deals.length, sum, porVendedor };
+}
+
+// Receita ganha POR DIA no intervalo [from,to] — base da série de tracking diário.
+// Retorna mapas data→receita e data→nº de vendas, + totais do período.
+async function fetchWonByDay(pipelineId, userId, from, to, TK) {
+  const amount = Math.round((Date.parse(to) - Date.parse(from)) / 864e5) + 1;
+  let url = `${V1}/deals/timeline?start_date=${from}&interval=day&amount=${amount}&field_key=won_time&status=won&pipeline_id=${pipelineId}`;
+  if (userId) url += `&user_id=${userId}`;
+  const r = await pd(url, TK);
+  const sumByDay = {}, countByDay = {};
+  let sum = 0, count = 0;
+  for (const p of (r.data || [])) {
+    const ds = p.period_start.slice(0, 10);
+    const deals = p.deals || [];
+    const s = deals.reduce((a, x) => a + (Number(x.value) || 0), 0);
+    sumByDay[ds] = s; countByDay[ds] = deals.length;
+    sum += s; count += deals.length;
+  }
+  return { sumByDay, countByDay, sum, count };
 }
 
 async function fetchWonMonth(pipelineId, userId, monthStart, TK) {
@@ -366,17 +449,32 @@ module.exports = async function handler(req, res) {
     const userId = u.searchParams.get("user_id") ? Number(u.searchParams.get("user_id")) : null;
     const month = u.searchParams.get("month");
 
-    const now = new Date();
-    let ano = now.getFullYear(), mes = now.getMonth();
-    if (month && /^\d{4}-\d{2}$/.test(month)) {
-      const parts = month.split("-").map(Number);
-      ano = parts[0]; mes = parts[1] - 1;
-    }
+    // ── Período (filtro estilo Pipedrive) ────────────────────────────────────
+    // Fonte da verdade = ?from=YYYY-MM-DD&to=YYYY-MM-DD. Compat: ?month=YYYY-MM → mês inteiro;
+    // sem nada → mês corrente (America/Sao_Paulo). O "hoje" é sempre TZ SP.
+    const hojeSP = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+    const dMy = /^\d{4}-\d{2}-\d{2}$/;
+    const boundsMes = (y, m) => [`${y}-${String(m + 1).padStart(2, "0")}-01`, `${y}-${String(m + 1).padStart(2, "0")}-${String(new Date(y, m + 1, 0).getDate()).padStart(2, "0")}`];
+    let from, to;
+    const pFrom = u.searchParams.get("from"), pTo = u.searchParams.get("to");
+    if (dMy.test(pFrom || "") && dMy.test(pTo || "")) { from = pFrom; to = pTo; }
+    else if (month && /^\d{4}-\d{2}$/.test(month)) { const [y, m] = month.split("-").map(Number); [from, to] = boundsMes(y, m - 1); }
+    else { const [y, m] = hojeSP.split("-").map(Number); [from, to] = boundsMes(y, m - 1); }
+    if (from > to) { const t = from; from = to; to = t; }
+    const periodoLabel = u.searchParams.get("label") || null;
+
+    // Mês-âncora p/ os blocos estruturais (geração/estoque/histórico): mês que contém HOJE
+    // se o período o abrange; senão o mês final do período (meses fechados → histórico).
+    const contemHoje = hojeSP >= from && hojeSP <= to;
+    const anchor = contemHoje ? hojeSP : to;
+    const ano = Number(anchor.slice(0, 4)), mes = Number(anchor.slice(5, 7)) - 1;
     const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
-    const monthStart = `${ano}-${String(mes + 1).padStart(2, "0")}-01`;
-    const monthEnd = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(ultimoDiaMes).padStart(2, "0")}`;
-    const ehMesAtual = ano === now.getFullYear() && mes === now.getMonth();
-    const diaAtual = ehMesAtual ? now.getDate() : ultimoDiaMes;
+    const [monthStart, monthEnd] = boundsMes(ano, mes);
+    const curY = Number(hojeSP.slice(0, 4)), curM = Number(hojeSP.slice(5, 7)) - 1;
+    const ehMesAtual = ano === curY && mes === curM;
+    const diaAtual = ehMesAtual ? Number(hojeSP.slice(8, 10)) : ultimoDiaMes;
+    // Período = exatamente 1 mês inteiro? (default "Este mês") → mantém caminho de cache/daily.
+    const periodoEhMesInteiro = from === monthStart && to === monthEnd;
 
     // ── Roteamento mês fechado vs mês corrente ──────────────────────────────────
     // SQL/OPP são uma FOTO DO ESTOQUE ATUAL do pipeline — não têm como ser reconstruídos
@@ -440,7 +538,19 @@ module.exports = async function handler(req, res) {
       metaParam && !isNaN(Number(metaParam)) && Number(metaParam) > 0
         ? Number(metaParam)
         : META_POR_FUNIL[pipelineId] || META_PADRAO;
-    const d = deriveMetrics({ ano, mes, diaAtual, faturamentoAtual: won.sum, negociosGanhos: won.count, metaMensal });
+    const metaPeriodo = metaRateadaPeriodo(from, to, metaMensal);
+
+    // Série de receita ganha POR DIA no período (base do tracking). Timeline pode dar 500 em
+    // mês de importação em massa → degrada p/ o lump do mês-âncora, sem quebra dia-a-dia.
+    let wonRange;
+    try { wonRange = await fetchWonByDay(pipelineId, userId, from, to, TK); }
+    catch (_) { wonRange = { sumByDay: {}, countByDay: {}, sum: won.sum, count: won.count }; }
+
+    const d = deriveMetrics({
+      from, to, hoje: hojeSP, metaPeriodo,
+      wonSum: wonRange.sum, wonCount: wonRange.count,
+      wonSumByDay: wonRange.sumByDay, wonCountByDay: wonRange.countByDay,
+    });
 
     // Vendas de HOJE (só faz sentido no mês corrente) — abatem a meta do dia no card.
     let vendasHoje = 0, vendasHojeCount = 0, vendasHojePorVendedor = [];
@@ -453,11 +563,12 @@ module.exports = async function handler(req, res) {
     // ontem = faturamento − vendas de hoje) ÷ dias úteis restantes. Invariante durante o dia; no
     // card (bloco 3) é abatida SÓ pelas vendas de hoje. Distinta do "Necessário por dia útil"
     // (bloco 2 = gap ao vivo ÷ dias restantes), que se move com o mês.
-    const realizadoAteOntem = won.sum - (vendasHoje || 0);
-    const metaDiaInicioCalc = ehMesAtual
+    // Meta do dia FIXA ("início do dia") — agora SEM off-by-one: dias restantes INCLUEM hoje,
+    // numerador = meta do período − realizado até ONTEM (da série). Congelada write-once no dia.
+    const metaDiaInicioCalc = d.contemHoje
       ? (d.diasUteisRestantes > 0
-          ? (metaMensal - realizadoAteOntem) / d.diasUteisRestantes
-          : Math.max(0, metaMensal - realizadoAteOntem))
+          ? Math.max(0, metaPeriodo - d.realizadoAteOntem) / d.diasUteisRestantes
+          : Math.max(0, metaPeriodo - d.realizadoAteOntem))
       : null;
 
     const stages = (stagesRaw.data || []).sort((a, b) => a.order_nr - b.order_nr);
@@ -475,8 +586,10 @@ module.exports = async function handler(req, res) {
       funilNome: (pipe.data && pipe.data.name) || `Funil ${pipelineId}`,
       usuarioNome: (user && user.data && user.data.name) || "Todos os vendedores",
       metaMensal,
-      faturamentoAtual: won.sum,
-      negociosGanhos: won.count,
+      metaPeriodo,
+      periodo: { from, to, label: periodoLabel, ehMesInteiro: periodoEhMesInteiro, contemHoje: d.contemHoje },
+      faturamentoAtual: wonRange.sum,
+      negociosGanhos: wonRange.count,
       pipelineAbertoTotal,
       abertoCount,
       funil,
@@ -497,7 +610,7 @@ module.exports = async function handler(req, res) {
     // recorte por vendedor, funil 7/2) E o cliente pediu refresh explícito — ou seja,
     // o clique no botão "Atualizar". Nunca grava em views filtradas nem em leituras
     // incidentais. É o único momento em que o cache do dashboard/TV é renovado.
-    const cacheavel = ehMesAtual && !userId && (pipelineId === 7 || pipelineId === 2);
+    const cacheavel = ehMesAtual && periodoEhMesInteiro && !userId && (pipelineId === 7 || pipelineId === 2);
     if (cacheavel && u.searchParams.get("refreshCache") === "1") {
       // Resolve a meta do dia FIXA (write-once): se já foi gravada hoje, reusa; senão usa o cálculo
       // do início do dia. Assim o gap do mês encolhendo NÃO mexe nesse número — só a venda de hoje.
