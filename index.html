@@ -26900,7 +26900,7 @@ function trackTab(which, btn){
   if (which==='perdidos'){ const f=document.getElementById('perdidos-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
 }
 /* Painel Perdidos: acesso restrito a perfil de gestão (mesma regra do isAdminUser/ccIsManager). */
-function pbPerdidosIsManager(){try{var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");if(!s.name)return false;var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];var u=all.find(function(x){return x.name===s.name;});return !!(u&&(u.admin||u.team==="Gestão"));}catch(e){return false;}}
+function pbPerdidosIsManager(){try{if(typeof isAdminUser==="function")return !!isAdminUser();var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");if(!s.name)return false;var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];var u=all.find(function(x){return x.name===s.name;});return !!(u&&(u.admin||u.team==="Gestão"));}catch(e){return false;}}
 (function(){var t=0;function g(){var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():null;if((!all||!all.length)&&t++<20){return setTimeout(g,150);}var b=document.getElementById('trk-tab-perdidos');if(b)b.style.display=pbPerdidosIsManager()?'':'none';}if(document.readyState!=='loading')g();else document.addEventListener('DOMContentLoaded',g);})();
 </script>
 
