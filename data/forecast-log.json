@@ -1,7 +1,7 @@
 {
   "_meta": {
     "desc": "Log da Calculadora de Data de Fechamento (IA): previsto x realizado para medir acuracia ao longo do tempo. Gravado a cada calculo em POST /api/forecast-date; reconciliado (ganho/perdido) via action:reconcile.",
-    "updatedAt": "2026-07-22T18:33:59.669Z"
+    "updatedAt": "2026-07-22T18:35:19.010Z"
   },
   "registros": [
     {
@@ -133,6 +133,34 @@
       "respostas": {
         "q1": "sim",
         "q2": "sim",
+        "q3": "parcial",
+        "q4": "sim",
+        "obs": ""
+      },
+      "por": "Ana Luiza",
+      "status": "aberto",
+      "dataReal": null,
+      "deltaDias": null,
+      "lostReason": null,
+      "reconciliadoEm": null
+    },
+    {
+      "id": "42668-1784745319010",
+      "dealId": 42668,
+      "titulo": "(Inbound)🟢 Saimon",
+      "pipelineId": 7,
+      "etapa": "Negociação",
+      "diasNoFunil": 1,
+      "diasNaEtapaAtual": 0,
+      "expectedCloseDateNaPrevisao": "2026-07-28",
+      "previstoEm": "2026-07-22T18:35:19.010Z",
+      "dataPrevista": "2026-07-30",
+      "diasEstimados": 8,
+      "confianca": "media",
+      "resumo": "O card avança em ritmo acelerado (praticamente zero dias por etapa) e há urgência real com cronograma inverso validado, mas a decisão ainda não está totalmente confirmada com o dono do orçamento e a burocracia está apenas parcialmente mapeada, o que pode adicionar 1-3 dias úteis além da data prevista de 28/07.",
+      "respostas": {
+        "q1": "sim",
+        "q2": "parcial",
         "q3": "parcial",
         "q4": "sim",
         "obs": ""
