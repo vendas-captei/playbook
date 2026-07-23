@@ -182,7 +182,7 @@
     <!-- Tracking diário — receita ganha por dia útil vs alvo, com saldo cumulativo -->
     <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="text-base font-semibold">Tracking Diário <span class="text-xs font-normal text-slate-400">· realizado por dia útil vs alvo (saldo acumulado)</span></h2>
+        <h2 class="text-base font-semibold">Tracking Diário <span class="text-xs font-normal text-slate-400">· realizado por dia útil vs base (saldo acumulado)</span></h2>
         <span id="track-sub" class="text-xs text-slate-500"></span>
       </div>
       <div id="track-resumo" class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
@@ -191,7 +191,6 @@
           <thead class="sticky top-0 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
             <tr>
               <th class="px-3 py-2 text-left font-semibold">Dia útil</th>
-              <th class="px-3 py-2 text-right font-semibold">Alvo</th>
               <th class="px-3 py-2 text-right font-semibold">Realizado</th>
               <th class="px-3 py-2 text-right font-semibold">Saldo acum.</th>
               <th class="px-3 py-2 text-right font-semibold">Necessário</th>
@@ -566,7 +565,6 @@
         const necStr = futuro ? '<span class="text-slate-300">—</span>' : brl(r.necessarioRecalc);
         return `<tr class="border-t border-slate-100 ${ehHoje?"bg-blue-50":""}">`+
           `<td class="px-3 py-1.5 text-left"><span class="font-medium text-slate-600">${dd}</span> <span class="text-[10px] text-slate-400">${r.dow}</span>${ehHoje?' <span class="rounded bg-blue-600 px-1 py-0.5 text-[9px] font-bold text-white">HOJE</span>':""}</td>`+
-          `<td class="px-3 py-1.5 text-right text-slate-500">${brl(r.alvo)}</td>`+
           `<td class="px-3 py-1.5 text-right">${realStr}</td>`+
           `<td class="px-3 py-1.5 text-right font-semibold" style="color:${saldoCor}">${(r.saldoAcum>=0?"+":"−")+brl(Math.abs(r.saldoAcum))}</td>`+
           `<td class="px-3 py-1.5 text-right text-slate-500">${necStr}</td>`+
@@ -603,18 +601,19 @@
       const leadsDia = diasRest>0 ? Math.ceil(fL/diasRest) : fL;
       document.getElementById("nec-sub").textContent = `${brl(meta)} ÷ ticket ${brl(ticket)} = ${num(vN)} vendas`;
       // falta=null → tile é uma META pura (ex.: "Leads necessários"), sem linha de faltam/atingido.
-      const tile = (t,total,falta,sub) =>
+      // Tiles compactos atual/meta (pedido Natan 23/07): gerados/necessários e fechadas/necessárias.
+      // O "necessário" (560 / 56) fica embutido na fração → dispensa tile próprio e economiza espaço.
+      const tileFrac = (t,atual,meta,falta,sub) =>
         `<div class="rounded-lg border border-slate-200 p-3">
            <p class="text-xs text-slate-500">${t}</p>
-           <p class="mt-1 text-xl font-bold">${num(total)}</p>
-           ${falta==null?"":`<p class="mt-0.5 text-[11px] ${falta>0?'text-rose-600':'text-emerald-600'}">${falta>0?`faltam ${num(falta)}`:'✓ atingido'}</p>`}
+           <p class="mt-1 text-xl font-bold">${num(atual)}<span class="font-semibold text-slate-400">/${num(meta)}</span></p>
+           <p class="mt-0.5 text-[11px] ${falta>0?'text-rose-600':'text-emerald-600'}">${falta>0?`faltam ${num(falta)}`:'✓ atingido'}</p>
            ${sub?`<p class="mt-1 text-[10px] text-slate-400">${sub}</p>`:""}
          </div>`;
       el.innerHTML = `
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          ${tile("Leads / MQL necessários", lN, null, `📊 medido · ${Math.round(clv*100)}% novo deal→venda`)}
-          ${tile("Leads gerados no mês", gerados, fL, `alvo ${num(lN)} · ${fL>0?'faltam gerar':'alvo batido'}`)}
-          ${tile("Vendas necessárias", vN, fV, `${feitas} fechada(s)`)}
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          ${tileFrac("Leads gerados / necessários", gerados, lN, fL, `📊 ${Math.round(clv*100)}% novo deal→venda`)}
+          ${tileFrac("Vendas fechadas / necessárias", feitas, vN, fV, `ticket ${brl(ticket)}`)}
           <div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
             <p class="text-xs text-blue-700">Leads/dia útil p/ meta</p>
             <p class="mt-1 text-xl font-bold text-blue-700">${num(leadsDia)}</p>
