@@ -77,6 +77,19 @@
         <option value="7">F7 · Captação Ativa</option>
       </select>
     </div>
+    <div><label>Vendedor</label>
+      <select id="vend"><option value="">Todos</option></select>
+    </div>
+    <div><label>Motivo</label>
+      <select id="motivo"><option value="">Todos</option></select>
+    </div>
+    <div><label>Ordenar</label>
+      <select id="ord">
+        <option value="perda-desc">Perda (recente)</option>
+        <option value="dias-asc">Dias (menor→maior)</option>
+        <option value="dias-desc">Dias (maior→menor)</option>
+      </select>
+    </div>
     <button class="primary" id="go">Atualizar</button>
     <span id="status"></span>
   </div>
@@ -90,7 +103,7 @@
 
   <h2>Detalhe — perdidos (mais recentes primeiro)</h2>
   <div class="scroll"><table id="tblDet"><thead><tr>
-    <th>Perda</th><th>Reunião</th><th class="num">Dias</th><th>Vendedor</th><th>Funil</th><th>Motivo</th><th>Lead</th>
+    <th>Perda</th><th>Reunião</th><th class="num">Dias</th><th>Vendedor</th><th>Funil</th><th>Motivo</th><th>Lead</th><th>Observação (última nota)</th>
   </tr></thead><tbody></tbody></table></div>
 
   <div class="note" id="note"></div>
@@ -111,11 +124,46 @@ async function load(){
     const r = await fetch(`/api/tpc?${qs}`, {cache:"no-store"});
     if(!r.ok) throw new Error("HTTP "+r.status);
     const j = await r.json();
-    render(j);
+    LAST = j;
+    populaFiltros(j);
+    aplicar();
     $("#status").textContent = `atualizado ${new Date(j.geradoEm).toLocaleString("pt-BR")}` + (j.capAtingido? " · amostra limitada a 350":"");
   }catch(e){
     $("#status").textContent = "erro: "+e.message;
   }finally{ btn.disabled = false; }
+}
+
+// ── Filtros client-side (Vendedor + Motivo) + ordenação ──────────────────────
+// O backend já traz TODOS os perdidos do período (rows). Filtramos e reagregamos
+// aqui p/ não re-consultar o Pipedrive a cada troca de filtro.
+let LAST = null;
+const mediana = arr => { if(!arr.length) return 0; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2? s[m] : (s[m-1]+s[m])/2; };
+
+function populaFiltros(j){
+  const rows = j.rows||[];
+  const encher = (id, vals) => {
+    const sel = $("#"+id), atual = sel.value;
+    sel.innerHTML = '<option value="">Todos</option>' + vals.map(v=>`<option value="${v.replace(/"/g,'&quot;')}">${v}</option>`).join("");
+    if (vals.includes(atual)) sel.value = atual; // preserva seleção se ainda existir
+  };
+  encher("vend", [...new Set(rows.map(r=>r.vendedor).filter(Boolean))].sort());
+  encher("motivo", [...new Set(rows.map(r=>r.motivo).filter(Boolean))].sort());
+}
+
+function aplicar(){
+  if(!LAST) return;
+  const fv = $("#vend").value, fm = $("#motivo").value, ord = $("#ord").value;
+  let rows = (LAST.rows||[]).filter(r => (!fv||r.vendedor===fv) && (!fm||r.motivo===fm));
+  if (ord==="dias-asc") rows = rows.slice().sort((a,b)=>a.dias-b.dias);
+  else if (ord==="dias-desc") rows = rows.slice().sort((a,b)=>b.dias-a.dias);
+  else rows = rows.slice().sort((a,b)=>(a.perda<b.perda?1:-1));
+  // Reagrega cards (por funil) e tabela por vendedor a partir das linhas filtradas.
+  const pd = LAST.precoceDias;
+  const gF={}, gV={};
+  for(const r of rows){ (gF[r.pipe]=gF[r.pipe]||[]).push(r.dias); const k=r.pipe+"|"+r.vendedor; (gV[k]=gV[k]||{pipe:r.pipe,vendedor:r.vendedor,dias:[]}).dias.push(r.dias); }
+  const resumoFunil = Object.keys(gF).map(p=>({pipe:+p,n:gF[p].length,mediana:mediana(gF[p]),precoce:gF[p].filter(x=>x<=pd).length})).sort((a,b)=>a.pipe-b.pipe);
+  const resumoVendedor = Object.values(gV).map(v=>({pipe:v.pipe,vendedor:v.vendedor,n:v.dias.length,mediana:mediana(v.dias),precoce:v.dias.filter(x=>x<=pd).length})).sort((a,b)=>(b.pipe-a.pipe)||(b.n-a.n));
+  render({ precoceDias:pd, resumoFunil, resumoVendedor, rows });
 }
 
 function render(j){
@@ -155,8 +203,9 @@ function render(j){
       <td><span class="fb ${meta.c}">${meta.n.split(" ")[0]}</span></td>
       <td class="muted">${r.motivo}</td>
       <td><a href="https://${DOMAIN}.pipedrive.com/deal/${r.id}" target="_blank" rel="noopener">${(r.title||"").slice(0,42)}</a></td>
+      <td class="muted" style="white-space:normal;max-width:340px" title="${(r.obs||'').replace(/"/g,'&quot;')}">${r.obs || "—"}</td>
     </tr>`;
-  }).join("") || '<tr><td colspan="7" class="empty">Sem registros.</td></tr>';
+  }).join("") || '<tr><td colspan="8" class="empty">Sem registros.</td></tr>';
 
   $("#note").innerHTML = `<b>Como é calculado:</b> considera-se "reunião" a entrada do deal no stage <b>Reunião Agendada</b> (9 no F2, 41 no F7); a data da reunião é a <b>última entrada</b> nesse stage antes da perda. <b>Dias</b> = data da perda − data da reunião. Usamos a <b>mediana</b> (robusta a outliers). Motivo = campo de motivo de perda do Pipedrive. Fonte: Pipedrive ao vivo (funis 2 e 7).`;
 }
@@ -164,6 +213,10 @@ function render(j){
 $("#go").addEventListener("click", load);
 $("#days").addEventListener("change", load);
 $("#pipe").addEventListener("change", load);
+// Vendedor / Motivo / Ordenar são client-side — não re-consultam o Pipedrive.
+$("#vend").addEventListener("change", aplicar);
+$("#motivo").addEventListener("change", aplicar);
+$("#ord").addEventListener("change", aplicar);
 load();
 </script>
 </body>
