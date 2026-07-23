@@ -67,6 +67,7 @@
       <button id="btn-atualizar" class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60">
         <span id="btn-atualizar-ico">↻</span> Atualizar
       </button>
+      <button id="btn-limpar" title="Voltar ao período padrão (Este mês) e limpar datas" class="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50">✕ Limpar datas</button>
       <div id="spinner" class="hidden items-center gap-2 pb-2 text-sm text-slate-400 sm:flex">
         <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600"></span> consultando Pipedrive…
       </div>
@@ -402,7 +403,9 @@
           `Projeção no ritmo atual (${pctRun}% da meta)`) +
         kpiCard("Faturamento Atual", brl(d.faturamentoAtual), "border-blue-500",
           `${d.negociosGanhos} ganhos · ${pctMeta.toFixed(1)}% da meta`) +
-        kpiCard("Leads em aberto", num(d.abertoCount), abertoCor, abertoNota);
+        ((d.geracao && d.geracao.modo==="ca" && d.geracao.opp!=null)
+          ? kpiCard("Oportunidades", num(d.geracao.opp), "border-emerald-500", "Proposta Enviada em diante · Captação Ativa")
+          : kpiCard("Leads em aberto", num(d.abertoCount), abertoCor, abertoNota));
 
       renderTrilha(d);
       renderTracking(d);
@@ -1058,6 +1061,14 @@
       });
       document.getElementById("f-de").addEventListener("change", carregar);
       document.getElementById("f-ate").addEventListener("change", carregar);
+      // Limpar datas: volta ao período padrão (Este mês) e zera o range personalizado.
+      document.getElementById("btn-limpar").addEventListener("click", ()=>{
+        document.getElementById("f-periodo").value = "este-mes";
+        document.getElementById("f-de").value = "";
+        document.getElementById("f-ate").value = "";
+        document.getElementById("f-range").style.display = "none";
+        carregar();
+      });
       // Previsão × Realizado: renderiza independente do cache de métricas (funciona geral e por vendedor).
       document.querySelectorAll(".acc-metric").forEach(b=>b.onclick=()=>{ accMetric=b.dataset.metric; renderAccuracy(); });
       document.querySelectorAll(".acc-mode").forEach(b=>b.onclick=()=>{ accMode=b.dataset.mode; renderAccuracy(); });
