@@ -149,7 +149,16 @@ async function handlePerdidos(req, res, TK) {
         if (ld != null && ld <= lt && (best == null || ld > best)) best = ld;
       }
     } catch (_) {}
-    return best == null ? null : { d, reuniaoMs: best, lostMs: lt };
+    if (best == null) return null;
+    // Observação do motivo de perda = ÚLTIMA anotação do card (dica Luiz 23/07: o detalhe
+    // do porquê fica na última nota, não há campo próprio). +1 chamada só p/ deals ancorados.
+    let obs = "";
+    try {
+      const nt = await pd(`${V1}/notes?deal_id=${d.id}&sort=add_time%20DESC&limit=1`, TK);
+      const c = nt.data && nt.data[0] && nt.data[0].content;
+      if (c) obs = String(c).replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim().slice(0, 240);
+    } catch (_) {}
+    return { d, reuniaoMs: best, lostMs: lt, obs };
   }, 10);
 
   const rows = anchored.filter(Boolean).map((x) => ({
@@ -158,6 +167,7 @@ async function handlePerdidos(req, res, TK) {
     user_id: (x.d.user_id && x.d.user_id.id) || null,
     reuniao: isoDate(x.reuniaoMs), perda: isoDate(x.lostMs),
     dias: diffDias(x.reuniaoMs, x.lostMs), motivo: x.d.lost_reason || "—",
+    obs: x.obs || "",
   })).sort((a, b) => (a.perda < b.perda ? 1 : -1));
 
   const funis = {}, vendedores = {};
