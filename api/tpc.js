@@ -217,25 +217,36 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    // Entrantes do mês (add_time) do funil. Se a janela-mês der 500 (importação em massa),
-    // cai p/ buckets diários somados.
+    // Entrantes do mês (add_time) do funil via PAGINAÇÃO de /v1/deals.
+    // ⚠️ NÃO usar /deals/timeline?field_key=add_time: subconta (só reflete abertos → jul/26 deu 271
+    // no F7 vs ~497 reais). Descoberto 2026-07-23. Paginado por add_time DESC, para no início do mês.
     let deals = [];
-    async function timelineMes() {
-      let url = `${V1}/deals/timeline?start_date=${monthStart}&interval=month&amount=1&field_key=add_time&pipeline_id=${pipelineId}`;
-      if (userId) url += `&user_id=${userId}`;
-      const tl = await pd(url, TK);
-      return (tl.data && tl.data[0] && tl.data[0].deals) || [];
-    }
-    async function timelineDias() {
-      const acc = {};
-      for (let d = 1; d <= lastDay; d++) {
-        let url = `${V1}/deals/timeline?start_date=${ano}-${String(mes + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}&interval=day&amount=1&field_key=add_time&pipeline_id=${pipelineId}`;
+    async function entrantesPaginado() {
+      const nextStart = mes === 11 ? `${ano + 1}-01-01` : `${ano}-${String(mes + 2).padStart(2, "0")}-01`;
+      const out = [];
+      let start = 0, guard = 0;
+      while (guard++ < 60) {
+        let url = `${V1}/deals?status=all_not_deleted&sort=add_time%20DESC&start=${start}&limit=500`;
         if (userId) url += `&user_id=${userId}`;
-        try { const tl = await pd(url, TK); for (const x of ((tl.data && tl.data[0] && tl.data[0].deals) || [])) acc[x.id] = x; } catch (_) {}
+        const r = await pd(url, TK);
+        const data = r.data || [];
+        if (!data.length) break;
+        let stop = false;
+        for (const d of data) {
+          const at = (d.add_time || "").slice(0, 10);
+          if (!at) continue;
+          if (at < monthStart) { stop = true; continue; }
+          if (at >= nextStart) continue;
+          if (d.pipeline_id !== pipelineId) continue;
+          out.push(d);
+        }
+        const pg = (r.additional_data && r.additional_data.pagination) || {};
+        if (stop || !pg.more_items_in_collection) break;
+        start = pg.next_start;
       }
-      return Object.values(acc);
+      return out;
     }
-    try { deals = await timelineMes(); } catch (e) { if (String(e.message).includes("500")) deals = await timelineDias(); else throw e; }
+    deals = await entrantesPaginado();
 
     const totalEntrantes = deals.length;
     deals = deals
