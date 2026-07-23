@@ -602,11 +602,12 @@
       const diasRest = d.diasUteisRestantes || 0;
       const leadsDia = diasRest>0 ? Math.ceil(fL/diasRest) : fL;
       document.getElementById("nec-sub").textContent = `${brl(meta)} ÷ ticket ${brl(ticket)} = ${num(vN)} vendas`;
+      // falta=null → tile é uma META pura (ex.: "Leads necessários"), sem linha de faltam/atingido.
       const tile = (t,total,falta,sub) =>
         `<div class="rounded-lg border border-slate-200 p-3">
            <p class="text-xs text-slate-500">${t}</p>
            <p class="mt-1 text-xl font-bold">${num(total)}</p>
-           <p class="mt-0.5 text-[11px] ${falta>0?'text-rose-600':'text-emerald-600'}">${falta>0?`faltam ${num(falta)}`:'✓ atingido'}</p>
+           ${falta==null?"":`<p class="mt-0.5 text-[11px] ${falta>0?'text-rose-600':'text-emerald-600'}">${falta>0?`faltam ${num(falta)}`:'✓ atingido'}</p>`}
            ${sub?`<p class="mt-1 text-[10px] text-slate-400">${sub}</p>`:""}
          </div>`;
       el.innerHTML = `
