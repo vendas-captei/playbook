@@ -403,8 +403,8 @@
           `Projeção no ritmo atual (${pctRun}% da meta)`) +
         kpiCard("Faturamento Atual", brl(d.faturamentoAtual), "border-blue-500",
           `${d.negociosGanhos} ganhos · ${pctMeta.toFixed(1)}% da meta`) +
-        ((d.geracao && d.geracao.modo==="ca" && d.geracao.opp!=null)
-          ? kpiCard("Oportunidades", num(d.geracao.opp), "border-emerald-500", "Proposta Enviada em diante · Captação Ativa")
+        ((d.geracao && d.geracao.opp!=null)
+          ? kpiCard("Oportunidades", num(d.geracao.opp), "border-emerald-500", "Proposta Enviada em diante")
           : kpiCard("Leads em aberto", num(d.abertoCount), abertoCor, abertoNota));
 
       renderTrilha(d);
