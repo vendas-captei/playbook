@@ -279,11 +279,39 @@ async function fetchWonMonth(pipelineId, userId, monthStart, TK) {
   return { count: deals.length, sum };
 }
 
+// Entrantes de UM mês por add_time — via PAGINAÇÃO de /v1/deals (status all_not_deleted).
+// ⚠️ NÃO usar /deals/timeline?field_key=add_time: ele SUBCONTA (só reflete deals ainda abertos →
+// jul/26 deu 270 no funil 7 vs 485 reais; bate com o relatório nativo do Luiz de 395+exclusões).
+// Descoberto 2026-07-23 com Natan. Paginado por add_time DESC, para ao cruzar o início do mês.
+async function fetchEntrantesMes(pipelineId, userId, monthStart, TK) {
+  const [y, m] = monthStart.split("-").map(Number);
+  const nextStart = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
+  const out = [];
+  let start = 0, guard = 0;
+  while (guard++ < 60) {
+    let url = `${V1}/deals?status=all_not_deleted&sort=add_time%20DESC&start=${start}&limit=500`;
+    if (userId) url += `&user_id=${userId}`;
+    const r = await pd(url, TK);
+    const data = r.data || [];
+    if (!data.length) break;
+    let stop = false;
+    for (const d of data) {
+      const at = (d.add_time || "").slice(0, 10);
+      if (!at) continue;
+      if (at < monthStart) { stop = true; continue; }
+      if (at >= nextStart) continue;                       // mais novo que o mês → ignora, segue
+      if (pipelineId && d.pipeline_id !== pipelineId) continue;
+      out.push(d);
+    }
+    const pg = (r.additional_data && r.additional_data.pagination) || {};
+    if (stop || !pg.more_items_in_collection) break;
+    start = pg.next_start;
+  }
+  return out;
+}
+
 async function fetchEntrantesMonth(pipelineId, userId, monthStart, TK) {
-  let url = `${V1}/deals/timeline?start_date=${monthStart}&interval=month&amount=1&field_key=add_time&pipeline_id=${pipelineId}`;
-  if (userId) url += `&user_id=${userId}`;
-  const r = await pd(url, TK);
-  return (r.data && r.data[0] && r.data[0].deals) || [];
+  return fetchEntrantesMes(pipelineId, userId, monthStart, TK);
 }
 
 // ── Geração por ETAPA (funis que ainda não têm definição de negócio, ex.: funil 2 por ora) ──
@@ -351,10 +379,7 @@ function contaOPP(open, stagesRaw) {
 
 // Entrantes do mês SEM filtro de funil (cross-funil), com os campos custom p/ o MQL de negócio.
 async function fetchEntrantesCrossFunil(userId, monthStart, TK) {
-  let url = `${V1}/deals/timeline?start_date=${monthStart}&interval=month&amount=1&field_key=add_time`;
-  if (userId) url += `&user_id=${userId}`;
-  const r = await pd(url, TK);
-  return (r.data && r.data[0] && r.data[0].deals) || [];
+  return fetchEntrantesMes(null, userId, monthStart, TK);
 }
 
 // Deals de um filtro salvo do Pipedrive (v1), paginado. Traz os campos custom no topo do objeto.
@@ -530,6 +555,7 @@ module.exports = async function handler(req, res) {
       } else {
         const entrantes = await fetchEntrantesMonth(pipelineId, userId, monthStart, TK);
         geracao = computeGeracao(entrantes, stagesRaw);
+        geracao.opp = contaOPP(open, stagesRaw); // Oportunidades (Proposta enviada+) p/ o card KPI (ex.: funil 2)
       }
     }
 
