@@ -1073,7 +1073,19 @@ body::before {
   .sidebar { transform: translateX(-100%); transition: transform 0.3s var(--ease); z-index: 300; }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; }
-  .content-wrap { padding: 32px 20px 60px; }
+  /* Seções full-bleed fora do .main (algumas com margin-left inline) precisam
+     zerar o offset da sidebar quando ela vira drawer — senão o conteúdo fica
+     espremido numa coluna de ~115px à direita. */
+  #sec-ranking-home,
+  #sec-comissao,
+  #sec-tracking,
+  #sec-pdi-board,
+  #sec-pdi-checkin,
+  #sec-pdi-timeline,
+  #sec-tabuleiro-comercial { margin-left: 0 !important; }
+  .content-wrap { padding: 64px 20px 60px; }
+  /* Header da home full-bleed: afasta a saudação/título dos botões fixos (☰ e Sair). */
+  #sec-ranking-home > div:first-of-type { padding-top: 56px !important; padding-left: 20px !important; padding-right: 20px !important; }
   .page-header h2 { font-size: 22px; }
   .home-hero { padding: 32px 24px; }
   .home-hero h2 { font-size: 24px; }
