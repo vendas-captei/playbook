@@ -384,8 +384,29 @@
         `<span class="font-medium text-slate-700">${d.funilNome}</span> · ${d.usuarioNome} · ${rotPeriodo}`+
         (d.historico ? ` · <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500" title="Mês fechado — dados congelados do histórico (${d.fonte||''})">📅 histórico</span>` : "");
 
-      currentMeta = d.metaMensal; // a edição de meta continua sendo MENSAL do funil
-      document.getElementById("meta-view").textContent = brl(d.metaMensal);
+      // A edição continua sobre a meta-BASE (100%) do funil; o número exibido é o ALVO
+      // EFETIVO (já escalonado por patamar no backend). O selo mostra o patamar + base.
+      currentMeta = (d.metaBase != null ? d.metaBase : d.metaMensal);
+      const mv = document.getElementById("meta-view");
+      mv.textContent = brl(d.metaMensal);
+      let badge = document.getElementById("meta-patamar");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.id = "meta-patamar";
+        mv.parentNode.insertBefore(badge, mv.nextSibling);
+      }
+      if (d.patamarAtivo && d.patamarPct > 100) {
+        const emoji = d.patamarPct >= 120 ? "💰" : "🚀";
+        const label = d.patamarPct >= 120 ? "Acel II" : "Acel I";
+        badge.innerHTML =
+          ` <span class="rounded bg-violet-100 px-1.5 py-0.5 text-[11px] font-bold text-violet-700"`
+          + ` title="Alvo escalonado: bateu a meta e subiu pro próximo patamar da Calculadora de Comissão">`
+          + `${emoji} patamar ${d.patamarPct}% · ${label}</span>`
+          + ` <span class="text-[11px] text-slate-400">base ${brl(d.metaBase)}</span>`;
+        badge.style.display = "";
+      } else {
+        badge.style.display = "none";
+      }
       renderMetaControls();
 
       const pctMeta = metaEfetiva ? Math.min(100,(d.faturamentoAtual/metaEfetiva)*100) : 0;

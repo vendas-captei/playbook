@@ -572,8 +572,23 @@ module.exports = async function handler(req, res) {
     try { wonRange = await fetchWonByDay(pipelineId, userId, from, to, TK); }
     catch (_) { wonRange = { sumByDay: {}, countByDay: {}, sum: won.sum, count: won.count }; }
 
+    // ── Escalonamento por patamar (pedido Natan 24/07) ───────────────────────────────
+    // Quando o realizado bate a meta, o ALVO sobe pro próximo patamar da Calculadora de
+    // Comissão (100% → 110% Acel I → 120% Acel II) e trava em 120%. Como metaPeriodoEf
+    // alimenta deriveMetrics + a meta do dia, o escalonamento reflete no painel INTEIRO
+    // (Gap, Trilha, Ritmo Diário, Tracking Diário, Necessidade) — e vale tanto no recorte
+    // individual (meta via ?meta=) quanto na meta agregada do funil/time.
+    let patamarMult = 1.0;
+    if (wonRange.sum >= metaPeriodo)         patamarMult = 1.1;  // bateu 100% → alvo 110%
+    if (wonRange.sum >= metaPeriodo * 1.1)   patamarMult = 1.2;  // bateu 110% → alvo 120% (teto)
+    const metaMensalBase  = metaMensal;
+    const metaPeriodoBase = metaPeriodo;
+    const metaMensalEf    = metaMensal  * patamarMult;
+    const metaPeriodoEf   = metaPeriodo * patamarMult;
+    const patamarPct      = Math.round(patamarMult * 100);
+
     const d = deriveMetrics({
-      from, to, hoje: hojeSP, metaPeriodo,
+      from, to, hoje: hojeSP, metaPeriodo: metaPeriodoEf,
       wonSum: wonRange.sum, wonCount: wonRange.count,
       wonSumByDay: wonRange.sumByDay, wonCountByDay: wonRange.countByDay,
     });
@@ -593,8 +608,8 @@ module.exports = async function handler(req, res) {
     // numerador = meta do período − realizado até ONTEM (da série). Congelada write-once no dia.
     const metaDiaInicioCalc = d.contemHoje
       ? (d.diasUteisRestantes > 0
-          ? Math.max(0, metaPeriodo - d.realizadoAteOntem) / d.diasUteisRestantes
-          : Math.max(0, metaPeriodo - d.realizadoAteOntem))
+          ? Math.max(0, metaPeriodoEf - d.realizadoAteOntem) / d.diasUteisRestantes
+          : Math.max(0, metaPeriodoEf - d.realizadoAteOntem))
       : null;
 
     const stages = (stagesRaw.data || []).sort((a, b) => a.order_nr - b.order_nr);
@@ -611,8 +626,12 @@ module.exports = async function handler(req, res) {
       mesReferencia: nomeMes(ano, mes),
       funilNome: (pipe.data && pipe.data.name) || `Funil ${pipelineId}`,
       usuarioNome: (user && user.data && user.data.name) || "Todos os vendedores",
-      metaMensal,
-      metaPeriodo,
+      metaMensal: metaMensalEf,
+      metaPeriodo: metaPeriodoEf,
+      metaBase: metaMensalBase,       // meta-base "oficial" (100%) — editável e mostrada como referência
+      metaPeriodoBase: metaPeriodoBase,
+      patamarPct,                      // 100 | 110 | 120 — patamar atual do alvo
+      patamarAtivo: patamarMult > 1,   // true quando o alvo já escalou (bateu ≥100%)
       periodo: { from, to, label: periodoLabel, ehMesInteiro: periodoEhMesInteiro, contemHoje: d.contemHoje },
       faturamentoAtual: wonRange.sum,
       negociosGanhos: wonRange.count,
@@ -650,7 +669,8 @@ module.exports = async function handler(req, res) {
       // Registra a foto diária (decomposição do dia) no Edge Config p/ controle macro no detalhe.
       await dailyUpsert(pipelineId, {
         data: hojeSP, funil: pipelineId,
-        metaMensal, faturamentoAtual: won.sum, gapMeta: d.gapMeta,
+        metaMensal: metaMensalEf, metaBase: metaMensalBase, patamarPct,
+        faturamentoAtual: won.sum, gapMeta: d.gapMeta,
         baseDia: d.metaDiariaFixa, necessarioHoje: d.fechamentoDiarioNecessario,
         metaDiaInicio: metaDiaInicioFinal,
         vendidoHoje: vendasHoje, vendasCount: vendasHojeCount, porVendedor: vendasHojePorVendedor,
