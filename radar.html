@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar do Time · Captei</title>
+</head>
+<body>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#283040;
+    --tx:#e6edf3; --mut:#8b949e; --mut2:#5f6b7a;
+    --blue:#3b82f6; --green:#22c55e; --amber:#f59e0b; --red:#f43f5e; --violet:#a855f7;
+    --r:16px; --r2:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#16202c 0,var(--bg) 55%);color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+  .head{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+  .title h1{margin:0;font-size:22px;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(47,191,113,.15)}
+  .title p{margin:4px 0 0;color:var(--mut);font-size:13px}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px}
+  .seg button{border:0;background:transparent;color:var(--mut);font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;transition:.15s}
+  .seg button.on{background:var(--blue);color:#fff}
+  .seg button:not(.on):hover{color:var(--tx)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 20px}
+  .chip{border:1px solid var(--line);background:var(--panel);color:var(--mut);font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s}
+  .chip:hover{color:var(--tx);border-color:#3a4757}
+  .chip.on{color:var(--tx);border-color:var(--blue);background:rgba(76,141,255,.12)}
+  .chip .st{width:8px;height:8px;border-radius:50%}
+  .grid{display:grid;gap:14px}
+  .panel{background:linear-gradient(180deg,var(--panel),#11171e);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .panel h3{margin:0 0 2px;font-size:13px;color:var(--mut);font-weight:600;letter-spacing:.2px}
+  .panel .sub{color:var(--mut2);font-size:11.5px;margin-bottom:12px}
+  .idcard{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .av{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-weight:700;font-size:17px;color:#fff}
+  .idmeta{flex:1;min-width:180px}
+  .idmeta .nm{font-size:18px;font-weight:700}
+  .idmeta .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .tag{font-size:11px;color:var(--mut);background:var(--panel2);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
+  .statusbig{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;padding:9px 14px;border-radius:12px}
+  .kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+  .kpi{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r2);padding:14px}
+  .kpi .lab{font-size:12px;color:var(--mut);display:flex;justify-content:space-between;gap:8px}
+  .kpi .per{font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.4px}
+  .kpi .val{font-size:23px;font-weight:750;margin:8px 0 2px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .kpi .val small{font-size:13px;color:var(--mut);font-weight:600}
+  .bar{height:7px;background:#0c1116;border-radius:999px;overflow:hidden;margin-top:9px}
+  .bar > i{display:block;height:100%;border-radius:999px}
+  .kmeta{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--mut)}
+  .thermowrap{display:flex;gap:20px;align-items:stretch}
+  .thermo{width:74px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+  .tube{width:22px;flex:1;background:#0c1116;border:1px solid var(--line);border-radius:999px;position:relative;overflow:hidden;min-height:150px}
+  .tube > i{position:absolute;left:0;right:0;bottom:0;border-radius:999px;transition:height .6s cubic-bezier(.2,.7,.2,1)}
+  .bulb{width:40px;height:40px;border-radius:50%;margin-top:-8px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;border:3px solid #0c1116;z-index:2}
+  .zones{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:2px 0;font-size:11px;color:var(--mut2)}
+  .dims{flex:1;display:flex;flex-direction:column;gap:11px;justify-content:center;min-width:0}
+  .dim .dl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+  .dim .dl b{color:var(--tx);font-weight:600}
+  .dim .dl span{color:var(--mut)}
+  .ins{display:flex;flex-direction:column;gap:10px}
+  .insrow{display:flex;gap:11px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-left-width:3px;border-radius:10px;padding:11px 13px}
+  .insrow .ic{font-size:15px;line-height:1.2;margin-top:1px}
+  .insrow .tx{font-size:13px;line-height:1.5}
+  .insrow small{display:block;color:var(--mut);font-size:11.5px;margin-top:3px}
+  .pulse{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+  .pcard{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r2);padding:13px;cursor:pointer;transition:.15s}
+  .pcard:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .pcard .top{display:flex;align-items:center;gap:10px}
+  .pcard .nm{font-weight:700;font-size:14px}
+  .pcard .rl{font-size:11px;color:var(--mut)}
+  .pcard .mini{display:flex;gap:5px;margin-top:11px}
+  .pcard .mini i{flex:1;height:5px;border-radius:999px;background:#0c1116;overflow:hidden;position:relative}
+  .pcard .mini i b{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+  .pfoot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11.5px;color:var(--mut)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+  .banner{font-size:11.5px;color:var(--mut2);background:var(--panel);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin-bottom:16px;display:flex;gap:8px;align-items:center}
+  .periodbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:-4px 0 18px}
+  .periodbar .lbl{font-size:11px;color:var(--mut2);text-transform:uppercase;letter-spacing:.5px;margin-right:2px}
+  .seg.small button{padding:6px 12px;font-size:12.5px}
+  .range{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:12.5px}
+  .range input{background:var(--panel);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:7px 10px;font-size:12.5px;font-family:inherit;color-scheme:dark}
+</style>
+
+<div class="wrap">
+  <div class="banner">⚙️ Termômetro usa as <b style="color:var(--mut)">7 dimensões reais</b> do scorecard Meetrox da Captei · backend já recebendo reuniões ao vivo (webhook) · números de KPIs ainda são <b style="color:var(--mut)">exemplo</b> (em desenvolvimento).</div>
+  <div class="head">
+    <div class="title">
+      <h1><span class="dot"></span> Radar do Time</h1>
+      <p id="crumb">Visão geral · semana atual</p>
+    </div>
+    <div class="seg" id="seg">
+      <button data-v="time" class="on">Time</button>
+      <button data-v="vendedor">Vendedor</button>
+      <button data-v="funcao">Função</button>
+      <button data-v="funil">Funil</button>
+    </div>
+  </div>
+  <div class="periodbar">
+    <span class="lbl">Período</span>
+    <div class="seg small" id="pseg">
+      <button data-p="hoje">Hoje</button>
+      <button data-p="semana" class="on">Semana</button>
+      <button data-p="mes">Mês</button>
+      <button data-p="custom">Personalizado</button>
+    </div>
+    <div class="range" id="range" style="display:none">
+      <input type="date" id="d1"><span>até</span><input type="date" id="d2">
+    </div>
+  </div>
+  <div class="chips" id="chips" style="display:none"></div>
+  <div class="grid" id="stage"></div>
+</div>
+
+<script>
+const P = [
+  { id:'ana', nome:'Ana Luiza', ini:'AL', cor:'#4c8dff', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7',
+    kpis:[
+      {lab:'Faturamento hoje', real:7200, meta:10500, un:'R$', per:'dia', fmt:'money'},
+      {lab:'Faturamento no mês', real:112000, meta:160000, un:'R$', per:'super meta', fmt:'money'},
+      {lab:'Aderência reunião 30min', real:4, meta:5, un:'dias', per:'semana', fmt:'num'},
+      {lab:'Reuniões realizadas', real:3, meta:4, un:'', per:'hoje', fmt:'num'}],
+    call:{n:9, dims:[['Preparação',72],['Abertura e posicionamento',80],['Descoberta (SPIN/BANT)',70],['Impacto e prioridade',68],['Solução e valor',76],['Tratamento de objeções',62],['Postura e comunicação',82]]} },
+  { id:'elaine', nome:'Elaine', ini:'EL', cor:'#2fbf71', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7',
+    kpis:[
+      {lab:'Faturamento hoje', real:11500, meta:10500, un:'R$', per:'dia', fmt:'money'},
+      {lab:'Faturamento no mês', real:138000, meta:160000, un:'R$', per:'super meta', fmt:'money'},
+      {lab:'Aderência reunião 30min', real:5, meta:5, un:'dias', per:'semana', fmt:'num'},
+      {lab:'Reuniões realizadas', real:4, meta:4, un:'', per:'hoje', fmt:'num'}],
+    call:{n:11, dims:[['Preparação',85],['Abertura e posicionamento',88],['Descoberta (SPIN/BANT)',84],['Impacto e prioridade',82],['Solução e valor',86],['Tratamento de objeções',80],['Postura e comunicação',90]]} },
+  { id:'tamara', nome:'Tamara', ini:'TA', cor:'#9a7bff', papel:'Sales REP', squad:'Copiloto', funil:'Funil 2',
+    kpis:[
+      {lab:'Novos leads', real:6, meta:8, un:'', per:'dia', fmt:'num'},
+      {lab:'Novos contratos', real:1, meta:2, un:'', per:'semana', fmt:'num'},
+      {lab:'Faturamento no mês', real:64000, meta:120000, un:'R$', per:'mês', fmt:'money'}],
+    call:{n:8, dims:[['Preparação',66],['Abertura e posicionamento',74],['Descoberta (SPIN/BANT)',64],['Impacto e prioridade',62],['Solução e valor',70],['Tratamento de objeções',58],['Postura e comunicação',76]]} },
+  { id:'rafael', nome:'Rafael', ini:'RA', cor:'#f5a524', papel:'Sales REP', squad:'Copiloto', funil:'Funil 2', novo:true,
+    kpis:[
+      {lab:'Novos leads', real:4, meta:8, un:'', per:'dia', fmt:'num'},
+      {lab:'Novos contratos', real:0, meta:1, un:'', per:'semana (ramp)', fmt:'num'},
+      {lab:'Carteira antiga redistribuída', real:120, meta:300, un:'leads', per:'onboarding', fmt:'num'}],
+    call:{n:5, dims:[['Preparação',55],['Abertura e posicionamento',64],['Descoberta (SPIN/BANT)',52],['Impacto e prioridade',50],['Solução e valor',60],['Tratamento de objeções',46],['Postura e comunicação',66]]} },
+  { id:'eloise', nome:'Eloise', ini:'EO', cor:'#4cd0e0', papel:'SDR/BDR', squad:'Prospecção', funil:'Funil 21',
+    kpis:[
+      {lab:'Atividades', real:88, meta:100, un:'', per:'dia', fmt:'num'},
+      {lab:'Novos leads', real:7, meta:8, un:'', per:'dia', fmt:'num'},
+      {lab:'Reuniões agendadas', real:5, meta:8, un:'', per:'semana', fmt:'num'}],
+    call:{n:14, dims:[['Preparação',70],['Abertura e posicionamento',78],['Descoberta (SPIN/BANT)',72],['Impacto e prioridade',68],['Solução e valor',66],['Tratamento de objeções',64],['Postura e comunicação',76]]} },
+];
+const money = v => 'R$ '+ (v>=1000 ? (v/1000).toFixed(v%1000?1:0)+'k' : v);
+const fmt = (k,v)=> k.fmt==='money' ? money(v) : (''+v);
+const pct = k => Math.min(999, Math.round(k.real/k.meta*100));
+const clr = p => p>=95?'var(--green)': p>=75?'var(--amber)':'var(--red)';
+const callScore = p => Math.round(p.call.dims.reduce((s,d)=>s+d[1],0)/p.call.dims.length);
+const attain = p => Math.round(p.kpis.reduce((s,k)=>s+Math.min(1,k.real/k.meta),0)/p.kpis.length*100);
+const stColor = a => a>=90?'var(--green)': a>=70?'var(--amber)':'var(--red)';
+const stWord = a => a>=90?'No ritmo': a>=70?'Atenção':'Fora do ritmo';
+const zoneWord = s => s>=75?'Forte': s>=55?'No caminho':'Precisa ajustar';
+function kpiCard(k){ const p=pct(k), c=clr(p);
+  return `<div class="kpi"><div class="lab"><span>${k.lab}</span><span class="per">${k.per}</span></div>
+    <div class="val">${fmt(k,k.real)} <small>/ ${fmt(k,k.meta)}${k.un&&k.un!=='R$'?' '+k.un:''}</small></div>
+    <div class="bar"><i style="width:${Math.min(100,p)}%;background:${c}"></i></div>
+    <div class="kmeta"><span style="color:${c};font-weight:700">${p}% da meta</span><span>${p>=100?'batida':'faltam '+fmt(k,Math.max(0,k.meta-k.real))}</span></div></div>`; }
+function thermo(p){ const s=callScore(p), c=clr(s>=75?100:s>=55?80:50);
+  const dims=p.call.dims.map(d=>`<div class="dim"><div class="dl"><b>${d[0]}</b><span>${d[1]}</span></div>
+     <div class="bar"><i style="width:${d[1]}%;background:${clr(d[1]>=75?100:d[1]>=55?80:50)}"></i></div></div>`).join('');
+  return `<div class="panel"><h3>Termômetro de ligações e reuniões</h3>
+    <div class="sub">${p.call.n} conversas analisadas · zona: <b style="color:${c}">${zoneWord(s)}</b></div>
+    <div class="thermowrap">
+      <div class="thermo" style="width:64px"><div class="zones"><span>Forte</span><span>No caminho</span><span>Ajustar</span></div></div>
+      <div class="thermo" style="width:52px"><div class="tube"><i style="height:${s}%;background:linear-gradient(180deg,${c},${c}99)"></i></div><div class="bulb" style="background:${c}">${s}</div></div>
+      <div class="dims">${dims}</div></div></div>`; }
+function insights(list){ let items=[];
+  list.forEach(p=>{ p.kpis.forEach(k=>{ const r=k.real/k.meta; if(r<0.8) items.push({p,k,r,tipo:'kpi'}); });
+    const s=callScore(p); if(s<70){ const worst=[...p.call.dims].sort((a,b)=>a[1]-b[1])[0]; items.push({p,r:s/100,tipo:'call',worst,s}); } });
+  items.sort((a,b)=>a.r-b.r); if(!items.length) items=[{tipo:'ok'}];
+  return `<div class="panel"><h3>Onde apertar</h3><div class="sub">Prioridade do maior gap para o menor</div>
+    <div class="ins">${items.slice(0,6).map(it=>{
+      if(it.tipo==='ok') return `<div class="insrow" style="border-left-color:var(--green)"><div class="ic">✅</div><div class="tx">Todos dentro do ritmo nos indicadores acompanhados.</div></div>`;
+      if(it.tipo==='call'){ return `<div class="insrow" style="border-left-color:var(--red)"><div class="ic">🎙️</div><div class="tx">
+          <b>${it.p.nome}</b> — qualidade das conversas em <b>${it.s}</b> (${zoneWord(it.s)}).
+          <small>Ponto mais fraco: ${it.worst[0].toLowerCase()} (${it.worst[1]}). Rever em 1:1.</small></div></div>`; }
+      const p=Math.round(it.r*100), c=p>=75?'var(--amber)':'var(--red)';
+      return `<div class="insrow" style="border-left-color:${c}"><div class="ic">📉</div><div class="tx">
+        <b>${it.p.nome}</b> — ${it.k.lab.toLowerCase()} em <b>${fmt(it.k,it.k.real)}</b> de ${fmt(it.k,it.k.meta)} (${p}%).
+        <small>${it.p.papel==='SDR/BDR'?'Topo de funil':'Fundo de funil'} · ${it.k.per} · faltam ${fmt(it.k,Math.max(0,it.k.meta-it.k.real))}.</small></div></div>`;
+    }).join('')}</div></div>`; }
+function pulseCards(list){ return `<div class="panel"><h3>Pulso do time</h3><div class="sub">Clique para abrir o detalhe de cada pessoa</div>
+   <div class="pulse">${list.map(p=>{const a=attain(p),s=callScore(p);
+     return `<div class="pcard" onclick="openPerson('${p.id}')"><div class="top">
+       <div class="av" style="width:34px;height:34px;font-size:13px;border-radius:11px;background:${p.cor}">${p.ini}</div>
+       <div><div class="nm">${p.nome}</div><div class="rl">${p.papel} · ${p.funil}</div></div></div>
+       <div class="mini">${p.kpis.map(k=>`<i><b style="width:${Math.min(100,pct(k))}%;background:${clr(pct(k))}"></b></i>`).join('')}</div>
+       <div class="pfoot"><span style="color:${stColor(a)};font-weight:700">● ${stWord(a)}</span><span>conversas ${s}</span></div></div>`;}).join('')}</div></div>`; }
+function personDetail(p){ const a=attain(p);
+  return `<div class="panel idcard"><div class="av" style="background:${p.cor}">${p.ini}</div>
+      <div class="idmeta"><div class="nm">${p.nome}${p.novo?' <span class="tag" style="border-color:var(--amber);color:var(--amber)">onboarding</span>':''}</div>
+        <div class="tags"><span class="tag">${p.papel}</span><span class="tag">${p.squad}</span><span class="tag">${p.funil}</span></div></div>
+      <div class="statusbig" style="background:${stColor(a)}22;color:${stColor(a)}">● ${stWord(a)} · ${a}%</div></div>
+    <div class="panel"><h3>Indicadores · Realizado × Meta</h3><div class="sub">Metas definidas na reunião comercial</div>
+      <div class="kgrid">${p.kpis.map(kpiCard).join('')}</div></div>
+    <div class="two">${thermo(p)}${insights([p])}</div>`; }
+function groupView(list,titulo){ const am=Math.round(list.reduce((s,p)=>s+attain(p),0)/list.length), qm=Math.round(list.reduce((s,p)=>s+callScore(p),0)/list.length);
+  return pulseCards(list) + `<div class="two">${insights(list)}
+    <div class="panel"><h3>Resumo · ${titulo}</h3><div class="sub">Média de atingimento e qualidade de conversas</div>
+    <div class="kgrid">
+      <div class="kpi"><div class="lab"><span>Atingimento médio</span></div><div class="val">${am}%</div><div class="bar"><i style="width:${am}%;background:var(--blue)"></i></div></div>
+      <div class="kpi"><div class="lab"><span>Qualidade das conversas</span></div><div class="val">${qm}</div><div class="bar"><i style="width:${qm}%;background:var(--violet)"></i></div></div>
+      <div class="kpi"><div class="lab"><span>Pessoas no ritmo</span></div><div class="val">${list.filter(p=>attain(p)>=90).length} <small>/ ${list.length}</small></div><div class="bar"><i style="width:${list.filter(p=>attain(p)>=90).length/list.length*100}%;background:var(--green)"></i></div></div>
+    </div></div></div>`; }
+let view='time', sel=null, period='semana';
+const stage=document.getElementById('stage'), chips=document.getElementById('chips'), crumb=document.getElementById('crumb');
+function fmtD(v){ if(!v) return '…'; const p=v.split('-'); return p[2]+'/'+p[1]; }
+function periodLabel(){ if(period==='hoje') return 'Hoje'; if(period==='semana') return 'Esta semana'; if(period==='mes') return 'Este mês';
+  const a=document.getElementById('d1').value, b=document.getElementById('d2').value; return (a||b)?`${fmtD(a)}–${fmtD(b)}`:'Personalizado'; }
+function setCrumb(base){ crumb.textContent = base + ' · ' + periodLabel(); }
+const byFunc={'SDR/BDR':P.filter(p=>p.papel==='SDR/BDR'),'Sales REP':P.filter(p=>p.papel==='Sales REP'),'Copiloto':P.filter(p=>p.squad==='Copiloto'),'Captação Ativa':P.filter(p=>p.squad==='Captação Ativa')};
+const byFunil={'Funil 7':P.filter(p=>p.funil==='Funil 7'),'Funil 2':P.filter(p=>p.funil==='Funil 2'),'Funil 21':P.filter(p=>p.funil==='Funil 21')};
+const grpAttain = l => Math.round(l.reduce((s,p)=>s+attain(p),0)/l.length);
+function openPerson(id){ view='vendedor'; sel=id; syncSeg(); render(); }
+function syncSeg(){ document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.v===view)); }
+function groupResumoOnly(){ const am=grpAttain(P), qm=Math.round(P.reduce((s,p)=>s+callScore(p),0)/P.length);
+  return `<div class="panel"><h3>Resumo do time</h3><div class="sub">Semana atual · ${P.length} pessoas</div>
+   <div class="kgrid">
+     <div class="kpi"><div class="lab"><span>Atingimento médio</span></div><div class="val">${am}%</div><div class="bar"><i style="width:${am}%;background:var(--blue)"></i></div></div>
+     <div class="kpi"><div class="lab"><span>Qualidade das conversas</span></div><div class="val">${qm}</div><div class="bar"><i style="width:${qm}%;background:var(--violet)"></i></div></div>
+     <div class="kpi"><div class="lab"><span>No ritmo</span></div><div class="val">${P.filter(p=>attain(p)>=90).length}<small> / ${P.length}</small></div><div class="bar"><i style="width:${P.filter(p=>attain(p)>=90).length/P.length*100}%;background:var(--green)"></i></div></div>
+   </div></div>`; }
+function buildChips(arr){ chips.style.display='flex'; chips.innerHTML=arr.map(([id,nm,a])=>`<div class="chip" data-id="${id}" onclick="pick('${id}')"><span class="st" style="background:${stColor(a)}"></span>${nm}</div>`).join(''); }
+function markChips(id){ document.querySelectorAll('#chips .chip').forEach(c=>c.classList.toggle('on',c.dataset.id===id)); }
+function pick(id){ sel=id; markChips(id); render(); }
+function render(){ chips.style.display='none'; chips.innerHTML='';
+  if(view==='time'){ setCrumb('Visão geral'); stage.innerHTML = pulseCards(P) + `<div class="two">${insights(P)}${groupResumoOnly()}</div>`; return; }
+  if(view==='vendedor'){ buildChips(P.map(p=>[p.id,p.nome,attain(p)])); if(!sel||!P.find(p=>p.id===sel)) sel=P[0].id; markChips(sel); setCrumb('Detalhe do vendedor'); stage.innerHTML = personDetail(P.find(p=>p.id===sel)); return; }
+  if(view==='funcao'){ const keys=Object.keys(byFunc); buildChips(keys.map(k=>[k,k,grpAttain(byFunc[k])])); if(!sel||!byFunc[sel]) sel=keys[0]; markChips(sel); setCrumb('Por função · '+sel); stage.innerHTML = groupView(byFunc[sel],sel); return; }
+  if(view==='funil'){ const keys=Object.keys(byFunil); buildChips(keys.map(k=>[k,k,grpAttain(byFunil[k])])); if(!sel||!byFunil[sel]) sel=keys[0]; markChips(sel); setCrumb('Por funil · '+sel); stage.innerHTML = groupView(byFunil[sel],sel); return; }
+}
+document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{ view=b.dataset.v; sel=null; syncSeg(); render(); });
+document.querySelectorAll('#pseg button').forEach(b=>b.onclick=()=>{ period=b.dataset.p; document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x===b)); document.getElementById('range').style.display = period==='custom'?'flex':'none'; render(); });
+document.getElementById('d1').onchange=render; document.getElementById('d2').onchange=render;
+render();
+</script>
+
+</body>
+</html>

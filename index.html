@@ -26884,6 +26884,7 @@ const RH = (() => {
     <button class="trk-tab" data-trk="dash" onclick="trackTab('dash',this)" style="cursor:pointer;border:0;border-bottom:2px solid #2563eb;background:none;padding:8px 14px;font-size:14px;font-weight:700;color:#2563eb;">Dashboard</button>
     <button class="trk-tab" data-trk="fc" onclick="trackTab('fc',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Forecast</button>
     <button class="trk-tab" id="trk-tab-perdidos" data-trk="perdidos" onclick="trackTab('perdidos',this)" style="display:none;cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">🩸 Perdidos</button>
+    <button class="trk-tab" id="trk-tab-radar" data-trk="radar" onclick="trackTab('radar',this)" style="display:none;cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">📡 Radar do Time</button>
   </div>
   <div id="trk-dash-wrap" style="flex:1;">
     <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
@@ -26894,11 +26895,15 @@ const RH = (() => {
   <div id="trk-perdidos-wrap" style="flex:1;display:none;">
     <iframe id="perdidos-frame" data-src="/perdidos.html" title="Monitor de Perdidos Pos-Reuniao" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
   </div>
+  <div id="trk-radar-wrap" style="flex:1;display:none;">
+    <iframe id="radar-frame" data-src="/radar.html" title="Radar do Time" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
+  </div>
 </div>
 <script>
 /* Alterna as sub-abas do Tracking e carrega o iframe da aba na 1ª abertura (evita chamar o Pipedrive à toa). */
 function trackTab(which, btn){
   if (which==='perdidos' && !pbPerdidosIsManager()) return;
+  if (which==='radar' && !pbPerdidosIsManager()) return;
   document.querySelectorAll('.trk-tab').forEach(b=>{
     const on = b.dataset.trk===which;
     b.style.color = on ? '#2563eb' : '#64748b';
@@ -26908,12 +26913,14 @@ function trackTab(which, btn){
   document.getElementById('trk-dash-wrap').style.display = which==='dash' ? 'block' : 'none';
   document.getElementById('trk-fc-wrap').style.display   = which==='fc'   ? 'block' : 'none';
   document.getElementById('trk-perdidos-wrap').style.display = which==='perdidos' ? 'block' : 'none';
+  document.getElementById('trk-radar-wrap').style.display = which==='radar' ? 'block' : 'none';
   if (which==='fc'){ const f=document.getElementById('forecast-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
   if (which==='perdidos'){ const f=document.getElementById('perdidos-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
+  if (which==='radar'){ const f=document.getElementById('radar-frame'); if(f && !f.getAttribute('src')) f.setAttribute('src', f.dataset.src); }
 }
 /* Painel Perdidos: acesso restrito a perfil de gestão (mesma regra do isAdminUser/ccIsManager). */
 function pbPerdidosIsManager(){try{if(typeof isAdminUser==="function")return !!isAdminUser();var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");if(!s.name)return false;var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];var u=all.find(function(x){return x.name===s.name;});return !!(u&&(u.admin||u.team==="Gestão"));}catch(e){return false;}}
-(function(){var t=0;function g(){var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():null;if((!all||!all.length)&&t++<20){return setTimeout(g,150);}var b=document.getElementById('trk-tab-perdidos');if(b)b.style.display=pbPerdidosIsManager()?'':'none';}if(document.readyState!=='loading')g();else document.addEventListener('DOMContentLoaded',g);})();
+(function(){var t=0;function g(){var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():null;if((!all||!all.length)&&t++<20){return setTimeout(g,150);}var b=document.getElementById('trk-tab-perdidos');if(b)b.style.display=pbPerdidosIsManager()?'':'none';var br=document.getElementById('trk-tab-radar');if(br)br.style.display=pbPerdidosIsManager()?'':'none';}if(document.readyState!=='loading')g();else document.addEventListener('DOMContentLoaded',g);})();
 </script>
 
 <script>
