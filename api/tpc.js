@@ -27,7 +27,12 @@ function rdrPad(n){return String(n).padStart(2,'0');}
 function rdrIso(d){return d.getUTCFullYear()+'-'+rdrPad(d.getUTCMonth()+1)+'-'+rdrPad(d.getUTCDate());}
 function rdrBiz(from,to){let d=new Date(from+'T00:00:00Z'),end=new Date(to+'T00:00:00Z'),n=0;while(d<=end){const w=d.getUTCDay();if(w>=1&&w<=5)n++;d.setUTCDate(d.getUTCDate()+1);}return Math.max(1,n);}
 async function rdrPJ(url){const r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
-async function rdrGanhos(uid,from,to,TK){let start=0,count=0,value=0,g=0;while(g++<10){const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=won&start=${start}&limit=500&api_token=${TK}`);for(const x of (d.data||[])){const wt=(x.won_time||'').slice(0,10);if(wt>=from&&wt<=to){count++;value+=(x.value||0);}}const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return {count,value};}
+const RDR_MRR_KEY='ac90208e8bba90f5646de20bd9e3c63346521b3a';
+const RDR_FIDEL_KEY='59159d4bc25588dc645c158c463f58ae68e60629';
+const RDR_PLAN_MONTHS={mensal:1,trimestral:3,semestral:6,anual:12,copiloto:1};
+function rdrDetectPlan(fidel,val,mrr){ if(fidel){const v=String(fidel).toLowerCase(); if(v.includes('anual'))return'anual'; if(v.includes('semest'))return'semestral'; if(v.includes('trimes'))return'trimestral'; if(v.includes('mensal'))return'mensal'; if(v.includes('cop'))return'copiloto';} if(mrr>0&&val>0){const m=Math.round(val/mrr); if(m<=1)return'mensal'; if(m<=4)return'trimestral'; if(m<=8)return'semestral'; if(m<=13)return'anual';} return'anual'; }
+function rdrArrOf(x){ const mrrRaw=parseFloat(x[RDR_MRR_KEY]||0)||0; const val=x.value||0; const plan=rdrDetectPlan(x[RDR_FIDEL_KEY],val,mrrRaw); const mrr=mrrRaw>0?mrrRaw:(val/(RDR_PLAN_MONTHS[plan]||12)); return mrr*12; }
+async function rdrGanhos(uid,from,to,TK){let start=0,count=0,value=0,arr=0,g=0;while(g++<10){const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=won&start=${start}&limit=500&api_token=${TK}`);for(const x of (d.data||[])){const wt=(x.won_time||'').slice(0,10);if(wt>=from&&wt<=to){count++;value+=(x.value||0);arr+=rdrArrOf(x);}}const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return {count,value,arr:Math.round(arr)};}
 async function rdrAtiv(uid,from,to,TK){let start=0,count=0,g=0;while(g++<20){const d=await rdrPJ(`${V1}/activities?user_id=${uid}&done=1&start_date=${from}&end_date=${to}&start=${start}&limit=500&api_token=${TK}`);count+=(d.data||[]).length;const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return count;}
 async function handleRadar(req,res,TK){
   try{
@@ -40,12 +45,12 @@ async function handleRadar(req,res,TK){
       const gan=await rdrGanhos(s.id,from,to,TK).catch(()=>({count:0,value:0}));
       let kpis=[];
       if(s.squad==='Captação Ativa'){ kpis=[
-        {lab:'Faturamento (deals ganhos)',real:gan.value,meta:Math.round(10500*du),un:'R$',per:'meta '+du+' dias úteis',fmt:'money'},
+        {lab:'Faturamento ARR',real:gan.arr,meta:160000,un:'R$',per:'super meta · mês',fmt:'money'},
         {lab:'Contratos ganhos',real:gan.count,meta:null,un:'',per:'período',fmt:'num'},
         {lab:'Aderência reunião 30min',real:null,meta:null,un:'',per:'a definir (manual)',fmt:'num'} ]; }
       else if(s.squad==='Copiloto'){ kpis=[
         {lab:'Novos contratos',real:gan.count,meta:2*semanas,un:'',per:'meta '+semanas+' sem',fmt:'num'},
-        {lab:'Faturamento (deals ganhos)',real:gan.value,meta:null,un:'R$',per:'período',fmt:'money'},
+        {lab:'Faturamento ARR',real:gan.arr,meta:null,un:'R$',per:'período',fmt:'money'},
         {lab:'Novos leads',real:null,meta:8*du,un:'',per:'a definir (por criador)',fmt:'num'} ];
         if(s.novo) kpis.push({lab:'Carteira antiga redistribuída',real:null,meta:null,un:'leads',per:'a definir (manual)',fmt:'num'}); }
       else { const at=await rdrAtiv(s.id,from,to,TK).catch(()=>null); kpis=[
