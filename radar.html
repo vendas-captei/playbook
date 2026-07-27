@@ -233,7 +233,7 @@ async function load(){
   crumb.textContent='carregando · '+periodLabel(r);
   stage.innerHTML='<div class="spin">Carregando dados reais…</div>';
   try{
-    const resp=await fetch(`/api/radar-kpis?from=${r[0]}&to=${r[1]}`);
+    const resp=await fetch(`/api/tpc?view=radar&from=${r[0]}&to=${r[1]}`);
     const d=await resp.json();
     if(d.error) throw new Error(d.error);
     P=d.vendedores||[];
