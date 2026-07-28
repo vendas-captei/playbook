@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Monitor de Perdidos Pós-Reunião · Captei</title>
+<title>Monitor de Perdidos · Captei</title>
 <style>
   :root{
     --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#283040;
-    --tx:#e6edf3; --mut:#8b949e; --accent:#3b82f6; --f2:#a855f7; --f7:#22c55e;
+    --tx:#e6edf3; --mut:#8b949e; --accent:#3b82f6; --f2:#a855f7; --f7:#22c55e; --f21:#06b6d4;
     --danger:#f43f5e; --warn:#f59e0b; --ok:#22c55e;
   }
   *{box-sizing:border-box}
@@ -30,6 +30,7 @@
   .card .lil{font-size:12px;color:var(--mut)}
   .card.f2{border-left:3px solid var(--f2)} .card.f2 .tag{color:var(--f2)}
   .card.f7{border-left:3px solid var(--f7)} .card.f7 .tag{color:var(--f7)}
+  .card.f21{border-left:3px solid var(--f21)} .card.f21 .tag{color:var(--f21)}
   .pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700}
   .pill.bad{background:rgba(244,63,94,.15);color:#fda4b4}
   h2{font-size:14px;margin:22px 0 8px;color:var(--tx)}
@@ -44,6 +45,7 @@
   .fb{font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px}
   .fb.f2{background:rgba(168,85,247,.15);color:#d8b4fe}
   .fb.f7{background:rgba(34,197,94,.15);color:#86efac}
+  .fb.f21{background:rgba(6,182,212,.15);color:#67e8f9}
   .muted{color:var(--mut)}
   .note{color:var(--mut);font-size:11.5px;margin-top:22px;line-height:1.7;border-top:1px solid var(--line);padding-top:12px}
   #status{font-size:12px;color:var(--mut);margin-left:auto}
@@ -55,10 +57,10 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Monitor de Perdidos Pós-Reunião</h1>
+    <h1>Monitor de Perdidos</h1>
     <a class="back" href="/">← Playbook</a>
   </header>
-  <div class="sub">Leads perdidos que já haviam entrado em <b>Reunião Agendada</b> — com quanto tempo foram descartados, por qual motivo e por quem. Descarte precoce = perdido em até <b id="precoceLbl">4</b> dias após a reunião.</div>
+  <div class="sub"><b>F2/F7:</b> leads perdidos que já haviam entrado em <b>Reunião Agendada</b> (mede o descarte pós-reunião). <b>F21 · BDR Humana:</b> todos os perdidos, medidos da <b>abertura</b> à perda (é BDR, não há reunião). <b>Lead time</b> = abertura → perda. Descarte precoce = até <b id="precoceLbl">4</b> dias.</div>
 
   <div class="controls">
     <div><label>Período</label>
@@ -77,6 +79,7 @@
         <option value="">Todos</option>
         <option value="2">F2 · IA Copiloto</option>
         <option value="7">F7 · Captação Ativa</option>
+        <option value="21">F21 · BDR Humana</option>
       </select>
     </div>
     <div><label>Vendedor</label>
@@ -100,12 +103,12 @@
 
   <h2>Por vendedor</h2>
   <div class="scroll"><table id="tblVend"><thead><tr>
-    <th>Funil</th><th>Vendedor</th><th class="num">Casos</th><th class="num">Mediana (dias)</th><th class="num">Descarte precoce</th>
+    <th>Funil</th><th>Vendedor</th><th class="num">Casos</th><th class="num">Mediana (dias)</th><th class="num">Lead time (dias)</th><th class="num">Descarte precoce</th>
   </tr></thead><tbody></tbody></table></div>
 
   <h2>Detalhe — perdidos (mais recentes primeiro)</h2>
   <div class="scroll"><table id="tblDet"><thead><tr>
-    <th>Perda</th><th>Reunião</th><th class="num">Dias</th><th>Vendedor</th><th>Funil</th><th>Motivo</th><th>Lead</th><th>Observação (última nota)</th>
+    <th>Perda</th><th>Abertura</th><th>Reunião</th><th class="num">Dias</th><th class="num">Lead time</th><th>Vendedor</th><th>Funil</th><th>Motivo</th><th>Lead</th><th>Observação (última nota)</th>
   </tr></thead><tbody></tbody></table></div>
 
   <div class="note" id="note"></div>
@@ -113,7 +116,7 @@
 
 <script>
 const DOMAIN = "captei";
-const FUNIL = {2:{n:"F2 · IA Copiloto",c:"f2"}, 7:{n:"F7 · Captação Ativa",c:"f7"}};
+const FUNIL = {2:{n:"F2 · IA Copiloto",c:"f2"}, 7:{n:"F7 · Captação Ativa",c:"f7"}, 21:{n:"F21 · BDR Humana",c:"f21"}};
 const $ = s => document.querySelector(s);
 const fmtBR = iso => { if(!iso) return "—"; const [y,m,d]=iso.split("-"); return `${d}/${m}`; };
 
@@ -170,9 +173,12 @@ function aplicar(){
   // Reagrega cards (por funil) e tabela por vendedor a partir das linhas filtradas.
   const pd = LAST.precoceDias;
   const gF={}, gV={};
-  for(const r of rows){ (gF[r.pipe]=gF[r.pipe]||[]).push(r.dias); const k=r.pipe+"|"+r.vendedor; (gV[k]=gV[k]||{pipe:r.pipe,vendedor:r.vendedor,dias:[]}).dias.push(r.dias); }
-  const resumoFunil = Object.keys(gF).map(p=>({pipe:+p,n:gF[p].length,mediana:mediana(gF[p]),precoce:gF[p].filter(x=>x<=pd).length})).sort((a,b)=>a.pipe-b.pipe);
-  const resumoVendedor = Object.values(gV).map(v=>({pipe:v.pipe,vendedor:v.vendedor,n:v.dias.length,mediana:mediana(v.dias),precoce:v.dias.filter(x=>x<=pd).length})).sort((a,b)=>(b.pipe-a.pipe)||(b.n-a.n));
+  for(const r of rows){
+    const f=(gF[r.pipe]=gF[r.pipe]||{dias:[],lead:[]}); f.dias.push(r.dias); if(r.leadDias!=null) f.lead.push(r.leadDias);
+    const k=r.pipe+"|"+r.vendedor; const v=(gV[k]=gV[k]||{pipe:r.pipe,vendedor:r.vendedor,dias:[],lead:[]}); v.dias.push(r.dias); if(r.leadDias!=null) v.lead.push(r.leadDias);
+  }
+  const resumoFunil = Object.keys(gF).map(p=>({pipe:+p,n:gF[p].dias.length,mediana:mediana(gF[p].dias),leadMediana:mediana(gF[p].lead),precoce:gF[p].dias.filter(x=>x<=pd).length})).sort((a,b)=>a.pipe-b.pipe);
+  const resumoVendedor = Object.values(gV).map(v=>({pipe:v.pipe,vendedor:v.vendedor,n:v.dias.length,mediana:mediana(v.dias),leadMediana:mediana(v.lead),precoce:v.dias.filter(x=>x<=pd).length})).sort((a,b)=>(b.pipe-a.pipe)||(b.n-a.n));
   render({ precoceDias:pd, resumoFunil, resumoVendedor, rows });
 }
 
@@ -185,7 +191,7 @@ function render(j){
     return `<div class="card ${meta.c}">
       <div class="tag">${meta.n}</div>
       <div class="big">${f.mediana}<span style="font-size:14px;font-weight:600" class="muted"> dias · mediana</span></div>
-      <div class="lil">${f.n} perdidos com reunião · <span class="pill bad">${f.precoce} precoces (${pct}%)</span></div>
+      <div class="lil">${f.n} perdidos · lead time <b>${f.leadMediana}d</b> · <span class="pill bad">${f.precoce} precoces (${pct}%)</span></div>
     </div>`;
   }).join("") || '<div class="empty">Sem perdidos com reunião no período.</div>';
 
@@ -197,9 +203,10 @@ function render(j){
       <td>${v.vendedor}</td>
       <td class="num">${v.n}</td>
       <td class="num">${v.mediana}</td>
+      <td class="num">${v.leadMediana}</td>
       <td class="num">${v.precoce? `<span class="pill bad">${v.precoce}</span>`:"0"}</td>
     </tr>`;
-  }).join("") || '<tr><td colspan="5" class="empty">—</td></tr>';
+  }).join("") || '<tr><td colspan="6" class="empty">—</td></tr>';
 
   // detalhe
   $("#tblDet tbody").innerHTML = (j.rows||[]).map(r=>{
@@ -207,17 +214,19 @@ function render(j){
     const pre = r.dias <= j.precoceDias ? " precoce":"";
     return `<tr>
       <td>${fmtBR(r.perda)}</td>
+      <td class="muted">${fmtBR(r.abertura)}</td>
       <td class="muted">${fmtBR(r.reuniao)}</td>
       <td class="num"><span class="dias${pre}">${r.dias}</span></td>
+      <td class="num muted">${r.leadDias==null?"—":r.leadDias}</td>
       <td>${r.vendedor}</td>
       <td><span class="fb ${meta.c}">${meta.n.split(" ")[0]}</span></td>
       <td class="muted">${r.motivo}</td>
       <td><a href="https://${DOMAIN}.pipedrive.com/deal/${r.id}" target="_blank" rel="noopener">${(r.title||"").slice(0,42)}</a></td>
       <td class="muted" style="white-space:normal;max-width:340px" title="${(r.obs||'').replace(/"/g,'&quot;')}">${r.obs || "—"}</td>
     </tr>`;
-  }).join("") || '<tr><td colspan="8" class="empty">Sem registros.</td></tr>';
+  }).join("") || '<tr><td colspan="10" class="empty">Sem registros.</td></tr>';
 
-  $("#note").innerHTML = `<b>Como é calculado:</b> considera-se "reunião" a entrada do deal no stage <b>Reunião Agendada</b> (9 no F2, 41 no F7); a data da reunião é a <b>última entrada</b> nesse stage antes da perda. <b>Dias</b> = data da perda − data da reunião. Usamos a <b>mediana</b> (robusta a outliers). Motivo = campo de motivo de perda do Pipedrive. Fonte: Pipedrive ao vivo (funis 2 e 7).`;
+  $("#note").innerHTML = `<b>Como é calculado:</b> <b>F2/F7</b> — "reunião" = entrada do deal no stage <b>Reunião Agendada</b> (9 no F2, 41 no F7), última entrada antes da perda; <b>Dias</b> = perda − reunião (só entram perdidos que passaram por reunião). <b>F21 · BDR Humana</b> — a Eloise é BDR (não faz reunião nem ganho): conta <b>todos</b> os perdidos e <b>Dias</b> = perda − abertura. <b>Lead time</b> = perda − abertura (para todos os funis). Usamos a <b>mediana</b> (robusta a outliers). Motivo = campo de motivo de perda do Pipedrive. Fonte: Pipedrive ao vivo (funis 2, 7 e 21).`;
 }
 
 $("#go").addEventListener("click", load);

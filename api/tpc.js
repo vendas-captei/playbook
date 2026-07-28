@@ -182,10 +182,13 @@ function mediana(arr) {
 }
 const r1 = (x) => Math.round(x * 10) / 10;
 
-// ── Monitor de Perdidos Pós-Reunião (?view=perdidos) ────────────────────────
-// Lead perdido que ENTROU em "Reunião Agendada" (stage 9 no F2 / 41 no F7).
-// Data da reunião = última entrada nesse stage <= data da perda (via /deals/{id}/flow).
-// dias = perda − reunião (calendário). Mede o descarte precoce (pedido Luiz 22/07).
+// ── Monitor de Perdidos (?view=perdidos) ────────────────────────────────────
+// F2/F7: lead perdido que ENTROU em "Reunião Agendada" (stage 9 no F2 / 41 no F7).
+//   Data da reunião = última entrada nesse stage <= data da perda (via /deals/{id}/flow).
+//   dias = perda − reunião (calendário). Mede o descarte precoce (pedido Luiz 22/07).
+// F21 (BDR Humana / Eloise): NÃO há reunião nem ganho (é BDR) — eixo = abertura→perda.
+//   Conta TODOS os perdidos do funil; dias = perda − abertura (pedido reunião Bumbo 28/07).
+// Lead time (abertura→perda) é calculado p/ TODOS os funis (etapa 3 — pedido Luiz).
 const REUNIAO_STAGE = { 7: 41, 2: 9 };
 const POST_REUNIAO = { 7: new Set([41, 144, 42, 43, 79, 80]), 2: new Set([9, 10, 138, 100, 101, 102, 150]) };
 const PRECOCE_DIAS = 4;       // <= isso após a reunião = descarte precoce
@@ -219,9 +222,12 @@ async function handlePerdidos(req, res, TK) {
       if (lt == null) continue;
       if (lt < cutoffMs) { stop = true; continue; }
       const pid = d.pipeline_id;
-      if ((pid === 2 || pid === 7)
+      // F2/F7 exigem passagem por Reunião Agendada; F21 (BDR) conta todos os perdidos.
+      const okPipe = pid === 2 || pid === 7 || pid === 21;
+      const passaGate = pid === 21 ? true : (POST_REUNIAO[pid] && POST_REUNIAO[pid].has(d.stage_id));
+      if (okPipe
         && (!onlyPipe || pid === onlyPipe)
-        && POST_REUNIAO[pid].has(d.stage_id)
+        && passaGate
         && (!onlyUser || (d.user_id && d.user_id.id === onlyUser))) lost.push(d);
     }
     const pg = (r.additional_data && r.additional_data.pagination) || {};
@@ -232,20 +238,26 @@ async function handlePerdidos(req, res, TK) {
   lost = lost.slice(0, CAP_PERDIDOS);
 
   const anchored = await poolMap(lost, async (d) => {
-    const pid = d.pipeline_id, target = REUNIAO_STAGE[pid], lt = parseData(d.lost_time);
-    let best = null;
-    try {
-      const fl = await pd(`${V1}/deals/${d.id}/flow`, TK);
-      for (const e of (fl.data || [])) {
-        if (e.object !== "dealChange") continue;
-        const dd = e.data || {};
-        if (dd.field_key !== "stage_id") continue;
-        const nv = Number(dd.new_value); if (isNaN(nv) || nv !== target) continue;
-        const ld = parseData(dd.log_time);
-        if (ld != null && ld <= lt && (best == null || ld > best)) best = ld;
-      }
-    } catch (_) {}
-    if (best == null) return null;
+    const pid = d.pipeline_id, lt = parseData(d.lost_time), at = parseData(d.add_time);
+    // Âncora: F2/F7 = data da Reunião Agendada (via flow); F21 = abertura do card (add_time).
+    let reuniaoMs = null;
+    if (pid === 2 || pid === 7) {
+      const target = REUNIAO_STAGE[pid];
+      let best = null;
+      try {
+        const fl = await pd(`${V1}/deals/${d.id}/flow`, TK);
+        for (const e of (fl.data || [])) {
+          if (e.object !== "dealChange") continue;
+          const dd = e.data || {};
+          if (dd.field_key !== "stage_id") continue;
+          const nv = Number(dd.new_value); if (isNaN(nv) || nv !== target) continue;
+          const ld = parseData(dd.log_time);
+          if (ld != null && ld <= lt && (best == null || ld > best)) best = ld;
+        }
+      } catch (_) {}
+      if (best == null) return null;   // F2/F7 sem reunião confirmada → fora do monitor
+      reuniaoMs = best;
+    }
     // Observação do motivo de perda = ÚLTIMA anotação do card (dica Luiz 23/07: o detalhe
     // do porquê fica na última nota, não há campo próprio). +1 chamada só p/ deals ancorados.
     let obs = "";
@@ -254,31 +266,41 @@ async function handlePerdidos(req, res, TK) {
       const c = nt.data && nt.data[0] && nt.data[0].content;
       if (c) obs = String(c).replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim().slice(0, 240);
     } catch (_) {}
-    return { d, reuniaoMs: best, lostMs: lt, obs };
+    return { d, reuniaoMs, aberturaMs: at, lostMs: lt, obs };
   }, 10);
 
-  const rows = anchored.filter(Boolean).map((x) => ({
-    id: x.d.id, title: x.d.title || "—", pipe: x.d.pipeline_id,
-    vendedor: (x.d.user_id && x.d.user_id.name) || "—",
-    user_id: (x.d.user_id && x.d.user_id.id) || null,
-    reuniao: isoDate(x.reuniaoMs), perda: isoDate(x.lostMs),
-    dias: diffDias(x.reuniaoMs, x.lostMs), motivo: x.d.lost_reason || "—",
-    obs: x.obs || "",
-  })).sort((a, b) => (a.perda < b.perda ? 1 : -1));
+  const rows = anchored.filter(Boolean).map((x) => {
+    const pid = x.d.pipeline_id;
+    const leadDias = x.aberturaMs != null ? diffDias(x.aberturaMs, x.lostMs) : null;
+    // "dias" = métrica de descarte do funil: F2/F7 a partir da reunião; F21 a partir da abertura.
+    const dias = pid === 21 ? leadDias : diffDias(x.reuniaoMs, x.lostMs);
+    return {
+      id: x.d.id, title: x.d.title || "—", pipe: pid,
+      vendedor: (x.d.user_id && x.d.user_id.name) || "—",
+      user_id: (x.d.user_id && x.d.user_id.id) || null,
+      abertura: x.aberturaMs != null ? isoDate(x.aberturaMs) : null,
+      reuniao: x.reuniaoMs != null ? isoDate(x.reuniaoMs) : null,
+      perda: isoDate(x.lostMs),
+      dias, leadDias, motivo: x.d.lost_reason || "—",
+      obs: x.obs || "",
+    };
+  }).sort((a, b) => (a.perda < b.perda ? 1 : -1));
 
   const funis = {}, vendedores = {};
   for (const rr of rows) {
-    (funis[rr.pipe] = funis[rr.pipe] || []).push(rr);
+    const f = (funis[rr.pipe] = funis[rr.pipe] || { dias: [], lead: [] });
+    f.dias.push(rr.dias); if (rr.leadDias != null) f.lead.push(rr.leadDias);
     const k = `${rr.pipe}|${rr.vendedor}`;
-    (vendedores[k] = vendedores[k] || { pipe: rr.pipe, vendedor: rr.vendedor, user_id: rr.user_id, dias: [] }).dias.push(rr.dias);
+    const v = (vendedores[k] = vendedores[k] || { pipe: rr.pipe, vendedor: rr.vendedor, user_id: rr.user_id, dias: [], lead: [] });
+    v.dias.push(rr.dias); if (rr.leadDias != null) v.lead.push(rr.leadDias);
   }
-  const resumoFunil = Object.keys(funis).map((p) => {
-    const arr = funis[p].map((r) => r.dias);
-    return { pipe: Number(p), n: arr.length, mediana: mediana(arr), precoce: arr.filter((x) => x <= PRECOCE_DIAS).length };
-  }).sort((a, b) => a.pipe - b.pipe);
+  const resumoFunil = Object.keys(funis).map((p) => ({
+    pipe: Number(p), n: funis[p].dias.length, mediana: mediana(funis[p].dias),
+    leadMediana: mediana(funis[p].lead), precoce: funis[p].dias.filter((x) => x <= PRECOCE_DIAS).length,
+  })).sort((a, b) => a.pipe - b.pipe);
   const resumoVendedor = Object.values(vendedores).map((v) => ({
     pipe: v.pipe, vendedor: v.vendedor, user_id: v.user_id, n: v.dias.length,
-    mediana: mediana(v.dias), precoce: v.dias.filter((x) => x <= PRECOCE_DIAS).length,
+    mediana: mediana(v.dias), leadMediana: mediana(v.lead), precoce: v.dias.filter((x) => x <= PRECOCE_DIAS).length,
   })).sort((a, b) => (b.pipe - a.pipe) || (b.n - a.n));
 
   res.status(200).json({
