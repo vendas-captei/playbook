@@ -120,6 +120,19 @@
 let P=[], view='time', sel=null, period='mes';
 const stage=document.getElementById('stage'), chips=document.getElementById('chips'), crumb=document.getElementById('crumb');
 
+// ── Acesso (mesma lógica do Dashboard): admin/Gestão vê o time todo; colaborador vê só o seu. ──
+let ADMIN=true, MYEMAIL=null;
+function rdSession(){ try{ return JSON.parse(sessionStorage.getItem('captei_pb_session')||'{}'); }catch(e){ return {}; } }
+async function resolvePerm(){
+  const s=rdSession();
+  ADMIN=!!(s.isAdmin || s.team==='Gestão');
+  if(ADMIN) return;
+  try{ const r=await fetch('/api/users'); const d=await r.json();
+    const me=(d.users||[]).find(u=>(u.name||'').toLowerCase()===(s.name||'').toLowerCase());
+    MYEMAIL = me ? ((me.user||me.email||'').toLowerCase()) : null;
+  }catch(e){ MYEMAIL=null; }
+}
+
 const money=v=> 'R$ '+(v>=1000?(v/1000).toFixed(v%1000&&v<10000?1:0)+'k':v);
 const fmt=(k,v)=> v==null?'—':(k.fmt==='money'?money(v):(''+v));
 const clr=p=> p>=95?'var(--green)': p>=75?'var(--amber)':'var(--red)';
@@ -173,6 +186,21 @@ function pulseCards(list){ return `<div class="panel"><h3>Pulso do time</h3><div
        <div><div class="nm">${p.nome}</div><div class="rl">${p.papel} · ${p.funil}</div></div></div>
        <div class="mini">${p.kpis.map(k=>{const pc=pctK(k);return `<i>${pc!=null?`<b style="width:${Math.min(100,pc)}%;background:${clr(pc)}"></b>`:''}</i>`;}).join('')}</div>
        <div class="pfoot"><span style="color:${stColor(a)};font-weight:700">● ${stWord(a)}</span><span>${s!=null?'reuniões '+s:'—'}</span></div></div>`;}).join('')}</div></div>`; }
+function cardsDia(p){
+  const c=p.cards; if(!c) return '';
+  const dias=Object.keys(c.porDia||{}).sort();
+  const metaDia=c.metaDia||0;
+  const max=Math.max(1, metaDia, ...dias.map(d=>c.porDia[d]));
+  const bars=dias.map(d=>{ const n=c.porDia[d]; const h=Math.round(n/max*100);
+    const col= metaDia? (n>=metaDia?'var(--green)':'var(--amber)') : 'var(--blue)';
+    return `<div style="flex:1;min-width:26px;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="font-size:10px;color:var(--mut);font-variant-numeric:tabular-nums">${n}</div>
+      <div style="width:100%;height:70px;background:#0b0f16;border-radius:5px;display:flex;align-items:flex-end;overflow:hidden"><div style="width:100%;height:${h}%;background:${col};border-radius:5px 5px 0 0"></div></div>
+      <div style="font-size:9px;color:var(--mut2)">${d.slice(8)}/${d.slice(5,7)}</div></div>`; }).join('');
+  return `<div class="panel"><h3>Cards abertos por dia</h3>
+    <div class="sub">${c.total} no período${metaDia?` · meta ${metaDia}/dia`:' · sem meta/dia definida'} — funis Captação Ativa + Copiloto</div>
+    <div style="display:flex;gap:6px;align-items:flex-end;overflow-x:auto;padding-top:4px">${bars||'<div class="empty" style="width:100%">Nenhum card aberto no período.</div>'}</div></div>`;
+}
 function personDetail(p){ const a=attain(p);
   return `<div class="panel idcard"><div class="av" style="background:${p.cor}">${p.ini}</div>
       <div class="idmeta"><div class="nm">${p.nome}${p.novo?' <span class="tag" style="border-color:var(--amber);color:var(--amber)">onboarding</span>':''}</div>
@@ -180,6 +208,7 @@ function personDetail(p){ const a=attain(p);
       <div class="statusbig" style="background:${stColor(a)}22;color:${stColor(a)}">● ${stWord(a)}${a!=null?' · '+a+'%':''}</div></div>
     <div class="panel"><h3>Indicadores · Realizado × Meta</h3><div class="sub">Metas escaladas pelos dias úteis do período</div>
       <div class="kgrid">${p.kpis.map(kpiCard).join('')}</div></div>
+    ${cardsDia(p)}
     <div class="two">${thermo(p)}${insights([p])}</div>`; }
 function groupView(list,titulo){ const at=list.map(attain).filter(x=>x!=null), qs=list.map(callScore).filter(x=>x!=null);
   const am=at.length?Math.round(at.reduce((a,b)=>a+b,0)/at.length):null, qm=qs.length?Math.round(qs.reduce((a,b)=>a+b,0)/qs.length):null;
@@ -237,7 +266,14 @@ async function load(){
     const d=await resp.json();
     if(d.error) throw new Error(d.error);
     P=d.vendedores||[];
+    // Colaborador (não-gestão) só enxerga o próprio card; esconde o seletor de recorte do time.
+    if(!ADMIN){
+      document.getElementById('seg').style.display='none';
+      P = MYEMAIL ? P.filter(p=>(p.email||'').toLowerCase()===MYEMAIL) : [];
+      view='vendedor'; sel = P[0]?P[0].id:null;
+    }
     crumb.textContent=`${periodLabel(r)} · ${d.periodo?d.periodo.dias_uteis+' dias úteis':''} · atualizado ${new Date(d.gerado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    if(!ADMIN && !P.length){ stage.innerHTML='<div class="empty">Você não tem indicadores no Radar.<br>Fale com a gestão se isso não estiver certo.</div>'; return; }
     render();
   }catch(e){ stage.innerHTML=`<div class="empty">Erro ao carregar dados: ${e.message}</div>`; crumb.textContent='erro'; }
 }
@@ -245,7 +281,7 @@ async function load(){
 document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{ view=b.dataset.v; sel=null; syncSeg(); render(); });
 document.querySelectorAll('#pseg button').forEach(b=>b.onclick=()=>{ period=b.dataset.p; document.querySelectorAll('#pseg button').forEach(x=>x.classList.toggle('on',x===b)); document.getElementById('range').style.display=period==='custom'?'flex':'none'; load(); });
 document.getElementById('d1').onchange=load; document.getElementById('d2').onchange=load;
-load();
+resolvePerm().then(load);
 </script>
 </body>
 </html>

@@ -10,6 +10,17 @@ const V2 = "https://api.pipedrive.com/api/v2";
 let HISTORY = {};
 try { HISTORY = require("../data/history.json"); } catch (_) { HISTORY = {}; }
 
+// Config por-usuário (mesma fonte do dashboard: users.json). Usada pelo Radar p/ a meta de
+// "cards abertos por dia" (campo metaCardsDia, setado em Gerenciar Usuário). Chave = e-mail.
+let PB_USERS = [];
+try { PB_USERS = require("../users.json"); } catch (_) { PB_USERS = []; }
+const RDR_USERCFG = {};
+for (const u of (PB_USERS || [])) {
+  const em = (u.user || u.email || "").toLowerCase();
+  if (!em) continue;
+  RDR_USERCFG[em] = { metaCardsDia: parseInt(String(u.metaCardsDia || "").replace(/[^0-9]/g, "")) || 0 };
+}
+
 // Tipos que NÃO contam como primeiro contato (automação/registro de sistema).
 const TIPOS_SISTEMA = new Set(["gatilho_copiloto"]);
 
@@ -34,6 +45,29 @@ function rdrDetectPlan(fidel,val,mrr){ if(fidel){const v=String(fidel).toLowerCa
 function rdrArrOf(x){ const mrrRaw=parseFloat(x[RDR_MRR_KEY]||0)||0; const val=x.value||0; const plan=rdrDetectPlan(x[RDR_FIDEL_KEY],val,mrrRaw); const mrr=mrrRaw>0?mrrRaw:(val/(RDR_PLAN_MONTHS[plan]||12)); return mrr*12; }
 async function rdrGanhos(uid,from,to,TK){let start=0,count=0,value=0,arr=0,g=0;while(g++<10){const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=won&start=${start}&limit=500&api_token=${TK}`);for(const x of (d.data||[])){const wt=(x.won_time||'').slice(0,10);if(wt>=from&&wt<=to){count++;value+=(x.value||0);arr+=rdrArrOf(x);}}const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return {count,value,arr:Math.round(arr)};}
 async function rdrAtiv(uid,from,to,TK){let start=0,count=0,g=0;while(g++<20){const d=await rdrPJ(`${V1}/activities?user_id=${uid}&done=1&start_date=${from}&end_date=${to}&start=${start}&limit=500&api_token=${TK}`);count+=(d.data||[]).length;const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return count;}
+// Cards NOVOS/abertos por dia por owner: deals criados (add_time) nos funis de venda (Captação Ativa=7 + Copiloto=2).
+// Ordena add_time DESC e para ao cruzar o início do período (mesmo padrão do handlePerdidos). Dia em BRT.
+const RDR_PIPES_CARDS = new Set([2,7]);
+function rdrDiaBRT(s){ const t=parseData(s); return t==null?null:rdrIso(new Date(t + BRT)); }
+async function rdrCardsAbertos(uid,from,to,TK){
+  let start=0,g=0,total=0; const porDia={};
+  while(g++<12){
+    const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=all_not_deleted&sort=add_time%20DESC&start=${start}&limit=500&api_token=${TK}`);
+    const rows=d.data||[]; let stop=false;
+    for(const x of rows){
+      const dia=rdrDiaBRT(x.add_time);
+      if(dia==null) continue;
+      if(dia<from){ stop=true; continue; }   // sorted desc → passou do início do período
+      if(dia>to) continue;
+      if(!RDR_PIPES_CARDS.has(Number(x.pipeline_id))) continue;
+      total++; porDia[dia]=(porDia[dia]||0)+1;
+    }
+    const pg=(d.additional_data||{}).pagination||{};
+    if(stop || !pg.more_items_in_collection) break;
+    start=pg.next_start;
+  }
+  return {total,porDia};
+}
 async function handleRadar(req,res,TK){
   try{
     const u=new URL(req.url,'http://localhost'); const now=new Date();
@@ -42,23 +76,30 @@ async function handleRadar(req,res,TK){
     const du=rdrBiz(from,to), semanas=Math.max(1,Math.round(du/5));
     let callMap={}; try{const sm=await rdrPJ(RDR_N8N);(sm.vendedores||[]).forEach(v=>{callMap[(v.vendedor_email||'').toLowerCase()]=v;});}catch(e){}
     const out=await Promise.all(RDR_SELLERS.map(async s=>{
-      const gan=await rdrGanhos(s.id,from,to,TK).catch(()=>({count:0,value:0}));
+      const gan=await rdrGanhos(s.id,from,to,TK).catch(()=>({count:0,value:0,arr:0}));
+      // Cards abertos = deals criados por este owner nos funis de venda (CA=7 + Copiloto=2), por dia.
+      // Meta/dia vem do perfil (users.json → metaCardsDia), setada em Gerenciar Usuário.
+      const cab=await rdrCardsAbertos(s.id,from,to,TK).catch(()=>({total:0,porDia:{}}));
+      const cfg=RDR_USERCFG[(RDR_EMAIL[s.id]||'').toLowerCase()]||{metaCardsDia:0};
+      const metaCards=cfg.metaCardsDia>0?cfg.metaCardsDia*du:null;
+      const kCards={lab:'Cards abertos',real:cab.total,meta:metaCards,un:'',per:cfg.metaCardsDia>0?('meta '+cfg.metaCardsDia+'/dia'):'sem meta/dia',fmt:'num'};
       let kpis=[];
       if(s.squad==='Captação Ativa'){ kpis=[
         {lab:'Faturamento ARR',real:gan.arr,meta:160000,un:'R$',per:'super meta · mês',fmt:'money'},
         {lab:'Contratos ganhos',real:gan.count,meta:null,un:'',per:'período',fmt:'num'},
+        kCards,
         {lab:'Aderência reunião 30min',real:null,meta:null,un:'',per:'a definir (manual)',fmt:'num'} ]; }
       else if(s.squad==='Copiloto'){ kpis=[
         {lab:'Novos contratos',real:gan.count,meta:2*semanas,un:'',per:'meta '+semanas+' sem',fmt:'num'},
         {lab:'Faturamento ARR',real:gan.arr,meta:null,un:'R$',per:'período',fmt:'money'},
-        {lab:'Novos leads',real:null,meta:8*du,un:'',per:'a definir (por criador)',fmt:'num'} ];
+        kCards ];
         if(s.novo) kpis.push({lab:'Carteira antiga redistribuída',real:null,meta:null,un:'leads',per:'a definir (manual)',fmt:'num'}); }
       else { const at=await rdrAtiv(s.id,from,to,TK).catch(()=>null); kpis=[
         {lab:'Atividades concluídas',real:at,meta:100*du,un:'',per:'meta '+du+' dias úteis',fmt:'num'},
-        {lab:'Novos leads',real:null,meta:8*du,un:'',per:'a definir (por criador)',fmt:'num'},
+        kCards,
         {lab:'Reuniões agendadas',real:null,meta:8*semanas,un:'',per:'a definir',fmt:'num'} ]; }
       const call=callMap[(RDR_EMAIL[s.id]||'').toLowerCase()]||null;
-      return {...s,kpis,call:call?{n:call.n_calls,overall:call.overall,dims:(call.dims||[]).map(d=>[d.name,d.score]),talk_ratio:call.talk_ratio_medio,ultimas:call.ultimas}:null};
+      return {...s,email:(RDR_EMAIL[s.id]||null),cards:{total:cab.total,porDia:cab.porDia,metaDia:cfg.metaCardsDia||0},kpis,call:call?{n:call.n_calls,overall:call.overall,dims:(call.dims||[]).map(d=>[d.name,d.score]),talk_ratio:call.talk_ratio_medio,ultimas:call.ultimas}:null};
     }));
     res.setHeader('Cache-Control','s-maxage=120, stale-while-revalidate=300');
     res.status(200).json({gerado_em:new Date().toISOString(),periodo:{from,to,dias_uteis:du,semanas},vendedores:out});

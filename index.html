@@ -2521,6 +2521,10 @@ function clearSettingsModal() {
             <input class="um-input" id="um-meta" type="text" placeholder="Ex: R$ 50.000" />
           </div>
           <div>
+            <label class="um-label">Meta cards/dia (Radar)</label>
+            <input class="um-input" id="um-cards-dia" type="number" min="0" placeholder="Ex: 8" style="max-width:130px;" />
+          </div>
+          <div>
             <label class="um-label">&nbsp;</label>
             <button class="um-add-btn" onclick="USERMGMT.addUser()">Adicionar usuário</button>
           </div>
@@ -24401,7 +24405,7 @@ const USERMGMT = (() => {
   }
 
   function clearForm() {
-    ['um-name','um-email','um-pass','um-meta'].forEach(id => {
+    ['um-name','um-email','um-pass','um-meta','um-cards-dia'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -24510,6 +24514,10 @@ const USERMGMT = (() => {
               <input class="um-input" id="um-team-${i}-meta" type="text" value="${u.meta||''}" placeholder="Ex: R$ 50.000" style="background:var(--ink-00);" />
             </div>
           </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px; font-weight:700; color:#a78bfa; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px;">Meta cards abertos / dia (Radar)</div>
+            <input class="um-input" id="um-team-${i}-cards" type="number" min="0" value="${u.metaCardsDia||''}" placeholder="Ex: 8" style="background:var(--ink-00); max-width:160px;" />
+          </div>
           <div style="display:flex; gap:6px;">
             <button onclick="USERMGMT.saveTeam(${i}, ${extraIdx}, '${u.user}')" style="background:#7c3aed; color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar</button>
             <button onclick="USERMGMT.toggleEditTeam(${i}, ${extraIdx}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
@@ -24553,14 +24561,16 @@ const USERMGMT = (() => {
   function saveTeam(i, extraIdx, userLogin) {
     const sel    = document.getElementById(`um-team-${i}-sel`);
     const metaEl = document.getElementById(`um-team-${i}-meta`);
+    const cardsEl= document.getElementById(`um-team-${i}-cards`);
     const msg    = document.getElementById(`um-team-${i}-msg`);
     if (!sel) return;
     const newTeam = sel.value;
     const newMeta = metaEl ? metaEl.value.trim() : '';
+    const newCards= cardsEl ? cardsEl.value.trim() : '';
     const extra = AUTH.loadExtra();
     const ei = extra.findIndex(u => u.user === userLogin);
-    if (ei >= 0) { extra[ei].team = newTeam; extra[ei].meta = newMeta; AUTH.saveExtra(extra); }
-    if (msg) { msg.textContent = '✅ Equipe e meta atualizadas!'; msg.style.display = 'block'; }
+    if (ei >= 0) { extra[ei].team = newTeam; extra[ei].meta = newMeta; extra[ei].metaCardsDia = newCards; AUTH.saveExtra(extra); }
+    if (msg) { msg.textContent = '✅ Equipe e metas atualizadas!'; msg.style.display = 'block'; }
     setTimeout(() => { toggleEditTeam(i, extraIdx, userLogin); renderList(); }, 1200);
   }
 
@@ -24619,6 +24629,7 @@ const USERMGMT = (() => {
     const pass       = (document.getElementById('um-pass').value || '').trim();
     const team       = (document.getElementById('um-team')?.value) || 'CAP';
     const meta       = (document.getElementById('um-meta').value || '').trim();
+    const metaCardsDia = (document.getElementById('um-cards-dia')?.value || '').trim();
     const seniority  = (document.getElementById('um-seniority')?.value) || 'pleno1';
     const dataInicio = (document.getElementById('um-data-inicio')?.value || '').trim();
     const hasComissao= document.getElementById('um-has-comissao')?.checked || false;
@@ -24638,7 +24649,7 @@ const USERMGMT = (() => {
     }
 
     const extra = AUTH.loadExtra();
-    extra.push({ user: email, pass, name, team, meta, seniority, dataInicio, hasComissao, tipoVendas });
+    extra.push({ user: email, pass, name, team, meta, metaCardsDia, seniority, dataInicio, hasComissao, tipoVendas });
     AUTH.saveExtra(extra);
 
     clearForm();
@@ -26884,7 +26895,7 @@ const RH = (() => {
     <button class="trk-tab" data-trk="dash" onclick="trackTab('dash',this)" style="cursor:pointer;border:0;border-bottom:2px solid #2563eb;background:none;padding:8px 14px;font-size:14px;font-weight:700;color:#2563eb;">Dashboard</button>
     <button class="trk-tab" data-trk="fc" onclick="trackTab('fc',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Forecast</button>
     <button class="trk-tab" id="trk-tab-perdidos" data-trk="perdidos" onclick="trackTab('perdidos',this)" style="display:none;cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Perdidos</button>
-    <button class="trk-tab" id="trk-tab-radar" data-trk="radar" onclick="trackTab('radar',this)" style="display:none;cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Radar do Time</button>
+    <button class="trk-tab" id="trk-tab-radar" data-trk="radar" onclick="trackTab('radar',this)" style="cursor:pointer;border:0;border-bottom:2px solid transparent;background:none;padding:8px 14px;font-size:14px;font-weight:600;color:#64748b;">Radar do Time</button>
   </div>
   <div id="trk-dash-wrap" style="flex:1;">
     <iframe id="tracking-frame" data-src="/dashboard.html" title="Tracking Comercial" style="width:100%;height:calc(100vh - 45px);border:0;display:block;"></iframe>
@@ -26903,7 +26914,7 @@ const RH = (() => {
 /* Alterna as sub-abas do Tracking e carrega o iframe da aba na 1ª abertura (evita chamar o Pipedrive à toa). */
 function trackTab(which, btn){
   if (which==='perdidos' && !pbPerdidosIsManager()) return;
-  if (which==='radar' && !pbPerdidosIsManager()) return;
+  // Radar: visível a todos; o conteúdo (radar.html) se auto-restringe — colaborador vê só o seu, gestão/admin vê todos.
   document.querySelectorAll('.trk-tab').forEach(b=>{
     const on = b.dataset.trk===which;
     b.style.color = on ? '#2563eb' : '#64748b';
@@ -26920,7 +26931,7 @@ function trackTab(which, btn){
 }
 /* Painel Perdidos: acesso restrito a perfil de gestão (mesma regra do isAdminUser/ccIsManager). */
 function pbPerdidosIsManager(){try{if(typeof isAdminUser==="function")return !!isAdminUser();var s=JSON.parse(sessionStorage.getItem("captei_pb_session")||"{}");if(!s.name)return false;var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():[];var u=all.find(function(x){return x.name===s.name;});return !!(u&&(u.admin||u.team==="Gestão"));}catch(e){return false;}}
-(function(){var t=0;function g(){var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():null;if((!all||!all.length)&&t++<20){return setTimeout(g,150);}var b=document.getElementById('trk-tab-perdidos');if(b)b.style.display=pbPerdidosIsManager()?'':'none';var br=document.getElementById('trk-tab-radar');if(br)br.style.display=pbPerdidosIsManager()?'':'none';}if(document.readyState!=='loading')g();else document.addEventListener('DOMContentLoaded',g);})();
+(function(){var t=0;function g(){var all=(window.AUTH&&AUTH.getAllUsers)?AUTH.getAllUsers():null;if((!all||!all.length)&&t++<20){return setTimeout(g,150);}var b=document.getElementById('trk-tab-perdidos');if(b)b.style.display=pbPerdidosIsManager()?'':'none';}if(document.readyState!=='loading')g();else document.addEventListener('DOMContentLoaded',g);})();
 </script>
 
 <script>
