@@ -150,7 +150,9 @@ const POST_REUNIAO = { 7: new Set([41, 144, 42, 43, 79, 80]), 2: new Set([9, 10,
 const PRECOCE_DIAS = 4;       // <= isso após a reunião = descarte precoce
 const CAP_PERDIDOS = 350;
 
-function isoDate(ms) { return new Date(ms).toISOString().slice(0, 10); }
+// Data em fuso BRT (America/Sao_Paulo = UTC-3, sem horário de verão desde 2019).
+// Importa p/ o filtro "Hoje"/"Ontem" bater com o dia-calendário do Brasil e não do UTC.
+function isoDate(ms) { return new Date(ms - 3 * 3600000).toISOString().slice(0, 10); }
 function diffDias(aMs, bMs) {
   const a = new Date(aMs), b = new Date(bMs);
   const da = Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate());

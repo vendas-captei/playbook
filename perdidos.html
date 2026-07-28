@@ -63,6 +63,8 @@
   <div class="controls">
     <div><label>Período</label>
       <select id="days">
+        <option value="hoje">Hoje</option>
+        <option value="ontem">Ontem</option>
         <option value="7">últimos 7 dias</option>
         <option value="14">últimos 14 dias</option>
         <option value="30" selected>últimos 30 dias</option>
@@ -115,8 +117,15 @@ const FUNIL = {2:{n:"F2 · IA Copiloto",c:"f2"}, 7:{n:"F7 · Captação Ativa",c
 const $ = s => document.querySelector(s);
 const fmtBR = iso => { if(!iso) return "—"; const [y,m,d]=iso.split("-"); return `${d}/${m}`; };
 
+// Dia-calendário em BRT (UTC-3): back=0 → hoje, back=1 → ontem.
+const brtDay = back => new Date(Date.now() - 3*3600000 - back*86400000).toISOString().slice(0,10);
+
 async function load(){
-  const days = $("#days").value, pipe = $("#pipe").value;
+  const sel = $("#days").value, pipe = $("#pipe").value;
+  // "hoje"/"ontem" = dia único: pede uma janela folgada ao backend e filtra o dia exato no cliente.
+  let days = sel; DAYFILTER = null;
+  if (sel === "hoje")  { days = 2; DAYFILTER = brtDay(0); }
+  else if (sel === "ontem") { days = 3; DAYFILTER = brtDay(1); }
   const btn = $("#go"); btn.disabled = true;
   $("#status").innerHTML = '<span class="spin"></span>consultando Pipedrive…';
   try{
@@ -137,6 +146,7 @@ async function load(){
 // O backend já traz TODOS os perdidos do período (rows). Filtramos e reagregamos
 // aqui p/ não re-consultar o Pipedrive a cada troca de filtro.
 let LAST = null;
+let DAYFILTER = null; // quando "Hoje"/"Ontem": data ISO-BRT do dia único a exibir
 const mediana = arr => { if(!arr.length) return 0; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2? s[m] : (s[m-1]+s[m])/2; };
 
 function populaFiltros(j){
@@ -153,7 +163,7 @@ function populaFiltros(j){
 function aplicar(){
   if(!LAST) return;
   const fv = $("#vend").value, fm = $("#motivo").value, ord = $("#ord").value;
-  let rows = (LAST.rows||[]).filter(r => (!fv||r.vendedor===fv) && (!fm||r.motivo===fm));
+  let rows = (LAST.rows||[]).filter(r => (!DAYFILTER||r.perda===DAYFILTER) && (!fv||r.vendedor===fv) && (!fm||r.motivo===fm));
   if (ord==="dias-asc") rows = rows.slice().sort((a,b)=>a.dias-b.dias);
   else if (ord==="dias-desc") rows = rows.slice().sort((a,b)=>b.dias-a.dias);
   else rows = rows.slice().sort((a,b)=>(a.perda<b.perda?1:-1));
