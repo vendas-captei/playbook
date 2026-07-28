@@ -87,7 +87,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="banner">🟢 <b style="color:var(--mut)">Dados ao vivo</b> — Ganhos e Atividades vêm do Pipedrive; termômetro vem das reuniões do Meetrox. Itens marcados <b style="color:var(--mut)">"a definir"</b> aguardam a regra de cálculo combinada com você.</div>
+  <div class="banner"><b style="color:var(--mut)">Dados ao vivo</b> — Ganhos e Atividades vêm do Pipedrive; termômetro vem das reuniões do Meetrox. Itens marcados <b style="color:var(--mut)">"a definir"</b> aguardam a regra de cálculo combinada com você.</div>
   <div class="head">
     <div class="title">
       <h1><span class="dot"></span> Radar do Time</h1>
@@ -160,10 +160,10 @@ function insights(list){
   if(!items.length) items=[{tipo:'ok'}];
   return `<div class="panel"><h3>Onde apertar</h3><div class="sub">Prioridade do maior gap para o menor</div>
     <div class="ins">${items.slice(0,6).map(it=>{
-      if(it.tipo==='ok') return `<div class="insrow" style="border-left-color:var(--green)"><div class="ic">✅</div><div class="tx">Todos dentro do ritmo nos indicadores com meta definida.</div></div>`;
-      if(it.tipo==='call') return `<div class="insrow" style="border-left-color:var(--red)"><div class="ic">🎙️</div><div class="tx"><b>${it.p.nome}</b> — qualidade das reuniões em <b>${it.s}</b> (${zoneWord(it.s)}).${it.ins?`<small>${it.ins}</small>`:''}</div></div>`;
+      if(it.tipo==='ok') return `<div class="insrow" style="border-left-color:var(--green)"><div class="tx">Todos dentro do ritmo nos indicadores com meta definida.</div></div>`;
+      if(it.tipo==='call') return `<div class="insrow" style="border-left-color:var(--red)"><div class="tx"><b>${it.p.nome}</b> — qualidade das reuniões em <b>${it.s}</b> (${zoneWord(it.s)}).${it.ins?`<small>${it.ins}</small>`:''}</div></div>`;
       const pc=Math.round(it.r*100), c=pc>=75?'var(--amber)':'var(--red)';
-      return `<div class="insrow" style="border-left-color:${c}"><div class="ic">📉</div><div class="tx"><b>${it.p.nome}</b> — ${it.k.lab.toLowerCase()} em <b>${fmt(it.k,it.k.real)}</b> de ${fmt(it.k,it.k.meta)} (${pc}%).<small>${it.p.papel==='SDR/BDR'?'Topo de funil':'Fundo de funil'} · faltam ${fmt(it.k,Math.max(0,it.k.meta-it.k.real))}.</small></div></div>`;
+      return `<div class="insrow" style="border-left-color:${c}"><div class="tx"><b>${it.p.nome}</b> — ${it.k.lab.toLowerCase()} em <b>${fmt(it.k,it.k.real)}</b> de ${fmt(it.k,it.k.meta)} (${pc}%).<small>${it.p.papel==='SDR/BDR'?'Topo de funil':'Fundo de funil'} · faltam ${fmt(it.k,Math.max(0,it.k.meta-it.k.real))}.</small></div></div>`;
     }).join('')}</div></div>`;
 }
 function pulseCards(list){ return `<div class="panel"><h3>Pulso do time</h3><div class="sub">Clique para abrir o detalhe de cada pessoa</div>
