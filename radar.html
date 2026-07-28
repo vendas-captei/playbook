@@ -198,7 +198,7 @@ function cardsDia(p){
       <div style="width:100%;height:70px;background:#0b0f16;border-radius:5px;display:flex;align-items:flex-end;overflow:hidden"><div style="width:100%;height:${h}%;background:${col};border-radius:5px 5px 0 0"></div></div>
       <div style="font-size:9px;color:var(--mut2)">${d.slice(8)}/${d.slice(5,7)}</div></div>`; }).join('');
   return `<div class="panel"><h3>Cards abertos por dia</h3>
-    <div class="sub">${c.total} no período${metaDia?` · meta ${metaDia}/dia`:' · sem meta/dia definida'} — funis Captação Ativa + Copiloto</div>
+    <div class="sub">${c.total} no período${metaDia?` · meta ${metaDia}/dia`:' · sem meta/dia definida'} — ${p.funil||'funil da pessoa'}</div>
     <div style="display:flex;gap:6px;align-items:flex-end;overflow-x:auto;padding-top:4px">${bars||'<div class="empty" style="width:100%">Nenhum card aberto no período.</div>'}</div></div>`;
 }
 function personDetail(p){ const a=attain(p);

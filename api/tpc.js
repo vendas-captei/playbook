@@ -27,11 +27,11 @@ const TIPOS_SISTEMA = new Set(["gatilho_copiloto"]);
 // ── Radar do Time (fundido aqui p/ respeitar o limite de 12 Serverless Functions) — GET /api/tpc?view=radar&from=&to= ──
 const RDR_N8N = 'https://n8n-ops.captei.com.br/webhook/radar-summary?token=3F07B67F-52E9-4AEE-8708-60323EDDE767';
 const RDR_SELLERS = [
-  { id:24330468, nome:'Ana Luiza', ini:'AL', cor:'#3b82f6', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7' },
-  { id:16776298, nome:'Elaine',    ini:'EL', cor:'#22c55e', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7' },
-  { id:26325796, nome:'Tamara',    ini:'TA', cor:'#a855f7', papel:'Sales REP', squad:'Copiloto',        funil:'Funil 2' },
-  { id:27598749, nome:'Rafael',    ini:'RA', cor:'#f59e0b', papel:'Sales REP', squad:'Copiloto',        funil:'Funil 2', novo:true },
-  { id:26132438, nome:'Eloise',    ini:'EO', cor:'#06b6d4', papel:'SDR/BDR',   squad:'Prospecção',       funil:'Funil 21' },
+  { id:24330468, nome:'Ana Luiza', ini:'AL', cor:'#3b82f6', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7', pipe:7 },
+  { id:16776298, nome:'Elaine',    ini:'EL', cor:'#22c55e', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7', pipe:7 },
+  { id:26325796, nome:'Tamara',    ini:'TA', cor:'#a855f7', papel:'Sales REP', squad:'Copiloto',        funil:'Funil 2', pipe:2 },
+  { id:27598749, nome:'Rafael',    ini:'RA', cor:'#f59e0b', papel:'Sales REP', squad:'Copiloto',        funil:'Funil 2', novo:true, pipe:2 },
+  { id:26132438, nome:'Eloise',    ini:'EO', cor:'#06b6d4', papel:'SDR/BDR',   squad:'Prospecção',       funil:'Funil 21', pipe:21 },
 ];
 const RDR_EMAIL = {24330468:'ana.goncalves@captei.com.br',16776298:'elaine.ribeiro@captei.com.br',26325796:'tamara.sousa@captei.com.br',27598749:'rafael.souza@captei.com.br',26132438:'eloise.miranda@captei.com.br'};
 function rdrPad(n){return String(n).padStart(2,'0');}
@@ -45,11 +45,11 @@ function rdrDetectPlan(fidel,val,mrr){ if(fidel){const v=String(fidel).toLowerCa
 function rdrArrOf(x){ const mrrRaw=parseFloat(x[RDR_MRR_KEY]||0)||0; const val=x.value||0; const plan=rdrDetectPlan(x[RDR_FIDEL_KEY],val,mrrRaw); const mrr=mrrRaw>0?mrrRaw:(val/(RDR_PLAN_MONTHS[plan]||12)); return mrr*12; }
 async function rdrGanhos(uid,from,to,TK){let start=0,count=0,value=0,arr=0,g=0;while(g++<10){const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=won&start=${start}&limit=500&api_token=${TK}`);for(const x of (d.data||[])){const wt=(x.won_time||'').slice(0,10);if(wt>=from&&wt<=to){count++;value+=(x.value||0);arr+=rdrArrOf(x);}}const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return {count,value,arr:Math.round(arr)};}
 async function rdrAtiv(uid,from,to,TK){let start=0,count=0,g=0;while(g++<20){const d=await rdrPJ(`${V1}/activities?user_id=${uid}&done=1&start_date=${from}&end_date=${to}&start=${start}&limit=500&api_token=${TK}`);count+=(d.data||[]).length;const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return count;}
-// Cards NOVOS/abertos por dia por owner: deals criados (add_time) nos funis de venda (Captação Ativa=7 + Copiloto=2).
+// Cards NOVOS/abertos por dia por owner: deals criados (add_time) no funil da pessoa (pipes).
+// Ana/Elaine=F7, Tamara/Rafael=F2, Eloise=F21 — cada um conta no funil onde de fato opera.
 // Ordena add_time DESC e para ao cruzar o início do período (mesmo padrão do handlePerdidos). Dia em BRT.
-const RDR_PIPES_CARDS = new Set([2,7]);
 function rdrDiaBRT(s){ const t=parseData(s); return t==null?null:rdrIso(new Date(t + BRT)); }
-async function rdrCardsAbertos(uid,from,to,TK){
+async function rdrCardsAbertos(uid,from,to,TK,pipes){
   let start=0,g=0,total=0; const porDia={};
   while(g++<12){
     const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=all_not_deleted&sort=add_time%20DESC&start=${start}&limit=500&api_token=${TK}`);
@@ -59,7 +59,7 @@ async function rdrCardsAbertos(uid,from,to,TK){
       if(dia==null) continue;
       if(dia<from){ stop=true; continue; }   // sorted desc → passou do início do período
       if(dia>to) continue;
-      if(!RDR_PIPES_CARDS.has(Number(x.pipeline_id))) continue;
+      if(pipes && !pipes.has(Number(x.pipeline_id))) continue;
       total++; porDia[dia]=(porDia[dia]||0)+1;
     }
     const pg=(d.additional_data||{}).pagination||{};
@@ -79,7 +79,7 @@ async function handleRadar(req,res,TK){
       const gan=await rdrGanhos(s.id,from,to,TK).catch(()=>({count:0,value:0,arr:0}));
       // Cards abertos = deals criados por este owner nos funis de venda (CA=7 + Copiloto=2), por dia.
       // Meta/dia vem do perfil (users.json → metaCardsDia), setada em Gerenciar Usuário.
-      const cab=await rdrCardsAbertos(s.id,from,to,TK).catch(()=>({total:0,porDia:{}}));
+      const cab=await rdrCardsAbertos(s.id,from,to,TK,new Set([s.pipe])).catch(()=>({total:0,porDia:{}}));
       const cfg=RDR_USERCFG[(RDR_EMAIL[s.id]||'').toLowerCase()]||{metaCardsDia:0};
       const metaCards=cfg.metaCardsDia>0?cfg.metaCardsDia*du:null;
       const kCards={lab:'Cards abertos',real:cab.total,meta:metaCards,un:'',per:cfg.metaCardsDia>0?('meta '+cfg.metaCardsDia+'/dia'):'sem meta/dia',fmt:'num'};
