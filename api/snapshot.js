@@ -16,15 +16,26 @@ const FUNIS = [7, 2];
 // Arquivo histórico macro: { "<pid>": { "YYYY-MM-DD": {decomposição do dia + vendedores} } }.
 // Chamado por cron/manual (GET /api/snapshot?key=…&only=daily) — nunca a cada "Atualizar",
 // pra não disparar redeploy da Vercel a cada clique. O dado do dia corrente vive no Edge Config.
+const { fsRead } = require("../lib/fscache");
+
+// Cache migrado do Vercel Edge Config para o Firestore em 29/07/2026: o plano free do Edge
+// Config permite 250 escritas/MÊS e estourou em 22/07, falhando em silêncio (o painel abria com
+// foto velha). Firestore free tier = 20.000 escritas/DIA.
+// LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
+// primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
 async function snapshotDaily(ghHeaders) {
   const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
-  if (!EC_ID || !EC_READ) throw new Error("Edge Config não configurado");
   const vivo = {};
   for (const pid of FUNIS) {
-    try {
-      const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
-      vivo[pid] = r.ok ? ((await r.json()) || {}) : {};
-    } catch (_) { vivo[pid] = {}; }
+    // Firestore primeiro; Edge Config só como fallback de leitura (migração 29/07/2026).
+    let v = await fsRead(`daily${pid}`);
+    if (v === null && EC_ID && EC_READ) {
+      try {
+        const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
+        v = r.ok ? await r.json() : null;
+      } catch (_) { v = null; }
+    }
+    vivo[pid] = v || {};
   }
   const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${DAILY_PATH}`, { headers: ghHeaders });
   let arq = { _meta: {} }, sha;

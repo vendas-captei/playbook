@@ -15,7 +15,13 @@ const PIPES = [7, 2];               // Captação Ativa (7) + IA Copiloto (2)
 
 // Edge Config (mesmo padrão do metrics.js) — overlay ao vivo da acurácia.
 const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
-const EC_TEAM = process.env.EDGE_CONFIG_TEAM, EC_WRITE = process.env.VERCEL_WRITE_TOKEN;
+const { fsRead, fsWrite } = require("../lib/fscache");
+
+// Cache migrado do Vercel Edge Config para o Firestore em 29/07/2026: o plano free do Edge
+// Config permite 250 escritas/MÊS e estourou em 22/07, falhando em silêncio (o painel abria com
+// foto velha). Firestore free tier = 20.000 escritas/DIA.
+// LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
+// primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
 
 async function loadJson(path, tok) {
   if (!tok) return {};
@@ -28,19 +34,14 @@ async function loadJson(path, tok) {
 }
 
 async function ecRead(key) {
+  const v = await fsRead(key);
+  if (v !== null) return v;
   if (!EC_ID || !EC_READ) return null;
   try { const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/${key}?token=${EC_READ}`, { cache: "no-store" }); return r.ok ? await r.json() : null; }
   catch (_) { return null; }
 }
 async function ecWrite(key, value) {
-  if (!EC_ID || !EC_WRITE) return false;
-  try {
-    const r = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
-      method: "PATCH", headers: { Authorization: `Bearer ${EC_WRITE}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ operation: "upsert", key, value }] }),
-    });
-    return r.ok;
-  } catch (_) { return false; }
+  return await fsWrite(key, value);
 }
 
 // Commit de um objeto JSON num arquivo do repo via GitHub API (reflete na hora no loadJson).

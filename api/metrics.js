@@ -13,51 +13,42 @@ const META_PADRAO = 160000;
 // via API Vercel (só server-side); leitura via endpoint HTTPS com read token.
 const EC_ID = process.env.EDGE_CONFIG_ID;
 const EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
-const EC_TEAM = process.env.EDGE_CONFIG_TEAM;
-const EC_WRITE = process.env.VERCEL_WRITE_TOKEN;
+const { fsRead, fsWrite } = require("../lib/fscache");
 
-async function cacheRead(pid) {
+// Cache migrado do Vercel Edge Config para o Firestore em 29/07/2026: o plano free do Edge
+// Config permite 250 escritas/MÊS e estourou em 22/07, falhando em silêncio (o painel abria com
+// foto velha). Firestore free tier = 20.000 escritas/DIA.
+// LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
+// primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
+async function ecLegacyRead(key) {
   if (!EC_ID || !EC_READ) return null;
   try {
-    const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/live${pid}?token=${EC_READ}`, { cache: "no-store" });
-    if (!r.ok) return null;
-    return await r.json();
+    const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/${key}?token=${EC_READ}`, { cache: "no-store" });
+    return r.ok ? await r.json() : null;
   } catch (_) { return null; }
 }
-async function cacheWrite(pid, value) {
-  if (!EC_ID || !EC_WRITE) return false;
-  try {
-    const r = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${EC_WRITE}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ operation: "upsert", key: `live${pid}`, value }] }),
-    });
-    return r.ok;
-  } catch (_) { return false; }
+
+async function cacheRead(pid) {
+  const v = await fsRead(`live${pid}`);
+  return v !== null ? v : await ecLegacyRead(`live${pid}`);
 }
-// Registro diário (decomposição do dia) no Edge Config, chave daily<pid> = { "YYYY-MM-DD": {...} }.
+async function cacheWrite(pid, value) {
+  return await fsWrite(`live${pid}`, value);
+}
+// Registro diário (decomposição do dia), chave daily<pid> = { "YYYY-MM-DD": {...} }.
 // Upsert por data → acumula o mês ao vivo, sem redeploy. O snapshot.js flusha p/ data/daily.json (repo).
 async function dailyReadMap(pid) {
-  if (!EC_ID) return {};
-  try {
-    const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
-    return r.ok ? ((await r.json()) || {}) : {};
-  } catch (_) { return {}; }
+  const v = await fsRead(`daily${pid}`);
+  return v || (await ecLegacyRead(`daily${pid}`)) || {};
 }
 async function dailyUpsert(pid, rec, mapaPre) {
-  if (!EC_ID || !EC_WRITE) return false;
   try {
     const mapa = mapaPre || (await dailyReadMap(pid));
     // write-once: a meta do dia FIXA (valor do início do dia) grava UMA vez e nunca sobrescreve.
     const prev = mapa[rec.data];
     if (prev && prev.metaDiaInicio != null && rec.metaDiaInicio == null) rec.metaDiaInicio = prev.metaDiaInicio;
     mapa[rec.data] = rec;
-    const r2 = await fetch(`https://api.vercel.com/v1/edge-config/${EC_ID}/items${EC_TEAM ? `?teamId=${EC_TEAM}` : ""}`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${EC_WRITE}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ operation: "upsert", key: `daily${pid}`, value: mapa }] }),
-    });
-    return r2.ok;
+    return await fsWrite(`daily${pid}`, mapa);
   } catch (_) { return false; }
 }
 
