@@ -28,11 +28,6 @@
       "email": "ana.goncalves@captei.com.br"
     },
     {
-      "id": 24213076,
-      "nome": "Eduardo Sousa",
-      "email": "eduardo.sousa@captei.com.br"
-    },
-    {
       "id": 16776298,
       "nome": "Elaine de Paula",
       "email": "elaine.ribeiro@captei.com.br"
@@ -41,11 +36,6 @@
       "id": 26132438,
       "nome": "Eloise",
       "email": "eloise.miranda@captei.com.br"
-    },
-    {
-      "id": 24720484,
-      "nome": "John Faber",
-      "email": "john.blueoceansem@gmail.com"
     },
     {
       "id": 14587695,
@@ -63,13 +53,18 @@
       "email": "paulo.lourenco@captei.com.br"
     },
     {
+      "id": 27598749,
+      "nome": "Rafael Viana Souza",
+      "email": "rafael.souza@captei.com.br"
+    },
+    {
       "id": 26325796,
       "nome": "Tamara",
       "email": "tamara.sousa@captei.com.br"
     }
   ],
   "_meta": {
-    "atualizado_em": "2026-07-15",
+    "atualizado_em": "2026-07-30",
     "fonte": "snapshot-cron"
   }
 }
