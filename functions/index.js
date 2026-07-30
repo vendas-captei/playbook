@@ -1,4 +1,5 @@
-const functions = require("firebase-functions");
+const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -38,20 +39,22 @@ app.all("/api", (req, res) => {
   res.status(404).json({ error: "Endpoint /api não encontrado." });
 });
 
-// Exporta a Cloud Function 1ª Geração 'api' (sem necessidade de permissões do Cloud Build 2nd Gen)
-exports.api = functions.region("us-central1").https.onRequest(app);
+// Exporta a Cloud Function 'api' (2ª Geração)
+exports.api = onRequest({ region: "us-central1" }, app);
 
-// Agendador diário 1ª Geração (substituindo vercel.json cron "5 3 * * *")
-exports.cronFcHistory = functions
-  .region("us-central1")
-  .pubsub.schedule("5 3 * * *")
-  .timeZone("America/Sao_Paulo")
-  .onRun(async () => {
+// Agendador diário (2ª Geração)
+exports.cronFcHistory = onSchedule(
+  {
+    schedule: "5 3 * * *",
+    timeZone: "America/Sao_Paulo",
+    region: "us-central1",
+  },
+  async () => {
     console.log("Executando cronFcHistory via Cloud Scheduler...");
     const fcHistoryHandler = handlers["fc-history"];
     if (!fcHistoryHandler) {
       console.error("Handler fc-history não encontrado!");
-      return null;
+      return;
     }
 
     const mockReq = {
@@ -79,5 +82,5 @@ exports.cronFcHistory = functions
     } catch (err) {
       console.error("Erro na execução agendada do cronFcHistory:", err);
     }
-    return null;
-  });
+  }
+);
