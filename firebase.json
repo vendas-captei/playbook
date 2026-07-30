@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "playbook-comercial-18c7a",
     "public": ".",
     "ignore": [
       "firebase.json",
