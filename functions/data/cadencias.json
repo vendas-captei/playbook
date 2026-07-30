@@ -1,0 +1,42 @@
+{
+  "updatedAt": "2026-07-16T00:00:00.000Z",
+  "updatedBy": "seed",
+  "tracks": [
+    {
+      "id": "inbound",
+      "name": "Inbound",
+      "origin": "Lead veio do Marketplace / cadastro (título \"(Inbound) - …\")",
+      "desc": "Lead já demonstrou interesse (se inscreveu). Ritmo mais próximo no início.",
+      "steps": [
+        { "day": "D1", "channel": "Ligação", "title": "Abertura forte", "subject": "", "text": "Ligar apresentando a Captei e abrindo com rapport. Objetivo: agendar reunião." },
+        { "day": "D1", "channel": "WhatsApp", "title": "1º WhatsApp", "subject": "", "text": "Olá ${name}, tudo bem? Aqui é da Captei. Vi que você demonstrou interesse em captar mais imóveis para a ${imobiliaria} aí em ${cidade}. Consigo te mostrar em 15 min como funciona — qual o melhor horário?" },
+        { "day": "D1", "channel": "E-mail", "title": "E-mail de reforço", "subject": "Captação de imóveis para a ${imobiliaria}", "text": "Olá ${name},\n\nComplementando meu contato: a Captei ajuda imobiliárias de ${cidade} a captar mais imóveis com proprietários direto. Podemos conversar rapidamente esta semana?\n\nAbraço," },
+        { "day": "D2", "channel": "WhatsApp", "title": "Insistência", "subject": "", "text": "Oi ${name}! Passando de novo por aqui. Consegue um horário rápido hoje ou amanhã pra eu te mostrar a plataforma?" },
+        { "day": "D2", "channel": "Ligação", "title": "2ª tentativa", "subject": "", "text": "Nova ligação. Se cair na caixa, seguir com WhatsApp do dia." },
+        { "day": "D3", "channel": "WhatsApp", "title": "Toque leve", "subject": "", "text": "${name}, ainda faz sentido falarmos sobre captação de imóveis? Me diz um horário que eu me adapto." },
+        { "day": "D5", "channel": "WhatsApp", "title": "Retomada", "subject": "", "text": "Oi ${name}, retomando aqui. Separei um exemplo de como imobiliárias parecidas com a ${imobiliaria} estão captando com a gente. Posso te enviar?" },
+        { "day": "D5", "channel": "Ligação", "title": "3ª tentativa", "subject": "", "text": "Ligação de retomada. Referenciar os WhatsApps anteriores." },
+        { "day": "D7", "channel": "WhatsApp", "title": "Break-up", "subject": "", "text": "${name}, como não consegui retorno, vou encerrar meu contato por aqui pra não te incomodar. Se em algum momento fizer sentido falar de captação, é só me chamar. Sucesso! 🙌" },
+        { "day": "D7", "channel": "E-mail", "title": "E-mail de despedida", "subject": "Encerrando meu contato — Captei", "text": "Olá ${name},\n\nComo não consegui retorno, encerro meu acompanhamento por aqui. Quando quiser retomar a conversa sobre captação de imóveis, é só responder este e-mail.\n\nAbraço," }
+      ]
+    },
+    {
+      "id": "outbound",
+      "name": "Outbound",
+      "origin": "Card criado manualmente, via API ou importação de lista",
+      "desc": "Lead frio (você foi atrás). Cadência mais longa e persistente, um toque por dia.",
+      "steps": [
+        { "day": "D1", "channel": "E-mail", "title": "E-mail cold", "subject": "Ideia de captação para a ${imobiliaria}", "text": "Olá ${name},\n\nSou da Captei e trabalhamos ajudando imobiliárias de ${cidade} a captar imóveis direto com proprietários. Faz sentido eu te mostrar como em 15 minutos?\n\nAbraço," },
+        { "day": "D2", "channel": "WhatsApp", "title": "1º WhatsApp", "subject": "", "text": "Olá ${name}, tudo bem? Aqui é da Captei. Ajudo imobiliárias em ${cidade} a captar mais imóveis. Consigo te mostrar rapidinho — qual o melhor horário?" },
+        { "day": "D3", "channel": "WhatsApp", "title": "WhatsApp", "subject": "", "text": "${name}, você é a pessoa certa pra falar sobre captação de imóveis na ${imobiliaria}? Se não, me indica com quem eu falo? 🙏" },
+        { "day": "D3", "channel": "Ligação", "title": "1ª cold call", "subject": "", "text": "Primeira ligação de saída. Fluxo: rapport → contexto → dor → amplificar → agendar." },
+        { "day": "D4", "channel": "WhatsApp", "title": "WhatsApp", "subject": "", "text": "Oi ${name}! Tô te procurando pra te mostrar como aumentar a carteira de imóveis da ${imobiliaria}. Me diz um horário?" },
+        { "day": "D5", "channel": "WhatsApp", "title": "WhatsApp (decisor)", "subject": "", "text": "${name}, quero muito te apresentar a Captei. Consegue 15 min ainda esta semana?" },
+        { "day": "D5", "channel": "Ligação", "title": "2ª cold call (decisor)", "subject": "", "text": "Segunda ligação, buscando o decisor. Referenciar as tentativas anteriores." },
+        { "day": "D6", "channel": "WhatsApp", "title": "WhatsApp", "subject": "", "text": "Oi ${name}, ainda em busca de um horário com você. Prefere manhã ou tarde?" },
+        { "day": "D7", "channel": "WhatsApp", "title": "Break-up", "subject": "", "text": "${name}, vou encerrar meu contato por aqui pra não insistir demais. Se um dia quiser falar sobre captação de imóveis, é só me chamar. Abraço! 🙌" },
+        { "day": "D7", "channel": "E-mail", "title": "E-mail de despedida", "subject": "Encerrando meu contato — Captei", "text": "Olá ${name},\n\nSem retorno até aqui, então encerro meu acompanhamento. Quando fizer sentido falar de captação de imóveis, é só responder.\n\nAbraço," }
+      ]
+    }
+  ]
+}

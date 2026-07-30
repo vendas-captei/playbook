@@ -1,0 +1,86 @@
+{
+  "2": {
+    "2026-07": {
+      "forecastInicial": {
+        "cenarios": {
+          "pessimista": 122175,
+          "realista": 125653,
+          "otimista": 212558
+        },
+        "ponderado": 98833,
+        "totalAberto": 185738,
+        "dealsAbertos": 1802,
+        "metaMensal": 80000,
+        "semanas": [
+          {
+            "semana": "27/07–31/07",
+            "valor": 56379
+          }
+        ],
+        "semData": 42453,
+        "snapshotEm": "2026-07-30"
+      }
+    },
+    "2026-06": {
+      "fechamento": {
+        "realizado": 124828.4,
+        "negociosGanhos": 5,
+        "winRate": 21,
+        "cicloMedianoDias": 35,
+        "perdidosOpp": 19,
+        "perdidosTotal": 71,
+        "metaMensal": 80000,
+        "snapshotEm": "2026-07-30"
+      }
+    }
+  },
+  "7": {
+    "2026-07": {
+      "forecastInicial": {
+        "cenarios": {
+          "pessimista": 233406,
+          "realista": 233790,
+          "otimista": 299766
+        },
+        "ponderado": 100221,
+        "totalAberto": 166197,
+        "dealsAbertos": 434,
+        "metaMensal": 160000,
+        "semanas": [
+          {
+            "semana": "27/07–31/07",
+            "valor": 23771
+          },
+          {
+            "semana": "03/08–07/08",
+            "valor": 29799
+          },
+          {
+            "semana": "17/08–21/08",
+            "valor": 23629
+          }
+        ],
+        "semData": 23023,
+        "snapshotEm": "2026-07-30"
+      }
+    },
+    "2026-06": {
+      "fechamento": {
+        "realizado": 142000.78000000003,
+        "negociosGanhos": 53,
+        "winRate": 40,
+        "cicloMedianoDias": 7,
+        "perdidosOpp": 80,
+        "perdidosTotal": 492,
+        "metaMensal": 160000,
+        "snapshotEm": "2026-07-30"
+      }
+    }
+  },
+  "_meta": {
+    "descricao": "Histórico congelado do Forecast por funil. O pipeline aberto é uma FOTO DO PRESENTE e não pode ser reconstruído no passado — por isso o snapshot mensal congela aqui. Alimentado por api/snapshot.js (mesmo cron do Tracking).",
+    "chave": "pipeline_id -> 'YYYY-MM' -> { forecastInicial:{cenarios,ponderado,totalAberto,dealsAbertos,metaMensal,semanas,semData,commit,snapshotEm}, fechamento:{realizado,negociosGanhos,winRate,cicloMedianoDias,perdidosOpp,perdidosTotal,metaMensal,snapshotEm} }",
+    "regras": "forecastInicial = foto do forecast capturada no dia 1 do PRÓPRIO mês (o que previmos). fechamento = indicadores capturados no dia 1 do mês SEGUINTE (won/lost são carimbos imutáveis, recuperáveis). Acurácia = forecastInicial.cenarios.realista vs fechamento.realizado.",
+    "atualizado_em": "2026-07-30"
+  }
+}

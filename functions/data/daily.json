@@ -1,0 +1,29 @@
+{
+  "2": {},
+  "7": {
+    "2026-07-16": {
+      "data": "2026-07-16",
+      "funil": 7,
+      "metaMensal": 160000,
+      "faturamentoAtual": 54890.090000000004,
+      "gapMeta": 105109.91,
+      "baseDia": 6956.521739130435,
+      "necessarioHoje": 9555.446363636363,
+      "vendidoHoje": 5166.72,
+      "vendasCount": 2,
+      "porVendedor": [
+        {
+          "vendedor": "Elaine de Paula",
+          "valor": 5166.72,
+          "count": 2
+        }
+      ],
+      "diasUteisDecorridos": 12,
+      "diasUteisRestantes": 11,
+      "atualizadoEm": "2026-07-16T13:46:32.215Z"
+    }
+  },
+  "_meta": {
+    "atualizado_em": "2026-07-16"
+  }
+}

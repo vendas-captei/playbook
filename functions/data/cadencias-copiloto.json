@@ -1,0 +1,26 @@
+{
+  "updatedAt": "2026-07-20T00:00:00.000Z",
+  "updatedBy": "seed",
+  "tracks": [
+    {
+      "id": "outbound-copiloto",
+      "name": "Outbound — Copiloto",
+      "origin": "Card criado manualmente, via API ou importação de lista no funil IA Copiloto (lead frio, você foi atrás)",
+      "desc": "Cadência de 7 dias vendendo o Copiloto (IA que atende a imobiliária inteira 24h). WhatsApp todos os dias (D1→D7) + ligações em D1/D3/D5 + e-mails em D1/D7.",
+      "steps": [
+        { "day": "D1", "channel": "E-mail", "title": "Cold — a dor da noite", "subject": "A ${imobiliaria} atende lead às 22h?", "text": "Olá ${name},\n\nSou da Captei. Pergunta rápida: quando um lead da ${imobiliaria} chega às 22h ou no fim de semana, alguém responde na hora?\n\nCriamos uma IA que atende a imobiliária inteira — comercial, financeiro, locação e manutenção — 24h por dia, direto no WhatsApp. Não é chatbot de fluxo fixo: é IA real, feita para o mercado imobiliário (6 anos nisso).\n\nConsigo te mostrar em 25 minutos como funciona na prática. Que tal esta semana?\n\nAbraço," },
+        { "day": "D1", "channel": "Ligação", "title": "1ª cold call", "subject": "", "text": "Roteiro do Script Consultivo (ver aba \"Scripts de Ligação\"): rapport → contexto (IA 360° da Captei) → dor (lead que entra à noite e ninguém atende) → amplificar (quanto se perde por mês) → agendar demo de 25-30 min. Se cair na caixa, seguir com o WhatsApp do dia." },
+        { "day": "D1", "channel": "WhatsApp", "title": "1º toque", "subject": "", "text": "Olá ${name}! Aqui é da Captei, acabei de te ligar 😊 Criamos uma IA que atende a imobiliária inteira 24h — comercial, financeiro, locação e manutenção, tudo no WhatsApp. Não é chatbot. Consigo te mostrar em 25 min, qual o melhor horário pra você?" },
+        { "day": "D2", "channel": "WhatsApp", "title": "Dor", "subject": "", "text": "Oi ${name}, tudo bem? Uma dúvida: a ${imobiliaria} responde todo lead que chega fora do horário comercial? É aí que a maioria perde negócio pra concorrência. Posso te mostrar em 25 min como a IA resolve isso — hoje ou amanhã?" },
+        { "day": "D3", "channel": "WhatsApp", "title": "Decisor", "subject": "", "text": "${name}, você é quem cuida do atendimento / tecnologia na ${imobiliaria}? Se não for, consegue me indicar com quem eu falo? 🙏 Prometo ser rápido." },
+        { "day": "D3", "channel": "Ligação", "title": "2ª cold call", "subject": "", "text": "2ª tentativa buscando o decisor. Referenciar os toques anteriores (e-mail + WhatsApp). Retomar a dor do lead perdido fora do horário e propor a demo de 25 min." },
+        { "day": "D4", "channel": "WhatsApp", "title": "Prova", "subject": "", "text": "${name}, separei um exemplo do Copiloto atendendo um lead ao vivo e abrindo um chamado de manutenção sozinho, de ponta a ponta. Posso te enviar aqui pra você ver como ficaria na ${imobiliaria}?" },
+        { "day": "D5", "channel": "WhatsApp", "title": "Reforço", "subject": "", "text": "${name}, quero muito te mostrar como a ${imobiliaria} para de perder lead fora do horário e desafoga a equipe. São só 25 min. Consegue ainda esta semana? Manhã ou tarde?" },
+        { "day": "D5", "channel": "Ligação", "title": "3ª tentativa", "subject": "", "text": "3ª tentativa (ligação de retomada), foco no decisor. Reforçar o custo de continuar perdendo lead à noite / fim de semana e fechar um horário pra demo." },
+        { "day": "D6", "channel": "WhatsApp", "title": "Toque leve", "subject": "", "text": "Oi ${name}, ainda em busca de um horário com você 🙂 Prefere manhã ou tarde? Me diz que eu me adapto à sua agenda." },
+        { "day": "D7", "channel": "WhatsApp", "title": "Break-up", "subject": "", "text": "${name}, vou encerrar meu contato por aqui pra não te incomodar. Quando fizer sentido resolver o atendimento da ${imobiliaria} com IA (24h, sem perder lead), é só me chamar. Sucesso! 🙌" },
+        { "day": "D7", "channel": "E-mail", "title": "Despedida", "subject": "Encerrando meu contato — Captei", "text": "Olá ${name},\n\nComo não consegui retorno, encerro meu acompanhamento por aqui. Quando quiser conhecer o Copiloto — a IA que atende a imobiliária inteira 24h —, é só responder este e-mail.\n\nAbraço," }
+      ]
+    }
+  ]
+}
