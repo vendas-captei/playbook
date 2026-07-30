@@ -11,13 +11,30 @@ const crypto = require("crypto");
 let SA = null;
 try { SA = JSON.parse(process.env.FIREBASE_SA_JSON || "null"); } catch (_) { SA = null; }
 
-const BASE = SA ? `https://firestore.googleapis.com/v1/projects/${SA.project_id}/databases/(default)/documents/cache` : null;
+// Duas formas de autenticar, na ordem:
+//  1) FIREBASE_SA_JSON  → chave da service account (é o caso da Vercel, que não roda no GCP).
+//  2) ADC via metadata server → quando o código roda DENTRO do GCP (Cloud Functions/Run), a própria
+//     identidade da função já tem acesso ao Firestore. Evita carregar a chave privada no ambiente.
+const PROJECT_ID = SA?.project_id || process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || null;
+const NO_GCP = !!process.env.K_SERVICE || !!process.env.FUNCTION_TARGET;   // marcadores de Cloud Run/Functions
+const ADC = !SA && NO_GCP && !!PROJECT_ID;
+const ATIVO = (!!SA || ADC) && !!PROJECT_ID;
+
+const BASE = ATIVO ? `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/cache` : null;
 const b64u = (b) => Buffer.from(b).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
 let _tok = null, _exp = 0;
 async function token() {
   const now = Math.floor(Date.now() / 1000);
   if (_tok && _exp > now + 60) return _tok;                       // reusa o token por ~1h
+  if (ADC) {                                                      // dentro do GCP: token da própria função
+    const r = await fetch("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
+      { headers: { "Metadata-Flavor": "Google" } });
+    const j = await r.json();
+    if (!j.access_token) throw new Error("firestore auth (ADC) falhou");
+    _tok = j.access_token; _exp = now + (j.expires_in || 3600);
+    return _tok;
+  }
   const hdr = b64u(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const pl = b64u(JSON.stringify({
     iss: SA.client_email,
@@ -40,7 +57,7 @@ async function token() {
 // Blob inteiro guardado como um único stringValue → mesma semântica do Edge Config.
 // Retorna null em qualquer falha (mesmo contrato dos wrappers originais, que engoliam erro).
 async function fsRead(key) {
-  if (!SA) return null;
+  if (!ATIVO) return null;
   try {
     const r = await fetch(`${BASE}/${encodeURIComponent(key)}`, {
       headers: { Authorization: `Bearer ${await token()}` }, cache: "no-store",
@@ -52,7 +69,7 @@ async function fsRead(key) {
 }
 
 async function fsWrite(key, value) {
-  if (!SA) return false;
+  if (!ATIVO) return false;
   try {
     const qs = "updateMask.fieldPaths=json&updateMask.fieldPaths=updatedAt";
     const r = await fetch(`${BASE}/${encodeURIComponent(key)}?${qs}`, {
@@ -67,4 +84,4 @@ async function fsWrite(key, value) {
   } catch (_) { return false; }
 }
 
-module.exports = { fsRead, fsWrite, ativo: () => !!SA };
+module.exports = { fsRead, fsWrite, ativo: () => ATIVO };

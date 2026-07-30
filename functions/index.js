@@ -40,14 +40,27 @@ app.all("/api", (req, res) => {
 });
 
 // Exporta a Cloud Function 'api' (2ª Geração)
-exports.api = onRequest({ region: "us-central1" }, app);
+// Região = southamerica-east1, a MESMA do Firestore (São Paulo). Estava em us-central1, o que
+// somava uma ida/volta intercontinental a cada leitura de cache.
+// timeout 300s: na Vercel o teto era 10s — é justamente o que travava o painel BDR por footprint.
+// serviceAccount: a identidade PADRÃO (309910204812-compute@) só tem artifactregistry/cloudbuild/logging
+// — sem acesso ao Firestore, o que fazia lib/fscache.js falhar em SILÊNCIO (fsWrite engole erro).
+// Rodando como a SA do Admin SDK, o ADC do metadata server já tem permissão de Firestore e
+// nenhuma chave privada precisa viver no ambiente da função.
+exports.api = onRequest({
+  region: "southamerica-east1", timeoutSeconds: 300, memory: "512MiB",
+  serviceAccount: "firebase-adminsdk-fbsvc@playbook-comercial-18c7a.iam.gserviceaccount.com",
+}, app);
 
 // Agendador diário (2ª Geração)
 exports.cronFcHistory = onSchedule(
   {
     schedule: "5 3 * * *",
     timeZone: "America/Sao_Paulo",
-    region: "us-central1",
+    region: "southamerica-east1",
+    timeoutSeconds: 300,
+    memory: "512MiB",
+    serviceAccount: "firebase-adminsdk-fbsvc@playbook-comercial-18c7a.iam.gserviceaccount.com",
   },
   async () => {
     console.log("Executando cronFcHistory via Cloud Scheduler...");

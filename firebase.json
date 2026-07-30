@@ -17,7 +17,8 @@
     "rewrites": [
       {
         "source": "/api/**",
-        "function": "api"
+        "function": "api",
+        "region": "southamerica-east1"
       }
     ]
   },
