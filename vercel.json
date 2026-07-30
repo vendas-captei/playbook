@@ -4,5 +4,9 @@
       "path": "/api/fc-history?dataset=accuracy&refresh=1&persist=1",
       "schedule": "5 3 * * *"
     }
+  ],
+  "routes": [
+    { "src": "/users\\.json", "status": 403 },
+    { "handle": "filesystem" }
   ]
 }

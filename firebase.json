@@ -5,9 +5,14 @@
     "ignore": [
       "firebase.json",
       "**/.*",
+      ".git/**",
+      ".github/**",
       "**/node_modules/**",
       "functions/**",
-      "vercel.json"
+      "vercel.json",
+      "api/**",
+      "lib/**",
+      "users.json"
     ],
     "rewrites": [
       {
