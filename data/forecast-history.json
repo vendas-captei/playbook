@@ -3,26 +3,22 @@
     "2026-07": {
       "forecastInicial": {
         "cenarios": {
-          "pessimista": 186574,
-          "realista": 196310,
-          "otimista": 343792
+          "pessimista": 122175,
+          "realista": 125653,
+          "otimista": 212558
         },
-        "ponderado": 178430,
-        "totalAberto": 325912,
-        "dealsAbertos": 1844,
+        "ponderado": 98833,
+        "totalAberto": 185738,
+        "dealsAbertos": 1802,
         "metaMensal": 80000,
         "semanas": [
           {
-            "semana": "06/07–10/07",
-            "valor": 78802
-          },
-          {
-            "semana": "13/07–17/07",
-            "valor": 37027
+            "semana": "27/07–31/07",
+            "valor": 56379
           }
         ],
-        "semData": 62601,
-        "snapshotEm": "2026-07-12"
+        "semData": 42453,
+        "snapshotEm": "2026-07-30"
       }
     },
     "2026-06": {
@@ -34,7 +30,7 @@
         "perdidosOpp": 19,
         "perdidosTotal": 71,
         "metaMensal": 80000,
-        "snapshotEm": "2026-07-12"
+        "snapshotEm": "2026-07-30"
       }
     }
   },
@@ -42,34 +38,30 @@
     "2026-07": {
       "forecastInicial": {
         "cenarios": {
-          "pessimista": 144893,
-          "realista": 145798,
-          "otimista": 217652
+          "pessimista": 233406,
+          "realista": 233790,
+          "otimista": 299766
         },
-        "ponderado": 107173,
-        "totalAberto": 179027,
-        "dealsAbertos": 605,
+        "ponderado": 100221,
+        "totalAberto": 166197,
+        "dealsAbertos": 434,
         "metaMensal": 160000,
         "semanas": [
           {
-            "semana": "06/07–10/07",
-            "valor": 13832
-          },
-          {
-            "semana": "13/07–17/07",
-            "valor": 53201
-          },
-          {
-            "semana": "20/07–24/07",
-            "valor": 2936
-          },
-          {
             "semana": "27/07–31/07",
-            "valor": 4016
+            "valor": 23771
+          },
+          {
+            "semana": "03/08–07/08",
+            "valor": 29799
+          },
+          {
+            "semana": "17/08–21/08",
+            "valor": 23629
           }
         ],
-        "semData": 33189,
-        "snapshotEm": "2026-07-12"
+        "semData": 23023,
+        "snapshotEm": "2026-07-30"
       }
     },
     "2026-06": {
@@ -81,7 +73,7 @@
         "perdidosOpp": 80,
         "perdidosTotal": 492,
         "metaMensal": 160000,
-        "snapshotEm": "2026-07-12"
+        "snapshotEm": "2026-07-30"
       }
     }
   },
@@ -89,6 +81,6 @@
     "descricao": "Histórico congelado do Forecast por funil. O pipeline aberto é uma FOTO DO PRESENTE e não pode ser reconstruído no passado — por isso o snapshot mensal congela aqui. Alimentado por api/snapshot.js (mesmo cron do Tracking).",
     "chave": "pipeline_id -> 'YYYY-MM' -> { forecastInicial:{cenarios,ponderado,totalAberto,dealsAbertos,metaMensal,semanas,semData,commit,snapshotEm}, fechamento:{realizado,negociosGanhos,winRate,cicloMedianoDias,perdidosOpp,perdidosTotal,metaMensal,snapshotEm} }",
     "regras": "forecastInicial = foto do forecast capturada no dia 1 do PRÓPRIO mês (o que previmos). fechamento = indicadores capturados no dia 1 do mês SEGUINTE (won/lost são carimbos imutáveis, recuperáveis). Acurácia = forecastInicial.cenarios.realista vs fechamento.realizado.",
-    "atualizado_em": "2026-07-12"
+    "atualizado_em": "2026-07-30"
   }
 }
