@@ -4,20 +4,20 @@
       "forecastInicial": {
         "cenarios": {
           "pessimista": 122175,
-          "realista": 125653,
-          "otimista": 212558
+          "realista": 124930,
+          "otimista": 200658
         },
-        "ponderado": 98833,
-        "totalAberto": 185738,
-        "dealsAbertos": 1802,
+        "ponderado": 98110,
+        "totalAberto": 173838,
+        "dealsAbertos": 517,
         "metaMensal": 80000,
         "semanas": [
           {
             "semana": "27/07–31/07",
-            "valor": 56379
+            "valor": 56343
           }
         ],
-        "semData": 42453,
+        "semData": 41766,
         "snapshotEm": "2026-07-30"
       }
     },
@@ -38,29 +38,29 @@
     "2026-07": {
       "forecastInicial": {
         "cenarios": {
-          "pessimista": 233406,
-          "realista": 233790,
-          "otimista": 299766
+          "pessimista": 228588,
+          "realista": 229101,
+          "otimista": 289209
         },
-        "ponderado": 100221,
-        "totalAberto": 166197,
-        "dealsAbertos": 434,
+        "ponderado": 95532,
+        "totalAberto": 155640,
+        "dealsAbertos": 433,
         "metaMensal": 160000,
         "semanas": [
           {
             "semana": "27/07–31/07",
-            "valor": 23771
+            "valor": 20425
           },
           {
             "semana": "03/08–07/08",
-            "valor": 29799
+            "valor": 32272
           },
           {
             "semana": "17/08–21/08",
             "valor": 23629
           }
         ],
-        "semData": 23023,
+        "semData": 19206,
         "snapshotEm": "2026-07-30"
       }
     },
