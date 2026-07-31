@@ -24464,7 +24464,11 @@ const AUTH = (() => {
         return;
       }
       errEl.classList.remove('show');
-      grantAccess(found.name, found.admin || found.team === 'Gestão', found.team);
+      // Mesmos argumentos do login por senha, de propósito: quem define o que a pessoa vê é o
+      // REGISTRO dela na lista, não o meio de login. Passar `admin || team==='Gestão'` aqui faria
+      // Gestão entrar com isAdmin=true pelo Google e false pela senha — o próprio grantAccess já
+      // calcula isGestao internamente para liberar o painel admin.
+      grantAccess(found.name, found.admin, found.team);
     } catch (e) {
       const code = (e && e.code) || '';
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
