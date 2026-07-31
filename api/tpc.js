@@ -36,6 +36,12 @@ async function getUserCfg() {
 const TIPOS_SISTEMA = new Set(["gatilho_copiloto"]);
 
 // ── Radar do Time (fundido aqui p/ respeitar o limite de 12 Serverless Functions) — GET /api/tpc?view=radar&from=&to= ──
+// 31/07/2026 — reescrito p/ medir SAÚDE DE FUNIL por pessoa (pedido do Natan):
+//   saíram: Faturamento ARR, Cards abertos por dia (gráfico), Atividades concluídas, Reuniões agendadas
+//           (tudo isso já existe no Dashboard ou nos insights nativos do Pipedrive);
+//   entraram: funil de conversão da coorte do período + saúde da carteira aberta (próximo passo / parados).
+// Custo: 2 varreduras de deals por pessoa (período com parada antecipada + carteira aberta).
+// Antes eram 3 (ganhos + cards + atividades) e ainda faltava o funil.
 const RDR_N8N = 'https://n8n-ops.captei.com.br/webhook/radar-summary?token=3F07B67F-52E9-4AEE-8708-60323EDDE767';
 const RDR_SELLERS = [
   { id:24330468, nome:'Ana Luiza', ini:'AL', cor:'#3b82f6', papel:'Sales REP', squad:'Captação Ativa', funil:'Funil 7', pipe:7 },
@@ -45,40 +51,89 @@ const RDR_SELLERS = [
   { id:26132438, nome:'Eloise',    ini:'EO', cor:'#06b6d4', papel:'SDR/BDR',   squad:'Prospecção',       funil:'Funil 21', pipe:21 },
 ];
 const RDR_EMAIL = {24330468:'ana.goncalves@captei.com.br',16776298:'elaine.ribeiro@captei.com.br',26325796:'tamara.sousa@captei.com.br',27598749:'rafael.souza@captei.com.br',26132438:'eloise.miranda@captei.com.br'};
+
+// Mapa etapa → [nível, nome]. Nível = quão longe o card chegou no funil.
+// No-Show (F7 144 / F2 10) fica no MESMO nível de "Reunião agendada": a reunião FOI marcada e o lead
+// não apareceu — é queda, não avanço. Requalificação (F21 141) volta pro nível de tentativa de contato.
+// Etapas conferidas na API em 31/07/2026 (GET /v1/stages?pipeline_id=).
+const RDR_FUNIL = {
+  7: { noshow:144, stage:{37:[1,'Entrada'],38:[2,'Tentei Contato'],39:[3,'Conexão Realizada'],40:[4,'Qualificado'],41:[5,'Reunião Agendada'],144:[5,'No-Show'],42:[6,'Proposta Enviada'],43:[7,'Negociação'],79:[8,'Verbalizou que vai Fechar'],80:[9,'Termo na Rua']},
+       steps:[['Entraram no funil',1],['Falou com o lead',3],['Qualificado',4],['Reunião agendada',5],['Proposta enviada',6],['Ganho',99]] },
+  2: { noshow:10, stage:{6:[1,'Entrada'],149:[2,'Tentei Contato'],7:[3,'Contato realizado'],8:[4,'Qualificado / Confirmar reunião'],9:[5,'Reunião Agendada'],10:[5,'No-Show'],100:[6,'Proposta enviada'],101:[7,'Em negociação'],102:[8,'Em fechamento'],150:[9,'Pagamento / Assinatura']},
+       steps:[['Entraram no funil',1],['Falou com o lead',3],['Qualificado',4],['Reunião agendada',5],['Proposta enviada',6],['Ganho',99]] },
+  21:{ noshow:null, requal:141, stage:{140:[1,'Entrada'],142:[2,'Tentei contato'],139:[3,'Contato Realizado'],151:[4,'Decisor Conectado'],138:[5,'Qualificado'],141:[2,'Requalificação']},
+       steps:[['Entraram no funil',1],['Falou com o lead',3],['Decisor conectado',4],['Qualificado',5]] },
+};
+const rdrLvl=(pipe,sid)=>{const F=RDR_FUNIL[pipe]; const e=F&&F.stage[sid]; return e?e[0]:1;};
+const rdrNome=(pipe,sid)=>{const F=RDR_FUNIL[pipe]; const e=F&&F.stage[sid]; return e?e[1]:('Etapa '+sid);};
+
 function rdrPad(n){return String(n).padStart(2,'0');}
 function rdrIso(d){return d.getUTCFullYear()+'-'+rdrPad(d.getUTCMonth()+1)+'-'+rdrPad(d.getUTCDate());}
 function rdrBiz(from,to){let d=new Date(from+'T00:00:00Z'),end=new Date(to+'T00:00:00Z'),n=0;while(d<=end){const w=d.getUTCDay();if(w>=1&&w<=5)n++;d.setUTCDate(d.getUTCDate()+1);}return Math.max(1,n);}
 async function rdrPJ(url){const r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
-const RDR_MRR_KEY='ac90208e8bba90f5646de20bd9e3c63346521b3a';
-const RDR_FIDEL_KEY='59159d4bc25588dc645c158c463f58ae68e60629';
-const RDR_PLAN_MONTHS={mensal:1,trimestral:3,semestral:6,anual:12,copiloto:1};
-function rdrDetectPlan(fidel,val,mrr){ if(fidel){const v=String(fidel).toLowerCase(); if(v.includes('anual'))return'anual'; if(v.includes('semest'))return'semestral'; if(v.includes('trimes'))return'trimestral'; if(v.includes('mensal'))return'mensal'; if(v.includes('cop'))return'copiloto';} if(mrr>0&&val>0){const m=Math.round(val/mrr); if(m<=1)return'mensal'; if(m<=4)return'trimestral'; if(m<=8)return'semestral'; if(m<=13)return'anual';} return'anual'; }
-function rdrArrOf(x){ const mrrRaw=parseFloat(x[RDR_MRR_KEY]||0)||0; const val=x.value||0; const plan=rdrDetectPlan(x[RDR_FIDEL_KEY],val,mrrRaw); const mrr=mrrRaw>0?mrrRaw:(val/(RDR_PLAN_MONTHS[plan]||12)); return mrr*12; }
-async function rdrGanhos(uid,from,to,TK){let start=0,count=0,value=0,arr=0,g=0;while(g++<10){const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=won&start=${start}&limit=500&api_token=${TK}`);for(const x of (d.data||[])){const wt=(x.won_time||'').slice(0,10);if(wt>=from&&wt<=to){count++;value+=(x.value||0);arr+=rdrArrOf(x);}}const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return {count,value,arr:Math.round(arr)};}
-async function rdrAtiv(uid,from,to,TK){let start=0,count=0,g=0;while(g++<20){const d=await rdrPJ(`${V1}/activities?user_id=${uid}&done=1&start_date=${from}&end_date=${to}&start=${start}&limit=500&api_token=${TK}`);count+=(d.data||[]).length;const pg=(d.additional_data||{}).pagination||{};if(!pg.more_items_in_collection)break;start=pg.next_start;}return count;}
-// Cards NOVOS/abertos por dia por owner: deals criados (add_time) no funil da pessoa (pipes).
-// Ana/Elaine=F7, Tamara/Rafael=F2, Eloise=F21 — cada um conta no funil onde de fato opera.
-// Ordena add_time DESC e para ao cruzar o início do período (mesmo padrão do handlePerdidos). Dia em BRT.
 function rdrDiaBRT(s){ const t=parseData(s); return t==null?null:rdrIso(new Date(t + BRT)); }
-async function rdrCardsAbertos(uid,from,to,TK,pipes){
-  let start=0,g=0,total=0; const porDia={};
-  while(g++<12){
-    const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=all_not_deleted&sort=add_time%20DESC&start=${start}&limit=500&api_token=${TK}`);
+
+// Varredura A — o que aconteceu NO PERÍODO no funil da pessoa.
+// Ordena update_time DESC e para quando cruza o início do período: qualquer evento que nos interessa
+// (entrou, mudou de etapa, teve atividade, ganhou, perdeu) obrigatoriamente bumpa o update_time.
+async function rdrPeriodo(uid,from,to,TK,pipe){
+  const F=RDR_FUNIL[pipe]||{stage:{},steps:[]};
+  const inP=v=>!!v&&v>=from&&v<=to;
+  let start=0,g=0;
+  let tocados=0,entradas=0,avancaram=0,ganhos=0,valorGanho=0,perdidos=0,noshow=0;
+  const coorte=[], perdaMot={}, porDia={};
+  while(g++<14){
+    const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=all_not_deleted&sort=update_time%20DESC&start=${start}&limit=500&api_token=${TK}`);
     const rows=d.data||[]; let stop=false;
     for(const x of rows){
-      const dia=rdrDiaBRT(x.add_time);
-      if(dia==null) continue;
-      if(dia<from){ stop=true; continue; }   // sorted desc → passou do início do período
-      if(dia>to) continue;
-      if(pipes && !pipes.has(Number(x.pipeline_id))) continue;
-      total++; porDia[dia]=(porDia[dia]||0)+1;
+      const upd=rdrDiaBRT(x.update_time);
+      if(upd&&upd<from){ stop=true; continue; }
+      if(Number(x.pipeline_id)!==pipe) continue;
+      const add=rdrDiaBRT(x.add_time), won=rdrDiaBRT(x.won_time), lost=rdrDiaBRT(x.lost_time), mov=rdrDiaBRT(x.stage_change_time);
+      const ult=x.last_activity_date||null;
+      if(!(inP(add)||inP(won)||inP(lost)||inP(mov)||inP(ult))) continue;
+      tocados++;
+      const lvl = x.status==='won' ? 99 : rdrLvl(pipe,x.stage_id);
+      if(inP(add)){ entradas++; porDia[add]=(porDia[add]||0)+1; coorte.push(lvl); }
+      if(inP(won)){ ganhos++; valorGanho+=(x.value||0); }
+      if(inP(lost)){ perdidos++; const m=String(x.lost_reason||'').trim()||'não informado'; perdaMot[m]=(perdaMot[m]||0)+1; }
+      if(inP(mov)&&!inP(add)) avancaram++;
+      if(F.noshow&&Number(x.stage_id)===F.noshow) noshow++;
     }
     const pg=(d.additional_data||{}).pagination||{};
-    if(stop || !pg.more_items_in_collection) break;
+    if(stop||!pg.more_items_in_collection) break;
     start=pg.next_start;
   }
-  return {total,porDia};
+  // Funil da COORTE (só os cards que entraram no período) — cada etapa conta quem chegou nela OU passou dela.
+  const funil=(F.steps||[]).map(([lab,lvl])=>({lab,n:coorte.filter(l=>l>=lvl).length}));
+  const topPerda=Object.entries(perdaMot).sort((a,b)=>b[1]-a[1])[0]||null;
+  return {tocados,entradas,avancaram,ganhos,valorGanho:Math.round(valorGanho),perdidos,noshow,funil,porDia,
+          topPerda:topPerda?{motivo:topPerda[0],n:topPerda[1]}:null};
 }
+
+// Varredura B — saúde da CARTEIRA ABERTA hoje (independe do filtro de período; é foto do agora).
+// Fundamentos medidos: todo card tem próximo passo agendado? card está parado na mesma etapa?
+async function rdrCarteira(uid,TK,pipe){
+  let start=0,g=0,total=0,semPasso=0,par14=0,par30=0,valor=0; const porEtapa={};
+  const hoje=Date.now();
+  while(g++<8){
+    const d=await rdrPJ(`${V1}/deals?user_id=${uid}&status=open&start=${start}&limit=500&api_token=${TK}`);
+    for(const x of (d.data||[])){
+      if(Number(x.pipeline_id)!==pipe) continue;
+      total++; valor+=(x.value||0);
+      if(!x.next_activity_date) semPasso++;
+      const t=parseData(x.stage_change_time||x.add_time);
+      if(t!=null){ const dias=Math.floor((hoje-t)/86400000); if(dias>=30)par30++; else if(dias>=14)par14++; }
+      const lab=rdrNome(pipe,x.stage_id); porEtapa[lab]=(porEtapa[lab]||0)+1;
+    }
+    const pg=(d.additional_data||{}).pagination||{};
+    if(!pg.more_items_in_collection) break;
+    start=pg.next_start;
+  }
+  const etapas=Object.entries(porEtapa).map(([lab,n])=>({lab,n})).sort((a,b)=>b.n-a.n);
+  return {total,semPasso,par14,par30,valor:Math.round(valor),etapas};
+}
+
 async function handleRadar(req,res,TK){
   try{
     const u=new URL(req.url,'http://localhost'); const now=new Date();
@@ -88,30 +143,28 @@ async function handleRadar(req,res,TK){
     let callMap={}; try{const sm=await rdrPJ(RDR_N8N);(sm.vendedores||[]).forEach(v=>{callMap[(v.vendedor_email||'').toLowerCase()]=v;});}catch(e){}
     const RDR_USERCFG=await getUserCfg();
     const out=await Promise.all(RDR_SELLERS.map(async s=>{
-      const gan=await rdrGanhos(s.id,from,to,TK).catch(()=>({count:0,value:0,arr:0}));
-      // Cards abertos = deals criados por este owner nos funis de venda (CA=7 + Copiloto=2), por dia.
-      // Meta/dia vem do perfil (users.json → metaCardsDia), setada em Gerenciar Usuário.
-      const cab=await rdrCardsAbertos(s.id,from,to,TK,new Set([s.pipe])).catch(()=>({total:0,porDia:{}}));
+      const per=await rdrPeriodo(s.id,from,to,TK,s.pipe).catch(()=>({tocados:0,entradas:0,avancaram:0,ganhos:0,valorGanho:0,perdidos:0,noshow:0,funil:[],porDia:{},topPerda:null}));
+      const car=await rdrCarteira(s.id,TK,s.pipe).catch(()=>({total:0,semPasso:0,par14:0,par30:0,valor:0,etapas:[]}));
       const cfg=RDR_USERCFG[(RDR_EMAIL[s.id]||'').toLowerCase()]||{metaCardsDia:0};
       const metaCards=cfg.metaCardsDia>0?cfg.metaCardsDia*du:null;
-      const kCards={lab:'Cards abertos',real:cab.total,meta:metaCards,un:'',per:cfg.metaCardsDia>0?('meta '+cfg.metaCardsDia+'/dia'):'sem meta/dia',fmt:'num'};
+      const kCards={lab:'Cards abertos',real:per.entradas,meta:metaCards,un:'',per:cfg.metaCardsDia>0?('meta '+cfg.metaCardsDia+'/dia'):'sem meta/dia',fmt:'num'};
+      // Faturamento ARR saiu do Radar (vive no Dashboard). Atividades concluídas e Reuniões agendadas
+      // saíram por já existirem nos insights do Pipedrive. Sobra o que é resultado e ritmo de entrada.
       let kpis=[];
       if(s.squad==='Captação Ativa'){ kpis=[
-        {lab:'Faturamento ARR',real:gan.arr,meta:160000,un:'R$',per:'super meta · mês',fmt:'money'},
-        {lab:'Contratos ganhos',real:gan.count,meta:null,un:'',per:'período',fmt:'num'},
+        {lab:'Contratos ganhos',real:per.ganhos,meta:null,un:'',per:'período',fmt:'num'},
         kCards,
         {lab:'Aderência reunião 30min',real:null,meta:null,un:'',per:'a definir (manual)',fmt:'num'} ]; }
       else if(s.squad==='Copiloto'){ kpis=[
-        {lab:'Novos contratos',real:gan.count,meta:2*semanas,un:'',per:'meta '+semanas+' sem',fmt:'num'},
-        {lab:'Faturamento ARR',real:gan.arr,meta:null,un:'R$',per:'período',fmt:'money'},
+        {lab:'Novos contratos',real:per.ganhos,meta:2*semanas,un:'',per:'meta '+semanas+' sem',fmt:'num'},
         kCards ];
         if(s.novo) kpis.push({lab:'Carteira antiga redistribuída',real:null,meta:null,un:'leads',per:'a definir (manual)',fmt:'num'}); }
-      else { const at=await rdrAtiv(s.id,from,to,TK).catch(()=>null); kpis=[
-        {lab:'Atividades concluídas',real:at,meta:100*du,un:'',per:'meta '+du+' dias úteis',fmt:'num'},
-        kCards,
-        {lab:'Reuniões agendadas',real:null,meta:8*semanas,un:'',per:'a definir',fmt:'num'} ]; }
+      else { const qual=(per.funil.find(f=>f.lab==='Qualificado')||{}).n; kpis=[
+        {lab:'Leads qualificados',real:qual==null?null:qual,meta:null,un:'',per:'da entrada do período · meta a definir',fmt:'num'},
+        kCards ]; }
       const call=callMap[(RDR_EMAIL[s.id]||'').toLowerCase()]||null;
-      return {...s,email:(RDR_EMAIL[s.id]||null),cards:{total:cab.total,porDia:cab.porDia,metaDia:cfg.metaCardsDia||0},kpis,call:call?{n:call.n_calls,overall:call.overall,dims:(call.dims||[]).map(d=>[d.name,d.score]),talk_ratio:call.talk_ratio_medio,ultimas:call.ultimas}:null};
+      return {...s,email:(RDR_EMAIL[s.id]||null),kpis,periodo:per,carteira:car,
+        call:call?{n:call.n_calls,overall:call.overall,dims:(call.dims||[]).map(d=>[d.name,d.score]),talk_ratio:call.talk_ratio_medio,ultimas:call.ultimas}:null};
     }));
     res.setHeader('Cache-Control','s-maxage=120, stale-while-revalidate=300');
     res.status(200).json({gerado_em:new Date().toISOString(),periodo:{from,to,dias_uteis:du,semanas},vendedores:out});
