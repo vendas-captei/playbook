@@ -21,11 +21,7 @@ const { fsRead, fsWrite } = require("../lib/fscache");
 // LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
 // primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
 async function ecLegacyRead(key) {
-  if (!EC_ID || !EC_READ) return null;
-  try {
-    const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/${key}?token=${EC_READ}`, { cache: "no-store" });
-    return r.ok ? await r.json() : null;
-  } catch (_) { return null; }
+  return null;   // Edge Config desativado: morre junto com a conta Vercel. Cache = Firestore.
 }
 
 async function cacheRead(pid) {

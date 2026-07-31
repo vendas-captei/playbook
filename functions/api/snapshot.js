@@ -25,18 +25,9 @@ const { fsRead } = require("../lib/fscache");
 // LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
 // primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
 async function snapshotDaily() {
-  const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
   const vivo = {};
   for (const pid of FUNIS) {
-    // Firestore primeiro; Edge Config só como fallback de leitura (migração 29/07/2026).
-    let v = await fsRead(`daily${pid}`);
-    if (v === null && EC_ID && EC_READ) {
-      try {
-        const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/daily${pid}?token=${EC_READ}`, { cache: "no-store" });
-        v = r.ok ? await r.json() : null;
-      } catch (_) { v = null; }
-    }
-    vivo[pid] = v || {};
+    vivo[pid] = (await fsRead(`daily${pid}`)) || {};
   }
   const arq = (await readJson(DAILY_PATH)) || { _meta: {} };
   let dias = 0;
@@ -75,11 +66,10 @@ async function snapshotFilters() {
 }
 
 function baseUrl(req) {
-  // Usa o host da requisição (domínio de produção — sem deployment protection).
-  // VERCEL_URL (URL do deploy) é protegida e devolve HTML de login → não serve p/ fetch interno.
+  // Usa o host da requisição. Fallback = Firebase Hosting (a Vercel está sendo desligada).
   const host = req.headers["x-forwarded-host"] || req.headers.host;
   if (host) return `https://${host}`;
-  return "https://playbook-comercial-captei.vercel.app";
+  return "https://playbook-comercial-18c7a.web.app";
 }
 
 async function getMetrics(base, pid, month) {

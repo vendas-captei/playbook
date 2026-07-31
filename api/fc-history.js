@@ -13,8 +13,7 @@ const V2 = "https://api.pipedrive.com/api/v2";
 const WINDOW = "2026-05-01";        // início da janela (igual ao script de backfill)
 const PIPES = [7, 2];               // Captação Ativa (7) + IA Copiloto (2)
 
-// Edge Config (mesmo padrão do metrics.js) — overlay ao vivo da acurácia.
-const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
+// Overlay ao vivo da acurácia (mesmo padrão do metrics.js), no cache Firestore.
 const { fsRead, fsWrite } = require("../lib/fscache");
 
 // Cache migrado do Vercel Edge Config para o Firestore em 29/07/2026: o plano free do Edge
@@ -32,11 +31,7 @@ async function loadJson(path, tok) {
 }
 
 async function ecRead(key) {
-  const v = await fsRead(key);
-  if (v !== null) return v;
-  if (!EC_ID || !EC_READ) return null;
-  try { const r = await fetch(`https://edge-config.vercel.com/${EC_ID}/item/${key}?token=${EC_READ}`, { cache: "no-store" }); return r.ok ? await r.json() : null; }
-  catch (_) { return null; }
+  return await fsRead(key);
 }
 async function ecWrite(key, value) {
   return await fsWrite(key, value);
@@ -170,10 +165,12 @@ module.exports = async function handler(req, res) {
         const persisted = await ecWrite("accLive", ov);            // best-effort (Edge Config Hobby = 250/mês)
         const merged = applyOverlay(base, ov);
         merged._meta = Object.assign({}, merged._meta, { refresh_persisted: persisted });
-        // Persistência DURÁVEL (rebuild diário do base): commita o mesclado no JSON do repo.
-        // Autorizado só p/ o Vercel Cron (header x-vercel-cron) ou chamada c/ key=SNAPSHOT_KEY.
+        // Persistência DURÁVEL (rebuild diário do base): grava o mesclado no store.
+        // Autorizado para: Cloud Scheduler (req.internal, vindo do cronFcHistory em functions/index.js),
+        // chamada com key=SNAPSHOT_KEY, ou o Vercel Cron legado (header x-vercel-cron) enquanto existir.
         const wantPersist = u.searchParams.get("persist") === "1";
-        const authed = req.headers["x-vercel-cron"] || (process.env.SNAPSHOT_KEY && u.searchParams.get("key") === process.env.SNAPSHOT_KEY);
+        const authed = req.internal || req.headers["x-vercel-cron"] ||
+          (process.env.SNAPSHOT_KEY && u.searchParams.get("key") === process.env.SNAPSHOT_KEY);
         if (wantPersist && authed) {
           const commitObj = JSON.parse(JSON.stringify(merged));
           // Avança o congelamento p/ HOJE: fixa o previsto de hoje (capturado no início do dia) p/ sempre.

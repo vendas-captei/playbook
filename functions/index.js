@@ -70,14 +70,20 @@ exports.cronFcHistory = onSchedule(
       return;
     }
 
+    // `internal: true` autoriza a persistência durável em api/fc-history.js. Antes o guard aceitava
+    // só o header `x-vercel-cron` (Vercel Cron) ou ?key=SNAPSHOT_KEY — nenhum dos dois existe aqui,
+    // então o cron rodaria e devolveria 200 SEM gravar nada.
+    // `url` é necessário: o handler lê os parâmetros com new URL(req.url), não com req.query.
     const mockReq = {
       method: "GET",
+      url: "/api/fc-history?dataset=accuracy&refresh=1&persist=1",
       query: {
         dataset: "accuracy",
         refresh: "1",
         persist: "1",
       },
       headers: {},
+      internal: true,
     };
 
     const mockRes = {
