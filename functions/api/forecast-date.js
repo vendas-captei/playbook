@@ -10,34 +10,23 @@
 const V1 = "https://api.pipedrive.com/v1";
 const MODEL = "claude-sonnet-4-6"; // validado nesta conta; aceita params padrão
 
-// ── Repo (GitHub) como store do log da calculadora — padrão de api/fccommit.js ──
-const OWNER = "vendas-captei", REPO = "playbook", LOG_PATH = "data/forecast-log.json";
-const LOG_GH = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${LOG_PATH}`;
-const ghHeaders = (tok) => ({ Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" });
+// ── Firestore (`store`/`data__forecast-log`) como store do log da calculadora ──
+// Antes era um arquivo no repo, gravado via GitHub Contents API: cada cálculo virava commit e duas
+// gravações simultâneas colidiam em 409 de sha (daí o retry abaixo). Ver lib/store.js.
+const { readJson, writeJson, readBody } = require("../lib/store");
+const LOG_PATH = "data/forecast-log.json";
+const LOG_VAZIO = { _meta: { desc: "Log Calculadora Data de Fechamento (IA)" }, registros: [] };
 
 async function logRead(tok) {
-  const r = await fetch(LOG_GH, { headers: ghHeaders(tok), cache: "no-store" });
-  if (r.status === 404) return { data: { _meta: { desc: "Log Calculadora Data de Fechamento (IA)" }, registros: [] }, sha: null };
-  if (!r.ok) throw new Error(`GitHub ${r.status} ao ler forecast-log`);
-  const j = await r.json();
-  return { data: JSON.parse(Buffer.from(j.content.replace(/\n/g, ""), "base64").toString("utf8") || "{}"), sha: j.sha };
+  return { data: (await readJson(LOG_PATH)) || { ...LOG_VAZIO }, sha: null };
 }
-// Lê → aplica mutate(data) → grava; re-tenta 1x em 409 (conflito de sha por gravação concorrente).
+// Lê → aplica mutate(data) → grava. O `tok` e o `msg` seguem na assinatura só p/ não mexer nas chamadas.
 async function logMutate(tok, mutate, msg) {
-  for (let i = 0; i < 2; i++) {
-    const { data, sha } = await logRead(tok);
-    mutate(data);
-    data._meta = data._meta || {}; data._meta.updatedAt = new Date().toISOString();
-    const content = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
-    const r = await fetch(LOG_GH, {
-      method: "PUT", headers: { ...ghHeaders(tok), "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg, content, ...(sha ? { sha } : {}) }),
-    });
-    if (r.ok) return true;
-    if (r.status === 409) continue;
-    throw new Error(`GitHub PUT ${r.status}: ${(await r.text()).slice(0, 150)}`);
-  }
-  return false;
+  const { data } = await logRead(tok);
+  mutate(data);
+  data._meta = data._meta || {}; data._meta.updatedAt = new Date().toISOString();
+  await writeJson(LOG_PATH, data);
+  return true;
 }
 
 function pd(url, TK) {
@@ -85,15 +74,15 @@ async function callClaude(KEY, prompt) {
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") { res.status(405).end(); return; }
-  const TK = process.env.PIPEDRIVE_API_TOKEN, KEY = process.env.ANTHROPIC_API_KEY, GTOK = process.env.GITHUB_TOKEN;
+  // GTOK era o GITHUB_TOKEN; o log agora vai pro Firestore e a assinatura de logRead/logMutate
+  // mantém o parâmetro só para não mexer nas chamadas. Ver lib/store.js.
+  const TK = process.env.PIPEDRIVE_API_TOKEN, KEY = process.env.ANTHROPIC_API_KEY, GTOK = null;
   if (!TK || !KEY) { res.status(500).json({ error: "PIPEDRIVE_API_TOKEN ou ANTHROPIC_API_KEY ausente na Vercel" }); return; }
   try {
-    let body = ""; await new Promise((r) => { req.on("data", (c) => (body += c)); req.on("end", r); });
-    const b = JSON.parse(body || "{}");
+    const b = await readBody(req);
 
     // ── Reconciliação: previsto x realizado. Varre 'aberto', consulta Pipedrive, carimba ganho/perdido. ──
     if (b.action === "reconcile") {
-      if (!GTOK) { res.status(500).json({ error: "GITHUB_TOKEN ausente na Vercel" }); return; }
       const { data } = await logRead(GTOK);
       const regs = data.registros || [];
       const abertos = regs.filter((r) => r.status === "aberto");
@@ -235,7 +224,7 @@ Responda APENAS com JSON válido, sem markdown, neste formato:
 
     // ── Grava a previsão no log (previsto x realizado). NUNCA quebra a calculadora se falhar. ──
     try {
-      if (GTOK) {
+      {
         await logMutate(GTOK, (dd) => {
           dd.registros = dd.registros || [];
           dd.registros.push({

@@ -84,4 +84,11 @@ async function fsWrite(key, value) {
   } catch (_) { return false; }
 }
 
-module.exports = { fsRead, fsWrite, ativo: () => ATIVO };
+// `auth` é exportado para lib/store.js reusar EXATAMENTE esta autenticação (JWT RS256 na Vercel,
+// ADC/metadata dentro do GCP) sem duplicar a assinatura nem o cache de token de 1h.
+// Diferença de contrato: fsRead/fsWrite (cache) engolem erro; store.js PROPAGA erro de propósito,
+// porque lá o dado é fonte da verdade — falhar mudo devolveria configuração vazia como se fosse real.
+module.exports = {
+  fsRead, fsWrite, ativo: () => ATIVO,
+  auth: { token, projectId: () => PROJECT_ID, ativo: () => ATIVO },
+};

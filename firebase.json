@@ -12,7 +12,15 @@
       "vercel.json",
       "api/**",
       "lib/**",
-      "users.json"
+      "users.json",
+      "metas.json",
+      "params.json",
+      "fccommit.json",
+      "fcparams.json",
+      "data/history.json",
+      "data/forecast-*.json",
+      "data/filters.json",
+      "data/daily.json"
     ],
     "rewrites": [
       {

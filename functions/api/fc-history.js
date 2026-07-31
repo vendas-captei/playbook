@@ -23,14 +23,12 @@ const { fsRead, fsWrite } = require("../lib/fscache");
 // LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
 // primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
 
+// Datasets do Forecast agora vivem no Firestore (coleção `store`) — antes eram arquivos no repo,
+// e este endpoint COMMITAVA a cada rebuild diário do cron. Ver lib/store.js.
+// A assinatura mantém `tok` só para não mexer nas dezenas de chamadas; ele não é mais usado.
+const { readJson, writeJson } = require("../lib/store");
 async function loadJson(path, tok) {
-  if (!tok) return {};
-  const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-    headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" }, cache: "no-store",
-  });
-  if (r.ok) { const j = await r.json(); return JSON.parse(Buffer.from(j.content.replace(/\n/g, ""), "base64").toString("utf8") || "{}"); }
-  if (r.status === 404) return {};
-  throw new Error(`GitHub ${r.status}`);
+  return (await readJson(path)) || {};
 }
 
 async function ecRead(key) {
@@ -44,20 +42,11 @@ async function ecWrite(key, value) {
   return await fsWrite(key, value);
 }
 
-// Commit de um objeto JSON num arquivo do repo via GitHub API (reflete na hora no loadJson).
+// Persiste o dataset no store (reflete na hora no loadJson). Nome mantido por compatibilidade com
+// as chamadas existentes; não commita mais nada no GitHub. `msg` e `tok` ficam sem uso.
 async function ghPut(path, obj, tok, msg) {
-  if (!tok) return false;
   try {
-    const cur = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-      headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" }, cache: "no-store",
-    });
-    const sha = cur.ok ? (await cur.json()).sha : undefined;
-    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp", "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg, content: Buffer.from(JSON.stringify(obj)).toString("base64"), sha }),
-    });
-    return r.ok;
+    return await writeJson(path, obj);
   } catch (_) { return false; }
 }
 

@@ -10,9 +10,14 @@
 // O snapshot é refrescado pelo cron (api/snapshot.js). Ver data/filters.json.
 const V1 = "https://api.pipedrive.com/v1";
 
-// Snapshot commitado (fonte de fallback). Ver data/filters.json.
-let CACHE = null;
-try { CACHE = require("../data/filters.json"); } catch (_) { CACHE = null; }
+// Snapshot do Firestore (`store`/`data__filters`), gravado por api/snapshot.js. O require do arquivo
+// do repo continua como último fallback: ele é resolvido uma única vez no load do módulo e agora
+// serve dado congelado, então só vale quando o Firestore está fora. Ver lib/store.js.
+const { readJsonCached } = require("../lib/store");
+let CACHE_SEED = null;
+try { CACHE_SEED = require("../data/filters.json"); } catch (_) { CACHE_SEED = null; }
+const getCache = () => readJsonCached("data/filters.json", 300000, CACHE_SEED);
+const usavel = (c) => !!(c && Array.isArray(c.funis) && c.funis.length);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -34,16 +39,19 @@ module.exports = async function handler(req, res) {
 
   // Boot do dashboard: ?src=cache serve o snapshot commitado direto — ZERO Pipedrive.
   // Política sob demanda (2026-07-15): só o botão "Atualizar" pode tocar o Pipedrive.
-  if (/[?&]src=cache(&|$)/.test(req.url || "") && CACHE && Array.isArray(CACHE.funis) && CACHE.funis.length) {
-    res.setHeader("Cache-Control", "no-store");
-    res.status(200).json({
-      funis: CACHE.funis,
-      usuarios: CACHE.usuarios || [],
-      stale: true,
-      fromCache: true,
-      atualizadoEm: (CACHE._meta && CACHE._meta.atualizado_em) || null,
-    });
-    return;
+  if (/[?&]src=cache(&|$)/.test(req.url || "")) {
+    const CACHE = await getCache();
+    if (usavel(CACHE)) {
+      res.setHeader("Cache-Control", "no-store");
+      res.status(200).json({
+        funis: CACHE.funis,
+        usuarios: CACHE.usuarios || [],
+        stale: true,
+        fromCache: true,
+        atualizadoEm: (CACHE._meta && CACHE._meta.atualizado_em) || null,
+      });
+      return;
+    }
   }
 
   try {
@@ -64,8 +72,9 @@ module.exports = async function handler(req, res) {
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=86400");
     res.status(200).json({ funis, usuarios, stale: false });
   } catch (e) {
-    // Fallback: serve o snapshot commitado — o dashboard não depende da API estar de pé.
-    if (CACHE && Array.isArray(CACHE.funis) && CACHE.funis.length) {
+    // Fallback: serve o snapshot guardado — o dashboard não depende da API estar de pé.
+    const CACHE = await getCache();
+    if (usavel(CACHE)) {
       res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=86400");
       res.status(200).json({
         funis: CACHE.funis,

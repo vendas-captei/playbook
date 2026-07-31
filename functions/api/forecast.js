@@ -98,17 +98,13 @@ function buildForecastSemanal(open, probById) {
   return { semanas, semData: Math.round(semData) };
 }
 
-// Carrega probabilidades salvas (fcparams.json no repo) e mescla sobre os defaults. Sem token/arquivo → só defaults.
+// Carrega probabilidades salvas (Firestore `store`/`fcparams`, gravadas por api/fcparams.js) e
+// mescla sobre os defaults. Store fora do ar → só defaults (o forecast nunca deixa de responder).
+const { readJsonCached } = require("../lib/store");
 async function loadProbs(pipelineId) {
   const base = { ...(PROB_DEFAULT[pipelineId] || {}) };
-  const tok = process.env.GITHUB_TOKEN;
-  if (!tok) return base;
   try {
-    const GH = `https://api.github.com/repos/vendas-captei/playbook/contents/fcparams.json`;
-    const r = await fetch(GH, { headers: { Authorization: `Bearer ${tok}`, Accept: "application/vnd.github+json", "User-Agent": "PlaybookApp" }, cache: "no-store" });
-    if (!r.ok) return base;
-    const j = await r.json();
-    const saved = JSON.parse(Buffer.from(j.content.replace(/\n/g, ""), "base64").toString("utf8") || "{}");
+    const saved = (await readJsonCached("fcparams.json", 60000, null)) || {};
     return { ...base, ...(saved[pipelineId] || {}) };
   } catch (_) { return base; }
 }

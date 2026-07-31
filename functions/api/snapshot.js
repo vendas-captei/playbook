@@ -1,11 +1,12 @@
-// Congela o cenário mensal no data/history.json (commit via API do GitHub).
+// Congela o cenário mensal no Firestore (coleção `store`, doc `data__history`).
 // Uso: GET /api/snapshot?key=<SNAPSHOT_KEY>[&month=YYYY-MM]
 //   - default month = mês ANTERIOR ao atual (roda no dia 1 via cron n8n).
 //   - MQL/Venda/Faturamento vêm do /api/metrics do mês-alvo (carimbos imutáveis).
 //   - SQL/OPP vêm do /api/metrics do mês CORRENTE (foto do estoque de pipeline = estado de fim de mês).
 //   - Grava para todos os funis do radar (7 e 2).
-// Protegido por SNAPSHOT_KEY (env). Requer GITHUB_TOKEN (env, já existe no projeto).
-const REPO = "vendas-captei/playbook";
+// Protegido por SNAPSHOT_KEY (env). Não commita mais no repo: antes cada execução gerava um commit
+// (e com Vercel + Firebase rodando em paralelo, conflito de sha). Ver lib/store.js.
+const { readJson, writeJson } = require("../lib/store");
 const PATH = "data/history.json";
 const FC_PATH = "data/forecast-history.json";
 const FILTERS_PATH = "data/filters.json";
@@ -23,7 +24,7 @@ const { fsRead } = require("../lib/fscache");
 // foto velha). Firestore free tier = 20.000 escritas/DIA.
 // LEITURA: Firestore primeiro, com fallback no Edge Config (a foto antiga segue legível até a
 // primeira gravação nova). ESCRITA: só Firestore — as escritas do Edge Config estão mortas.
-async function snapshotDaily(ghHeaders) {
+async function snapshotDaily() {
   const EC_ID = process.env.EDGE_CONFIG_ID, EC_READ = process.env.EDGE_CONFIG_READ_TOKEN;
   const vivo = {};
   for (const pid of FUNIS) {
@@ -37,28 +38,20 @@ async function snapshotDaily(ghHeaders) {
     }
     vivo[pid] = v || {};
   }
-  const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${DAILY_PATH}`, { headers: ghHeaders });
-  let arq = { _meta: {} }, sha;
-  if (getR.ok) { const j = await getR.json(); sha = j.sha; try { arq = JSON.parse(Buffer.from(j.content, "base64").toString("utf8")); } catch (_) { arq = { _meta: {} }; } }
-  else if (getR.status !== 404) throw new Error(`GitHub GET daily ${getR.status}`);
+  const arq = (await readJson(DAILY_PATH)) || { _meta: {} };
   let dias = 0;
   for (const pid of FUNIS) {
     arq[pid] = arq[pid] || {};
     for (const data in (vivo[pid] || {})) { arq[pid][data] = vivo[pid][data]; dias++; }
   }
   arq._meta = arq._meta || {}; arq._meta.atualizado_em = new Date().toISOString().slice(0, 10);
-  const novo = Buffer.from(JSON.stringify(arq, null, 2) + "\n", "utf8").toString("base64");
-  const putR = await fetch(`https://api.github.com/repos/${REPO}/contents/${DAILY_PATH}`, {
-    method: "PUT", headers: ghHeaders,
-    body: JSON.stringify({ message: `snapshot diário: ${dias} registro(s) dia×funil`, content: novo, ...(sha ? { sha } : {}) }),
-  });
-  if (!putR.ok) throw new Error(`GitHub PUT daily ${putR.status}`);
+  await writeJson(DAILY_PATH, arq);
   return dias;
 }
 
 // Refresca o snapshot de filtros (funis + usuários ativos) commitado no repo.
 // É o fallback de api/filters.js — mantém o painel de pé quando o token estoura no Cloudflare.
-async function snapshotFilters(ghHeaders) {
+async function snapshotFilters() {
   const PD = process.env.PIPEDRIVE_API_TOKEN;
   if (!PD) return false;
   const V1 = "https://api.pipedrive.com/v1";
@@ -77,16 +70,7 @@ async function snapshotFilters(ghHeaders) {
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   if (!funis.length) throw new Error("0 funis — abortando (não sobrescreve snapshot bom)");
   const payload = { funis, usuarios, _meta: { atualizado_em: new Date().toISOString().slice(0, 10), fonte: "snapshot-cron" } };
-  const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILTERS_PATH}`, { headers: ghHeaders });
-  let sha;
-  if (getR.ok) sha = (await getR.json()).sha;
-  else if (getR.status !== 404) throw new Error(`GitHub GET filters ${getR.status}`);
-  const novo = Buffer.from(JSON.stringify(payload, null, 2) + "\n", "utf8").toString("base64");
-  const putR = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILTERS_PATH}`, {
-    method: "PUT", headers: ghHeaders,
-    body: JSON.stringify({ message: `snapshot filtros: ${funis.length} funis, ${usuarios.length} usuários`, content: novo, ...(sha ? { sha } : {}) }),
-  });
-  if (!putR.ok) throw new Error(`GitHub PUT filters ${putR.status}`);
+  await writeJson(FILTERS_PATH, payload);
   return true;
 }
 
@@ -120,11 +104,8 @@ async function getForecast(base, pid, month) {
 // Congela o Forecast no data/forecast-history.json. Mesmo cron do Tracking.
 // - forecastInicial: foto do forecast do mês CORRENTE (o que prevemos) — só pode ser capturada ao vivo.
 // - fechamento: indicadores do mês-alvo (anterior) — win/lost são carimbos imutáveis, recuperáveis.
-async function snapshotForecast(base, ghHeaders, monthAlvo, monthAtual) {
-  const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${FC_PATH}`, { headers: ghHeaders });
-  let hist = { _meta: {} }, sha;
-  if (getR.ok) { const j = await getR.json(); sha = j.sha; hist = JSON.parse(Buffer.from(j.content, "base64").toString("utf8")); }
-  else if (getR.status !== 404) throw new Error(`GitHub GET fc ${getR.status}`);
+async function snapshotForecast(base, monthAlvo, monthAtual) {
+  const hist = (await readJson(FC_PATH)) || { _meta: {} };
   const hoje = new Date().toISOString().slice(0, 10);
 
   for (const pid of FUNIS) {
@@ -152,12 +133,7 @@ async function snapshotForecast(base, ghHeaders, monthAlvo, monthAtual) {
     } catch (_) { /* best-effort */ }
   }
   hist._meta = hist._meta || {}; hist._meta.atualizado_em = hoje;
-  const novo = Buffer.from(JSON.stringify(hist, null, 2) + "\n", "utf8").toString("base64");
-  const putR = await fetch(`https://api.github.com/repos/${REPO}/contents/${FC_PATH}`, {
-    method: "PUT", headers: ghHeaders,
-    body: JSON.stringify({ message: `snapshot forecast: ${monthAtual} (prev) + ${monthAlvo} (fech)`, content: novo, ...(sha ? { sha } : {}) }),
-  });
-  if (!putR.ok) throw new Error(`GitHub PUT fc ${putR.status}: ${await putR.text()}`);
+  await writeJson(FC_PATH, hist);
   return hist;
 }
 
@@ -180,20 +156,17 @@ module.exports = async function handler(req, res) {
     res.status(401).json({ error: "unauthorized" });
     return;
   }
-  const GH = process.env.GITHUB_TOKEN;
-  if (!GH) { res.status(500).json({ error: "GITHUB_TOKEN ausente" }); return; }
-  const ghHeaders0 = { Authorization: `Bearer ${GH}`, Accept: "application/vnd.github+json", "User-Agent": "captei-playbook" };
 
   // Atalho leve: só refresca o fallback dos filtros (2 chamadas). GET /api/snapshot?key=…&only=filters
   if (u.searchParams.get("only") === "filters") {
-    try { const ok = await snapshotFilters(ghHeaders0); res.status(200).json({ ok, only: "filters" }); }
+    try { const ok = await snapshotFilters(); res.status(200).json({ ok, only: "filters" }); }
     catch (e) { res.status(500).json({ error: e.message }); }
     return;
   }
 
   // Atalho leve: flush do registro diário (Edge Config) → data/daily.json. GET /api/snapshot?key=…&only=daily
   if (u.searchParams.get("only") === "daily") {
-    try { const dias = await snapshotDaily(ghHeaders0); res.status(200).json({ ok: true, only: "daily", dias }); }
+    try { const dias = await snapshotDaily(); res.status(200).json({ ok: true, only: "daily", dias }); }
     catch (e) { res.status(500).json({ error: e.message }); }
     return;
   }
@@ -241,17 +214,8 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // Lê history.json atual (sha) e mescla.
-    const ghHeaders = { Authorization: `Bearer ${GH}`, Accept: "application/vnd.github+json", "User-Agent": "captei-playbook" };
-    const getR = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, { headers: ghHeaders });
-    let hist = {}, sha = undefined;
-    if (getR.ok) {
-      const j = await getR.json();
-      sha = j.sha;
-      hist = JSON.parse(Buffer.from(j.content, "base64").toString("utf8"));
-    } else if (getR.status !== 404) {
-      throw new Error(`GitHub GET ${getR.status}`);
-    }
+    // Lê o histórico atual do store e mescla.
+    const hist = (await readJson(PATH)) || {};
 
     for (const pid of FUNIS) {
       hist[pid] = hist[pid] || {};
@@ -259,15 +223,9 @@ module.exports = async function handler(req, res) {
     }
     if (hist._meta) hist._meta.atualizado_em = new Date().toISOString().slice(0, 10);
 
-    const novo = Buffer.from(JSON.stringify(hist, null, 2) + "\n", "utf8").toString("base64");
-    const putR = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
-      method: "PUT",
-      headers: ghHeaders,
-      body: JSON.stringify({ message: `snapshot: congela ${month} (funis ${FUNIS.join(",")})`, content: novo, sha }),
-    });
-    if (!putR.ok) throw new Error(`GitHub PUT ${putR.status}: ${await putR.text()}`);
+    await writeJson(PATH, hist);
 
-    // Recalcula a conversão MEDIDA (novo deal→venda) com trailing dos últimos 6 meses e grava em params.json.
+    // Recalcula a conversão MEDIDA (novo deal→venda) com trailing dos últimos 6 meses e grava em params.
     let convLeadVenda = null;
     try {
       const meses = Object.keys(hist["7"] || {}).filter((k) => /^\d{4}-\d{2}$/.test(k)).sort().slice(-6);
@@ -276,14 +234,9 @@ module.exports = async function handler(req, res) {
       const rate = sL > 0 ? sV / sL : null;
       if (rate && rate >= 0.05 && rate <= 0.6) {
         convLeadVenda = Math.round(rate * 100) / 100;
-        const pGet = await fetch(`https://api.github.com/repos/${REPO}/contents/params.json`, { headers: ghHeaders });
-        if (pGet.ok) {
-          const pj = await pGet.json();
-          const params = JSON.parse(Buffer.from(pj.content, "base64").toString("utf8"));
-          params["7"] = { ...(params["7"] || {}), convLeadVenda };
-          const pc = Buffer.from(JSON.stringify(params, null, 2) + "\n", "utf8").toString("base64");
-          await fetch(`https://api.github.com/repos/${REPO}/contents/params.json`, { method: "PUT", headers: ghHeaders, body: JSON.stringify({ message: `snapshot: convLeadVenda=${Math.round(rate * 100)}%`, content: pc, sha: pj.sha }) });
-        }
+        const params = (await readJson("params.json")) || {};
+        params["7"] = { ...(params["7"] || {}), convLeadVenda };
+        await writeJson("params.json", params);
       }
     } catch (_) { /* best-effort */ }
 
@@ -292,13 +245,13 @@ module.exports = async function handler(req, res) {
     try {
       const now2 = new Date();
       const monthAtual = `${now2.getUTCFullYear()}-${String(now2.getUTCMonth() + 1).padStart(2, "0")}`;
-      await snapshotForecast(base, ghHeaders, month, monthAtual);
+      await snapshotForecast(base, month, monthAtual);
       forecastOk = true;
     } catch (e) { /* forecast é best-effort; não derruba o snapshot do Tracking */ }
 
     // Refresca o fallback dos filtros (best-effort; não derruba o snapshot do Tracking).
     let filtersOk = false;
-    try { filtersOk = await snapshotFilters(ghHeaders); } catch (_) {}
+    try { filtersOk = await snapshotFilters(); } catch (_) {}
 
     res.status(200).json({ ok: true, month, registros, convLeadVenda, forecastOk, filtersOk });
   } catch (e) {

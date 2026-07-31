@@ -7,18 +7,29 @@
 const V1 = "https://api.pipedrive.com/v1";
 const V2 = "https://api.pipedrive.com/api/v2";
 
-let HISTORY = {};
-try { HISTORY = require("../data/history.json"); } catch (_) { HISTORY = {}; }
+// history.json e users.json agora são gravados no Firestore (coleção `store`) — o `require` só
+// resolve o arquivo do repo UMA vez, no load do módulo, e passaria a servir dado congelado.
+// Por isso a leitura é lazy (cache de 5 min por instância) e o require fica como último fallback
+// caso o Firestore esteja indisponível: dado velho é melhor que painel derrubado. Ver lib/store.js.
+const { readJsonCached } = require("../lib/store");
+
+let HISTORY_SEED = {};
+try { HISTORY_SEED = require("../data/history.json"); } catch (_) { HISTORY_SEED = {}; }
+const getHistory = () => readJsonCached("data/history.json", 300000, HISTORY_SEED);
 
 // Config por-usuário (mesma fonte do dashboard: users.json). Usada pelo Radar p/ a meta de
 // "cards abertos por dia" (campo metaCardsDia, setado em Gerenciar Usuário). Chave = e-mail.
-let PB_USERS = [];
-try { PB_USERS = require("../users.json"); } catch (_) { PB_USERS = []; }
-const RDR_USERCFG = {};
-for (const u of (PB_USERS || [])) {
-  const em = (u.user || u.email || "").toLowerCase();
-  if (!em) continue;
-  RDR_USERCFG[em] = { metaCardsDia: parseInt(String(u.metaCardsDia || "").replace(/[^0-9]/g, "")) || 0 };
+let PB_USERS_SEED = [];
+try { PB_USERS_SEED = require("../users.json"); } catch (_) { PB_USERS_SEED = []; }
+async function getUserCfg() {
+  const users = (await readJsonCached("users.json", 300000, PB_USERS_SEED)) || [];
+  const cfg = {};
+  for (const u of users) {
+    const em = (u.user || u.email || "").toLowerCase();
+    if (!em) continue;
+    cfg[em] = { metaCardsDia: parseInt(String(u.metaCardsDia || "").replace(/[^0-9]/g, "")) || 0 };
+  }
+  return cfg;
 }
 
 // Tipos que NÃO contam como primeiro contato (automação/registro de sistema).
@@ -75,6 +86,7 @@ async function handleRadar(req,res,TK){
     const to=u.searchParams.get('to')||rdrIso(now);
     const du=rdrBiz(from,to), semanas=Math.max(1,Math.round(du/5));
     let callMap={}; try{const sm=await rdrPJ(RDR_N8N);(sm.vendedores||[]).forEach(v=>{callMap[(v.vendedor_email||'').toLowerCase()]=v;});}catch(e){}
+    const RDR_USERCFG=await getUserCfg();
     const out=await Promise.all(RDR_SELLERS.map(async s=>{
       const gan=await rdrGanhos(s.id,from,to,TK).catch(()=>({count:0,value:0,arr:0}));
       // Cards abertos = deals criados por este owner nos funis de venda (CA=7 + Copiloto=2), por dia.
@@ -330,6 +342,7 @@ module.exports = async function handler(req, res) {
     const ehMesAtual = ano === now.getFullYear() && mes === now.getMonth();
 
     // Mês fechado + visão equipe → série congelada do histórico (instantâneo).
+    const HISTORY = (await getHistory()) || {};
     const hrec = (HISTORY[pipelineId] && HISTORY[pipelineId][monthKey]) || null;
     if (!ehMesAtual && !userId && hrec && hrec.tpc) {
       res.status(200).json({ ...hrec.tpc, historico: true, atualizadoEm: new Date().toISOString() });
