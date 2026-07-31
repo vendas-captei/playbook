@@ -2346,34 +2346,13 @@ function clearSettingsModal() {
   <div class="lp-right">
     <div class="lp-form-eyebrow">Acesso restrito</div>
     <div class="lp-form-title">Boas-vindas de volta</div>
-    <div class="lp-form-sub">Entre com suas credenciais para acessar o playbook do time.</div>
+    <div class="lp-form-sub">Entre com sua conta Google da Captei para acessar o playbook do time.</div>
 
-    <div class="lp-field">
-      <label class="lp-flabel" for="login-user">E-mail</label>
-      <input class="lp-finput" id="login-user" type="email" placeholder="seu@email.com"
-        autocomplete="username"
-        onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()" />
-    </div>
-
-    <div class="lp-field">
-      <label class="lp-flabel" for="login-pass">Senha</label>
-      <div class="lp-input-wrap">
-        <input class="lp-finput has-eye" id="login-pass" type="password" placeholder="••••••••"
-          autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')AUTH.submit()" />
-        <button class="lp-eye" id="login-eye-btn" onclick="AUTH.toggleEye()" title="Mostrar senha">👁</button>
-      </div>
-    </div>
-
-    <button class="lp-btn" id="login-submit-btn" onclick="AUTH.submit()">
-      Entrar no Playbook →
-    </button>
-
-    <!-- Login com Google (Firebase Auth). Caminho preferencial: quem garante que a conta é mesmo
-         @captei.com.br é o Workspace, não o nosso código — com e-mail/senha o cadastro do Firebase
-         aceita qualquer e-mail sem verificar. A autorização (quem pode entrar) continua sendo a
-         lista de Gerenciar Usuários, em AUTH.loginGoogle(). -->
-    <div class="lp-sep"><span>ou</span></div>
+    <!-- ÚNICO caminho de entrada = Google (Firebase Auth), decisão do Natan em 31/07/2026.
+         Os campos de e-mail/senha saíram junto com o campo `pass` dos usuários: enquanto existiam,
+         as senhas trafegavam em claro no GET /api/users, que é público.
+         Quem garante que a conta é mesmo @captei.com.br é o Workspace, não o nosso código.
+         A autorização (quem pode entrar) é a lista de Gerenciar Usuários — ver AUTH.loginGoogle(). -->
     <button class="lp-btn-google" id="login-google-btn" onclick="AUTH.loginGoogle()">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.0 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.0 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C39.9 35.8 44 30.5 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
       Entrar com Google
@@ -2381,12 +2360,12 @@ function clearSettingsModal() {
 
     <div class="lp-error" id="login-error">
       <span>⚠️</span>
-      <span id="login-error-msg">E-mail ou senha incorretos.</span>
+      <span id="login-error-msg">Não foi possível entrar.</span>
     </div>
 
     <div class="lp-footer">
       Acesso exclusivo para o time Captei.<br>
-      Dúvidas? Fale com o <strong>supervisor comercial</strong>.
+      Sua conta precisa estar cadastrada. Dúvidas? Fale com o <strong>supervisor comercial</strong>.
     </div>
   </div>
 </div>
@@ -2501,10 +2480,7 @@ function clearSettingsModal() {
           </div>
         </div>
         <div class="um-row" style="margin-bottom:14px;">
-          <div>
-            <label class="um-label">Senha</label>
-            <input class="um-input" id="um-pass" type="text" placeholder="Ex: senha123" />
-          </div>
+          <!-- Sem campo de senha: entrada é só por Google. Cadastrar o e-mail JÁ é dar acesso. -->
           <div>
             <label class="um-label">Equipe</label>
             <select class="um-input" id="um-team" style="cursor:pointer;">
@@ -24204,9 +24180,10 @@ const AUTH = (() => {
      As senhas ficam em texto (arquivo local/privado).
   ──────────────────────────────────────────────────── */
   // Usuários base (admins — nunca aparecem na listagem gerenciável)
-  const BASE_USERS = [
-    { user: 'admin', pass: 'admin123', name: 'Admin', admin: true },
-  ];
+  // Vazio de propósito: o login é SÓ por Google (31/07/2026). A conta 'admin' com senha fixa que
+  // morava aqui foi removida — sem campo de senha ela não teria como entrar, e a senha era legível
+  // por qualquer um no fonte público do index.html. Quem pode entrar = lista de Gerenciar Usuários.
+  const BASE_USERS = [];
 
   // Usuários adicionados pelo painel (persistem em localStorage + sincronizam com servidor)
   const EXTRA_KEY = 'captei_pb_users';
@@ -24330,64 +24307,8 @@ const AUTH = (() => {
   }
 
   /* ── Submit login ───────────────────────────────────── */
-  async function submit() {
-    const userEl = document.getElementById('login-user');
-    const passEl = document.getElementById('login-pass');
-    const errEl  = document.getElementById('login-error');
-    const errMsg = document.getElementById('login-error-msg');
-    const btn    = document.getElementById('login-submit-btn');
-
-    const user = (userEl.value || '').trim().toLowerCase();
-    const pass = (passEl.value || '').trim();
-
-    if (!user || !pass) {
-      errMsg.textContent = 'Preencha e-mail e senha.';
-      errEl.classList.add('show');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Verificando...';
-
-    // Tenta localmente primeiro
-    let found = getAllUsers().find(u => u.user === user && u.pass === pass);
-
-    // Não encontrou localmente — sincroniza com servidor e tenta de novo
-    if (!found) {
-      btn.textContent = 'Sincronizando...';
-      await syncFromServer();
-      found = getAllUsers().find(u => u.user === user && u.pass === pass);
-    }
-
-    if (found) {
-      errEl.classList.remove('show');
-      grantAccess(found.name, found.admin, found.team);
-    } else {
-      errMsg.textContent = 'Usuário ou senha incorretos. Tente novamente.';
-      errEl.classList.add('show');
-      passEl.value = '';
-      passEl.focus();
-      const card = document.querySelector('.lp-right');
-      if (card) {
-        card.style.animation = 'none';
-        card.style.transform = 'translateX(-8px)';
-        setTimeout(() => { card.style.transform = 'translateX(8px)'; }, 80);
-        setTimeout(() => { card.style.transform = 'translateX(-4px)'; }, 160);
-        setTimeout(() => { card.style.transform = 'translateX(4px)'; }, 240);
-        setTimeout(() => { card.style.transform = 'translateX(0)'; }, 320);
-      }
-    }
-    btn.disabled = false;
-    btn.textContent = 'Entrar no Playbook →';
-  }
-
-  /* ── Toggle eye ─────────────────────────────────────── */
-  function toggleEye() {
-    const inp = document.getElementById('login-pass');
-    const btn = document.getElementById('login-eye-btn');
-    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-    else { inp.type = 'password'; btn.textContent = '👁'; }
-  }
+  /* submit() e toggleEye() removidos: eram o login por e-mail/senha. A entrada agora é só
+     AUTH.loginGoogle(). */
 
   /* ── Logout ─────────────────────────────────────────── */
   function logout() {
@@ -24485,12 +24406,6 @@ const AUTH = (() => {
 
   /* ── Init ───────────────────────────────────────────── */
   async function init() {
-    // Enter no campo de senha submete
-    const passEl = document.getElementById('login-pass');
-    const userEl = document.getElementById('login-user');
-    if (passEl) passEl.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-    if (userEl) userEl.addEventListener('keydown', e => { if (e.key === 'Enter') { passEl && passEl.focus(); } });
-
     // Checar sessão já existente (antes do sync para não bloquear re-entradas)
     const session = checkSession();
     if (session) {
@@ -24501,13 +24416,12 @@ const AUTH = (() => {
       document.body.style.overflow = 'hidden';
       // Sincroniza usuários do servidor antes de liberar o login
       await syncFromServer();
-      setTimeout(() => { const u = document.getElementById('login-user'); if(u) u.focus(); }, 100);
     }
   }
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { submit, loginGoogle, toggleEye, logout, grantAccess, loadExtra, saveExtra, getAllUsers, BASE_USERS, saveSenOverride, loadSenOverrides, syncFromServer };
+  return { loginGoogle, logout, grantAccess, loadExtra, saveExtra, getAllUsers, BASE_USERS, saveSenOverride, loadSenOverrides, syncFromServer };
 })();
 
 /* ════════════════════════════════════════════════════════
@@ -24526,7 +24440,7 @@ const USERMGMT = (() => {
   }
 
   function clearForm() {
-    ['um-name','um-email','um-pass','um-meta','um-cards-dia'].forEach(id => {
+    ['um-name','um-email','um-meta','um-cards-dia'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -24591,14 +24505,13 @@ const USERMGMT = (() => {
           <div class="${avatarClass}">${getInitials(u.name)}</div>
           <div class="um-user-info">
             <div class="um-user-name">${u.name}</div>
-            <div class="um-user-login" id="${rowId}-passtext">${u.user} · <span style="font-family:'IBM Plex Mono',monospace;">${u.pass}</span></div>
+            <div class="um-user-login" id="${rowId}-passtext">${u.user}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
             <span class="um-user-badge ${badgeClass}">${badgeLabel}</span>
             ${teamLabel ? `<span style="font-size:10px;font-weight:700;color:${teamColor};background:var(--ink-15);border:1px solid var(--ink-25,var(--ink-30));padding:2px 7px;border-radius:5px;">${teamLabel}${metaSuffix}</span>` : ''}
           </div>
           <div style="display:flex;gap:4px;flex-shrink:0;">
-            <button class="um-del-btn" onclick="USERMGMT.toggleEditPass(${i}, ${extraIdx}, '${u.user}')" title="Alterar senha" style="color:var(--accent);border-color:transparent;">🔑</button>
             ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.toggleEditTeam(${i}, ${extraIdx}, '${u.user}')" title="Alterar equipe/meta" style="color:#a78bfa;border-color:transparent;">✏️</button>` : ''}
             ${!isBase ? `<button class="um-del-btn" onclick="USERMGMT.togglePerms(${i}, '${u.user}')" title="Permissões de módulos" style="color:#059669;border-color:transparent;">🔒</button>` : ''}
             <div style="display:flex;gap:4px;flex-shrink:0;">
@@ -24611,11 +24524,8 @@ const USERMGMT = (() => {
           <div style="display:flex; align-items:center; gap:8px;">
             <div style="flex:1;">
               <div style="font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px;">Nova senha para ${u.user}</div>
-              <input class="um-input" id="${editId}-input" type="text" placeholder="Digite a nova senha (mín. 4 caracteres)" style="background:var(--ink-00);" onkeydown="if(event.key==='Enter')USERMGMT.savePass(${i},${extraIdx},'${u.user}');if(event.key==='Escape')USERMGMT.toggleEditPass(${i},${extraIdx},'${u.user}')" />
             </div>
             <div style="display:flex; gap:6px; margin-top:16px; flex-shrink:0;">
-              <button onclick="USERMGMT.savePass(${i}, ${extraIdx}, '${u.user}')" style="background:var(--accent); color:white; border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Salvar</button>
-              <button onclick="USERMGMT.toggleEditPass(${i}, ${extraIdx}, '${u.user}')" style="background:var(--ink-30); color:var(--n-400); border:none; border-radius:7px; padding:8px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;">Cancelar</button>
             </div>
           </div>
           <div id="${editId}-msg" style="font-size:12px; color:var(--green); margin-top:6px; display:none;"></div>
@@ -24695,59 +24605,12 @@ const USERMGMT = (() => {
     setTimeout(() => { toggleEditTeam(i, extraIdx, userLogin); renderList(); }, 1200);
   }
 
-  function toggleEditPass(i, extraIdx, userLogin) {
-    const editId = `um-edit-${i}`;
-    const rowMain = `um-row-${i}-main`;
-    const editEl = document.getElementById(editId);
-    const mainEl = document.getElementById(rowMain);
-    if (!editEl) return;
-    const isOpen = editEl.style.display !== 'none';
-    editEl.style.display = isOpen ? 'none' : 'block';
-    if (mainEl) {
-      mainEl.style.borderRadius = isOpen ? '10px' : '10px 10px 0 0';
-      mainEl.style.borderBottom = isOpen ? '' : 'none';
-    }
-    if (!isOpen) {
-      const inp = document.getElementById(editId + '-input');
-      if (inp) { inp.value = ''; inp.focus(); }
-      const msg = document.getElementById(editId + '-msg');
-      if (msg) { msg.style.display = 'none'; }
-    }
-  }
-
-  function savePass(i, extraIdx, userLogin) {
-    const editId = `um-edit-${i}`;
-    const inp = document.getElementById(editId + '-input');
-    const msg = document.getElementById(editId + '-msg');
-    if (!inp) return;
-    const newPass = inp.value.trim();
-    if (newPass.length < 4) {
-      if (msg) { msg.textContent = '⚠️ Senha deve ter ao menos 4 caracteres.'; msg.style.color = '#FC8181'; msg.style.display = 'block'; }
-      inp.focus(); return;
-    }
-
-    const isBase = extraIdx === -1;
-    if (isBase) {
-      // Atualiza no BASE_USERS (em memória — persiste na sessão atual)
-      const bu = AUTH.BASE_USERS.find(u => u.user === userLogin);
-      if (bu) bu.pass = newPass;
-    } else {
-      const extra = AUTH.loadExtra();
-      if (extra[extraIdx]) extra[extraIdx].pass = newPass;
-      AUTH.saveExtra(extra);
-    }
-
-    if (msg) { msg.textContent = '✅ Senha alterada com sucesso!'; msg.style.color = 'var(--green)'; msg.style.display = 'block'; }
-    // Atualizar a senha exibida na linha
-    const passText = document.getElementById(`um-row-${i}-passtext`);
-    if (passText) passText.innerHTML = `@${userLogin} · <span style="font-family:'IBM Plex Mono',monospace;">${newPass}</span>`;
-    setTimeout(() => toggleEditPass(i, extraIdx, userLogin), 1200);
-  }
+  /* toggleEditPass() e savePass() removidos junto com o campo `pass`: não há mais senha para
+     exibir nem alterar — quem controla a senha é a conta Google da pessoa. */
 
   function addUser() {
     const name       = (document.getElementById('um-name').value || '').trim();
     const email      = (document.getElementById('um-email').value || '').trim().toLowerCase();
-    const pass       = (document.getElementById('um-pass').value || '').trim();
     const team       = (document.getElementById('um-team')?.value) || 'CAP';
     const meta       = (document.getElementById('um-meta').value || '').trim();
     const metaCardsDia = (document.getElementById('um-cards-dia')?.value || '').trim();
@@ -24759,9 +24622,8 @@ const USERMGMT = (() => {
     setMsg('error', '');
     setMsg('success', '');
 
-    if (!name || !email || !pass) { setMsg('error', 'Preencha nome, e-mail e senha.'); return; }
+    if (!name || !email) { setMsg('error', 'Preencha nome e e-mail.'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setMsg('error', 'E-mail inválido.'); return; }
-    if (pass.length < 4) { setMsg('error', 'Senha deve ter ao menos 4 caracteres.'); return; }
 
     const all = AUTH.getAllUsers();
     if (all.find(u => u.user === email)) {
@@ -24770,7 +24632,7 @@ const USERMGMT = (() => {
     }
 
     const extra = AUTH.loadExtra();
-    extra.push({ user: email, pass, name, team, meta, metaCardsDia, seniority, dataInicio, hasComissao, tipoVendas });
+    extra.push({ user: email, name, team, meta, metaCardsDia, seniority, dataInicio, hasComissao, tipoVendas });
     AUTH.saveExtra(extra);
 
     clearForm();
@@ -24923,7 +24785,7 @@ const USERMGMT = (() => {
     setTimeout(function(){ togglePerms(i, userLogin); renderList(); }, 1500);
   }
 
-  return { open, close, addUser, deleteUser, toggleEditPass, savePass, toggleEditTeam, saveTeam, togglePerms, permsAll, permsCat, permsNode, permsSync, permsSearch, savePerms };
+  return { open, close, addUser, deleteUser, toggleEditTeam, saveTeam, togglePerms, permsAll, permsCat, permsNode, permsSync, permsSearch, savePerms };
 })();
 
 /* ════════════════════════════════════════════════════════
