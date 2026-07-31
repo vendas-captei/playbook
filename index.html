@@ -1897,6 +1897,29 @@ body::before {
 }
 .lp-eye:hover { color: rgba(255,255,255,0.6); }
 
+/* Separador "ou" entre o login por senha e o Google */
+.lp-sep {
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0 14px; color: rgba(255,255,255,0.35);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  animation: lpFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.45s both;
+}
+.lp-sep::before, .lp-sep::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.12); }
+
+/* Botão do Google: branco, como manda o guia de marca do Google Sign-in. */
+.lp-btn-google {
+  width: 100%; padding: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px;
+  color: #1f1f1f; font-size: 14px; font-weight: 800;
+  font-family: 'Cabinet Grotesk', sans-serif; letter-spacing: -0.2px;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+  animation: lpFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+}
+.lp-btn-google:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.26); }
+.lp-btn-google:disabled { opacity: 0.6; cursor: default; transform: none; }
+
 .lp-btn {
   width: 100%; padding: 16px;
   background: linear-gradient(135deg, #E8620A 0%, #FF9500 100%);
@@ -2344,6 +2367,16 @@ function clearSettingsModal() {
 
     <button class="lp-btn" id="login-submit-btn" onclick="AUTH.submit()">
       Entrar no Playbook →
+    </button>
+
+    <!-- Login com Google (Firebase Auth). Caminho preferencial: quem garante que a conta é mesmo
+         @captei.com.br é o Workspace, não o nosso código — com e-mail/senha o cadastro do Firebase
+         aceita qualquer e-mail sem verificar. A autorização (quem pode entrar) continua sendo a
+         lista de Gerenciar Usuários, em AUTH.loginGoogle(). -->
+    <div class="lp-sep"><span>ou</span></div>
+    <button class="lp-btn-google" id="login-google-btn" onclick="AUTH.loginGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.0 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.0 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C39.9 35.8 44 30.5 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Entrar com Google
     </button>
 
     <div class="lp-error" id="login-error">
@@ -24362,6 +24395,90 @@ const AUTH = (() => {
     location.reload();
   }
 
+  /* ── Login com Google (Firebase Auth) ───────────────────────────────────────
+     Por que Google e não só e-mail/senha: o cadastro por senha do Firebase aceita
+     QUALQUER e-mail sem verificar se a pessoa o controla (accounts:signUp é público e usa
+     a apiKey que fica no fonte), e não dá para desligar esse cadastro sem pagar o Identity
+     Platform. Ou seja, filtrar por "@captei.com.br" no e-mail/senha não protegeria nada.
+     Com Google, quem garante o domínio é o Workspace da Captei.
+
+     AUTENTICAÇÃO (quem é a pessoa) = Google.
+     AUTORIZAÇÃO (quem pode entrar)  = a lista de Gerenciar Usuários. Não basta ter conta
+     Google da Captei: o e-mail precisa estar cadastrado. Fora da lista → signOut na hora.
+
+     O SDK é carregado sob demanda, no clique: não pesa no boot do painel e, se o CDN cair,
+     o login por senha continua de pé. ────────────────────────────────────────────────── */
+  const FB_CFG = {
+    apiKey: "AIzaSyBrARbfQ87QuZOkKTGqsXrNNmhlcWkW04U",
+    authDomain: "playbook-comercial-18c7a.firebaseapp.com",
+    projectId: "playbook-comercial-18c7a",
+    appId: "1:309910204812:web:e0395e58989e517c63a6a9",
+  };
+  const DOMINIO_OK = "@captei.com.br";
+  let _fbAuth = null;
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve;
+      s.onerror = () => reject(new Error('Não foi possível carregar o Google (rede ou bloqueio).'));
+      document.head.appendChild(s);
+    });
+  }
+  async function ensureFirebase() {
+    if (_fbAuth) return _fbAuth;
+    if (!window.firebase || !window.firebase.auth) {
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js');
+    }
+    if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
+    _fbAuth = firebase.auth();
+    return _fbAuth;
+  }
+
+  async function loginGoogle() {
+    const btn = document.getElementById('login-google-btn');
+    const errEl = document.getElementById('login-error');
+    const errMsg = document.getElementById('login-error-msg');
+    const falhar = (msg) => { errMsg.textContent = msg; errEl.classList.add('show'); };
+    const txt = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Abrindo o Google...'; }
+    try {
+      const auth = await ensureFirebase();
+      const provider = new firebase.auth.GoogleAuthProvider();
+      // hd = dica para o Google já filtrar contas do Workspace; a garantia real vem da lista abaixo.
+      provider.setCustomParameters({ hd: 'captei.com.br', prompt: 'select_account' });
+      const cred = await auth.signInWithPopup(provider);
+      const email = ((cred.user && cred.user.email) || '').toLowerCase();
+
+      if (!email.endsWith(DOMINIO_OK)) {
+        await auth.signOut();
+        falhar('Use sua conta ' + DOMINIO_OK + '. A conta ' + email + ' não é da Captei.');
+        return;
+      }
+      await syncFromServer();                       // lista fresca antes de decidir
+      const found = getAllUsers().find(u => (u.user || '').toLowerCase() === email);
+      if (!found) {
+        await auth.signOut();
+        falhar('A conta ' + email + ' não está cadastrada no Playbook. Fale com a Gestão.');
+        return;
+      }
+      errEl.classList.remove('show');
+      grantAccess(found.name, found.admin || found.team === 'Gestão', found.team);
+    } catch (e) {
+      const code = (e && e.code) || '';
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        errEl.classList.remove('show');           // desistiu: não é erro
+      } else if (code === 'auth/popup-blocked') {
+        falhar('O navegador bloqueou a janela do Google. Libere o pop-up e tente de novo.');
+      } else {
+        falhar((e && e.message) || 'Falha ao entrar com o Google.');
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = txt; }
+    }
+  }
+
   /* ── Init ───────────────────────────────────────────── */
   async function init() {
     // Enter no campo de senha submete
@@ -24386,7 +24503,7 @@ const AUTH = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { submit, toggleEye, logout, grantAccess, loadExtra, saveExtra, getAllUsers, BASE_USERS, saveSenOverride, loadSenOverrides, syncFromServer };
+  return { submit, loginGoogle, toggleEye, logout, grantAccess, loadExtra, saveExtra, getAllUsers, BASE_USERS, saveSenOverride, loadSenOverrides, syncFromServer };
 })();
 
 /* ════════════════════════════════════════════════════════
