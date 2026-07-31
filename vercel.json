@@ -1,8 +1,18 @@
 {
-  "routes": [
-    { "src": "/users\\.json", "status": 403 },
-    { "src": "/(metas|params|fccommit|fcparams)\\.json", "status": 403 },
-    { "src": "/data/(history|filters|daily|forecast-[a-z-]+)\\.json", "status": 403 },
-    { "handle": "filesystem" }
+  "_comentario": [
+    "A Vercel deixou de hospedar o Playbook em 31/07/2026 — tudo roda no Firebase",
+    "(Hosting + Cloud Functions em São Paulo, dados na coleção `store` do Firestore).",
+    "Este projeto sobrevive só como REDIRECT para não quebrar o link antigo, que está",
+    "salvo em favoritos, atalhos e mensagens. 308 preserva método e corpo, então POST",
+    "para /api/* também chega inteiro do outro lado.",
+    "Quando o tráfego zerar, o projeto na Vercel pode ser desligado.",
+    "`routes` foi removido de propósito: é legado e conflita com `redirects`."
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://playbook-comercial-18c7a.web.app/$1",
+      "statusCode": 308
+    }
   ]
 }
